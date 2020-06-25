@@ -1,0 +1,115 @@
+ST_P:
+  - reliable
+  - proven
+  - available when needed
+  - abundant
+  - versatile
+  - clean-burning
+  - innovation
+
+ST_N:
+  - old school
+  - inefficient
+  - inflexible
+  - unreliable
+  - idle
+  - unproven
+  - science fair project
+
+Ec_P:
+  - jobs
+  - Canada's resource wealth
+  - prosperity
+  - resilient
+  - energy exports
+  - Quebec equalization payments
+  - investing in sustainable energy
+  - supports local businesses
+  - royalties
+  - sustainable jobs
+  - diversified energy economy
+  - competitive prices
+  - job creation
+  - polluters pay
+
+Ec_N:
+  - divest
+  - blacklist
+  - phase out
+  - Canada's resource curse
+  - stranded assets
+  - abandoned wells
+  - cleanup
+  - fossil fuel subsidies
+  - peak oil demand
+  - peak oil supply
+  - poor investor confidence
+  - sunset industry
+  - not coming back
+  - expensive
+  - costs up
+  - rent-seeking
+  - government handouts
+  - feed-in tariffs
+  - economic collapse
+  - crash the economy
+  - taxpayers pay
+  - energy poverty
+  - energy imports
+
+En_P:
+  - land reclamation
+  - return to its original state
+  - Canadian oil companies are environmental leaders
+  - LNG is better than Asian coal
+  - clean
+  - green energy
+
+En_N:
+  - dirty
+  - unsustainable
+  - flood
+  - wildfire
+  - destroying forest
+  - high-carbon
+  - carbon-heavy
+  - climate crisis
+  - dirty manufacturers
+  - kills birds
+  - kills wildlife
+
+ME_P:
+  - ethical oil
+  - just transition
+
+ME_N:
+  - greenwashing
+  - killing future generations
+
+H_P:
+  - plastic standing between Canada and COVID
+
+H_N:
+  - poor air quality
+  - poor respiratory health
+  - unhealthy working conditions
+  - water contamination
+  - oil spill
+  - toxic materials
+
+C_P:
+  - community partnership
+  - community sponsorship
+  - heritage
+  - tradition
+  - oilers
+  - futuristic
+  - common humanity
+
+C_N:
+  - indigenous rights to hunt and fish
+  - colonization
+  - no social license
+  - hippie environmentalist
+  - driving to protests
+  - hypocrites

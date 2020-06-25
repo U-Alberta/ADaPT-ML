@@ -30,7 +30,7 @@ or something else that might be useful. The different types of text will be in t
 E.g.:
 ```
 id_str,lang,all_text,hashtags\n
-00001234,en,This is my tweet about energy! #canadarocks,#canadarocks'\n
+00001234,en,This is my tweet about energy! #canadarocks,#canadarocks\n
 ```
 
 ### Step 3: Train the label model
