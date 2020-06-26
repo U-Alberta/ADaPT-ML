@@ -13,11 +13,11 @@ Will create the `venv`, install the requirements, install nltk models.
 
 ## Main Usage
 
-### Step 1: Define labeling functions
+### Step 1: Create the label matrix
 #### Editing keyword LFs
 There is a file `keywords.yaml` which can be edited to change the keywords associated with each class.
 
-### Step 2: Input unlabeled training data
+#### Creating the matrix using unlabeled training data
 ```shell script
 python -m label --matrix
 ```
@@ -33,20 +33,20 @@ id_str,lang,all_text,hashtags\n
 00001234,en,This is my tweet about energy! #canadarocks,#canadarocks\n
 ```
 
-### Step 3: Train the label model
+### Step 2: Train the label model
 ```shell script
 python -m label --model
 ```
 Takes the Label Matrix in `L_train.npy` and trains a label model. Saves it to `label_model.pkl`
 
-### Step 4: Apply the label model to label the training data
+### Step 3: Apply the label model to label the training data
 ```shell script
 python -m label --apply
 ```
 Takes the Label Model and applies it on the Label Matrix to get predictions and probabilities for each data point. Saves
 the labeled training data to `labeled_train.csv`.
 
-### Step 5: Train a classifier
+### Step 4: Train a classifier
 ```shell script
 python -m classify --mlogit
 ```

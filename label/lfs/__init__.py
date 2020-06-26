@@ -3,10 +3,10 @@ import os
 
 
 KEYWORDS_YAML_FILENAME = os.path.join('label', 'lfs', 'keywords.yaml')
+ABSTAIN = -1
 
 
 class Label(Enum):
-    ABSTAIN = -1
     ST_P = 0
     ST_N = 1
     Ec_P = 2
