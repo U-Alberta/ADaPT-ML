@@ -1,3 +1,5 @@
 snorkel == 0.9.5
 nltk == 3.4.5
 pyyaml == 5.3.1
+spacy == 2.2.0
+https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.2.0/en_core_web_sm-2.2.0.tar.gz#egg=en_core_web_sm
