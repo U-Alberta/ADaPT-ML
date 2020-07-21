@@ -11,6 +11,7 @@ import pandas as pd
 from label import DEMO_DF_FILENAME, DEMO_MATRIX_FILENAME, DEMO_LABEL_MODEL_FILENAME, DEMO_TRAINING_DATA_FILENAME
 from label.lfs import Label
 from label.matrix import load_label_matrix
+from utils.config import read_config
 
 
 INIT_PARAMS = {
@@ -19,20 +20,11 @@ INIT_PARAMS = {
     'device': 'cpu'
 }
 
-TRAIN_PARAMS = {
-    'n_epochs': 1000,
-    'lr': 0.01,
-    'l2': 0.0,
-    'optimizer': 'sgd',
-    'lr_scheduler': 'constant',
-    'prec_init': 0.7,
-    'log_freq': 100
-}
-
 
 def train_label_model(L_train: np.ndarray, label_model_filename: str) -> LabelModel:
+    train_params = read_config('label_model')
     label_model = LabelModel(**INIT_PARAMS)
-    label_model.fit(L_train, **TRAIN_PARAMS)
+    label_model.fit(L_train, **train_params)
     label_model.save(label_model_filename)
 
     return label_model

@@ -10,9 +10,9 @@ parser.add_argument('--eval', default=0, help='evaluate labeling functions (1), 
 parsed_args = parser.parse_args()
 
 TRAIN_CSV_FILENAME = os.path.join('label', 'data', 'unlabeled_train.csv')
-TRAIN_DF_FILENAME = os.path.join('label', 'data', 'train_df.pkl')
-TRAIN_MATRIX_FILENAME = os.path.join('label', 'data', 'train_matrix.npy')
-LABEL_MODEL_FILENAME = os.path.join('label', 'data', 'label_model.pkl')
+TRAIN_DF_FILENAME = os.path.join('label', 'resources', 'train_df.pkl')
+TRAIN_MATRIX_FILENAME = os.path.join('label', 'resources', 'train_matrix.npy')
+LABEL_MODEL_FILENAME = os.path.join('label', 'resources', 'label_model.pkl')
 TRAINING_DATA_FILENAME = os.path.join('label', 'data', 'training_data.pkl')
 
 DEMO_CSV_FILENAME = os.path.join('demo', 'demo_data.csv')
