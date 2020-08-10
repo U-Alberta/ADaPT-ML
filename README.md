@@ -3,11 +3,8 @@
 A dynamic approach to creating classifiers where the training data the model is built upon and the research questions
 needing answers are always changing.
 
-## References
-https://medium.com/analytics-vidhya/serving-ml-with-flask-tensorflow-serving-and-docker-compose-fe69a9c1e369
-https://www.tensorflow.org/tfx/guide/serving
-https://docs.docker.com/compose/gettingstarted/
-https://docs.docker.com/engine/reference/builder/
+https://towardsdatascience.com/targeted-sentiment-analysis-vs-traditional-sentiment-analysis-4d9f2c12a476
+https://github.com/songyouwei/ABSA-PyTorch
 
 ## First Time Setup
 
