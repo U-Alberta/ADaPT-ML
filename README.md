@@ -60,3 +60,14 @@ Takes the training data and trains a specified classifier. Saves it to `classifi
 ```shell script
 python -m test
 ```
+
+Problem Definition:
+
+For a Target (e.g. the Energy East project) and the Aspects of the Target (e.g. route, cost), determine the emotion toward
+ the Target based on the combined emotions toward the Aspects (positive, negative, neutral, conflict).
+ 
+Approach this as a question answering task?
+
+docker build -t cecn-data-programming-image -f Dockerfile .
+docker run -i -t cecn-data-programming-image (if you want to develop)
+mlflow run -e energy_east

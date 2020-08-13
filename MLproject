@@ -1,2 +1,13 @@
+name: DataProgramming
+
 docker_env:
     image: cecn-data-programming-image
+
+entry_points:
+
+    energy_east:
+        parameters:
+            n_epochs: {type: int, default: 1000}
+            optimizer: {type: string, default: sgd}
+            prec_init: {type: float, default: 0.7}
+        command: "python -m label --step 2 --n_epochs {n_epochs} --optimizer {optimizer} --prec_init {prec_init}"

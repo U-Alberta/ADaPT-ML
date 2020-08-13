@@ -51,6 +51,21 @@ def apply_label_model(L_train: np.ndarray, label_model: LabelModel, train_df: pd
     return filtered_df
 
 
+def train_params_dict(label_model: LabelModel) -> dict:
+    try:
+        train_params = {
+            'n_epochs': label_model.train_config.n_epochs,
+            'optimizer': label_model.train_config.optimizer,
+            'lr_scheduler': label_model.train_config.lr_scheduler,
+            'lr': label_model.train_config.lr,
+            'l2': label_model.train_config.l2,
+            'prec_init': label_model.train_config.prec_init
+        }
+        return train_params
+    except AttributeError:
+        sys.exit("Label Model hasn't been trained yet.")
+
+
 if __name__ == '__main__':
     demo_df = pd.read_pickle(DEMO_DF_FILENAME)
     demo_matrix = np.load(DEMO_MATRIX_FILENAME)
