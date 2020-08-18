@@ -9,13 +9,13 @@ import numpy as np
 import pandas as pd
 
 from label import DEMO_DF_FILENAME, DEMO_MATRIX_FILENAME, DEMO_LABEL_MODEL_FILENAME, DEMO_TRAINING_DATA_FILENAME
-from label.lfs import Label
+from label.lfs import FrameLabel
 from label.matrix import load_label_matrix
 from utils.config import read_config
 
 
 INIT_PARAMS = {
-    'cardinality': len(Label),
+    'cardinality': len(FrameLabel),
     'verbose': True,
     'device': 'cpu'
 }
@@ -45,7 +45,7 @@ def apply_label_model(L_train: np.ndarray, label_model: LabelModel, train_df: pd
     logging.info("data points filtered out: {0}".format(train_df.shape[0]-filtered_df.shape[0]))
     logging.info("data points remaining: {0}".format(filtered_df.shape[0]))
     preds = probs_to_preds(probs)
-    pred_labels = [Label(pred).name if pred != -1 else 'ABSTAIN' for pred in preds]
+    pred_labels = [FrameLabel(pred).name if pred != -1 else 'ABSTAIN' for pred in preds]
     filtered_df.insert(len(filtered_df.columns), 'label', pred_labels)
     filtered_df.to_pickle(training_data_filename)
     return filtered_df

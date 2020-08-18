@@ -1,5 +1,4 @@
-from label import (parsed_args, matrix, model,
-                   TRAIN_CSV_FILENAME, TRAIN_DF_FILENAME, TRAIN_MATRIX_FILENAME,
+from label import (parsed_args, matrix, model, TRAIN_DF_FILENAME, TRAIN_MATRIX_FILENAME,
                    LABEL_MODEL_FILENAME, TRAINING_DATA_FILENAME)
 import mlflow
 import mlflow.tensorflow as mltf
@@ -7,7 +6,7 @@ from urllib.parse import urlparse
 
 if __name__ == '__main__':
 
-    train_df = matrix.create_df(TRAIN_CSV_FILENAME, TRAIN_DF_FILENAME)
+    train_df = matrix.load_df(parsed_args.data_path, TRAIN_DF_FILENAME)
 
     # Step 1: create the label matrix
     if parsed_args.step in (0, 1):

@@ -6,17 +6,14 @@ KEYWORDS_YAML_FILENAME = os.path.join('label', 'lfs', 'keywords.yaml')
 ABSTAIN = -1
 
 
-class Label(Enum):
-    ST_P = 0
-    ST_N = 1
-    Ec_P = 2
-    Ec_N = 3
-    En_P = 4
-    En_N = 5
-    ME_P = 6
-    ME_N = 7
-    H_P = 8
-    H_N = 9
-    C_P = 10
-    C_N = 11
+class FrameLabel(Enum):
+    ST = 0
+    Ec = 1
+    En = 2
+    ME = 3
+    H = 4
+    C = 5
 
+
+class PipelineLabel(Enum):
+    pass

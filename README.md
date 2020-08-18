@@ -71,3 +71,15 @@ Approach this as a question answering task?
 docker build -t cecn-data-programming-image -f Dockerfile .
 docker run -i -t cecn-data-programming-image (if you want to develop)
 mlflow run -e energy_east
+
+Social media convos connect or reflect or respond to a hearing -- person applies to CER and can be referrenced to by folks on social media
+linkage between platforms
+if these dates in a timeline have news articles then there could be tweets from NGOs or news outlets
+being able to crawl the conversation and see how it moves between platforms -- who are the influential speakers?
+cause - effect? could we predict who is more effective in this conversation? how does the framing and sentiment change?
+Who was the most influential speaker starting at a certain event? Aspects of the debate
+Sentiment, framing, networks
+
+spill explosion leak cancer fire Lesfrud et al. 2015
+
+http://206.12.93.193:10000/files/energyeastframe.pkl?_xsrf=2%7Cc7e064bd%7C08fffed8fac758db5f061ab8af69ef32%7C1596819379

@@ -11,14 +11,12 @@ from label import DEMO_CSV_FILENAME, DEMO_DF_FILENAME, DEMO_MATRIX_FILENAME
 from label.lfs.keyword import keyword_lfs, evaluate_lfs
 
 
-def create_df(data_csv_filename: str, train_df_filename: str) -> pd.DataFrame:
-    logging.info("Loading data into DataFrame ...")
+def load_df(data_path: str, train_df_filename: str) -> pd.DataFrame:
+    logging.info("Loading unlabeled training data ...")
     try:
         return pd.read_pickle(train_df_filename)
     except IOError:
-        train_df = pd.read_csv(data_csv_filename, header=0, index_col=0)
-        train_df.to_pickle(train_df_filename)
-        return train_df
+        sys.exit("Invalid path to training data: {0}".format(data_path))
 
 
 def create_label_matrix(train_df: pd.DataFrame, matrix_filename: str) -> np.ndarray:
@@ -39,7 +37,7 @@ def load_label_matrix(matrix_filename: str) -> np.ndarray:
 
 
 if __name__ == '__main__':
-    demo_df = create_df(DEMO_CSV_FILENAME, DEMO_DF_FILENAME)
+    demo_df = load_df(DEMO_CSV_FILENAME, DEMO_DF_FILENAME)
     demo_matrix = create_label_matrix(demo_df, DEMO_MATRIX_FILENAME)
     with pd.option_context('display.max_colwidth', -1):
         print("Here's a peek at the demo DF:\n", demo_df.head())
