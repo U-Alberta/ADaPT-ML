@@ -69,8 +69,8 @@ For a Target (e.g. the Energy East project) and the Aspects of the Target (e.g. 
 Approach this as a question answering task?
 
 docker build -t cecn-data-programming-image -f Dockerfile .
-docker run -i -t cecn-data-programming-image (if you want to develop)
-mlflow run /code -e pipelines -P ./label/data/energyeastframe.pkl
+docker run -i -t -v /var/run/docker.sock:/var/run/docker.sock cecn-data-programming-image (if you want to develop)
+mlflow run /code -e pipelines -P pipeline_data=./label/data/energyeastframe.pkl
 
 Social media convos connect or reflect or respond to a hearing -- person applies to CER and can be referrenced to by folks on social media
 linkage between platforms
