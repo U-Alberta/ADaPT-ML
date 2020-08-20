@@ -1,4 +1,4 @@
-name: DataProgramming
+name: cecn-data-programming
 
 docker_env:
     image: cecn-data-programming-image
