@@ -11,4 +11,4 @@ entry_points:
             n_epochs: {type: int, default: 1000}
             optimizer: {type: string, default: sgd}
             prec_init: {type: float, default: 0.7}
-        command: "python -m label --pipeline_data {pipeline_data} --n_epochs {n_epochs} --optimizer {optimizer} --prec_init {prec_init}"
+        command: "python -m label --n_epochs {n_epochs} --optimizer {optimizer} --prec_init {prec_init} {pipeline_data}"
