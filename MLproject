@@ -5,10 +5,18 @@ docker_env:
 
 entry_points:
 
-    pipelines:
+    atsc:
         parameters:
-            pipeline_data: path
+            atsc_data: path
             n_epochs: {type: int, default: 1000}
             optimizer: {type: string, default: sgd}
             prec_init: {type: float, default: 0.7}
-        command: "python -m label --n_epochs {n_epochs} --optimizer {optimizer} --prec_init {prec_init} {pipeline_data}"
+        command: "python -m label --atsc --n_epochs {n_epochs} --optimizer {optimizer} --prec_init {prec_init} {atsc_data}"
+
+    values:
+        parameters:
+            values_data: path
+            n_epochs: {type: int, default: 1000}
+            optimizer: {type: string, default: sgd}
+            prec_init: {type: float, default: 0.7}
+        command: "python -m label --values --n_epochs {n_epochs} --optimizer {optimizer} --prec_init {prec_init} {values_data}"

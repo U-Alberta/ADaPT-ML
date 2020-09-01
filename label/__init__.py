@@ -6,6 +6,7 @@ import logging
 
 parser = argparse.ArgumentParser(description='Perform data programming.')
 parser.add_argument('data_path', help='File path or URL to the unlabeled training data')
+parser.add_argument('--entry', default='demo', type=str, help="The entrypoint being run (default='demo')")
 parser.add_argument('--step', default=0, type=int, help='create label matrix (1), label model (2), training data (3). '
                                                         'or all (0)')
 parser.add_argument('--eval', default=0, help='evaluate labeling functions (1), label model (2), or both (0)')
@@ -14,6 +15,17 @@ parser.add_argument('--n_epochs', default=1000, type=int, help='the number of ep
 parser.add_argument('--optimizer', default='sgd', help='which optimizer to use for the Label Model')
 parser.add_argument('--prec_init', default=0.7, type=float, help='LF precision initializations / priors')
 parsed_args = parser.parse_args()
+
+if parsed_args.entry == 'atsc':
+    LabelGroup = None
+    REGISTERED_MODEL_NAME = 'ATSCLabelModel'
+elif parsed_args.entry == 'values':
+    from label.lfs import ValueLabel as LabelGroup
+    REGISTERED_MODEL_NAME = 'ValueLabelModel'
+elif parsed_args.entry == 'demo':
+    LabelGroup = None
+else:
+    sys.exit("Entry point not recognized")
 
 TRAIN_DF_FILENAME = os.path.join('label', 'resources', 'train_df.pkl')
 TRAIN_MATRIX_FILENAME = os.path.join('label', 'resources', 'train_matrix.npy')

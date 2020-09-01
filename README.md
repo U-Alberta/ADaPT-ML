@@ -69,8 +69,9 @@ For a Target (e.g. the Energy East project) and the Aspects of the Target (e.g. 
 Approach this as a question answering task?
 
 docker build -t cecn-data-programming-image -f Dockerfile .
-docker run -i -t -v /var/run/docker.sock:/var/run/docker.sock cecn-data-programming-image (if you want to develop)
+docker run -i -t -p 5000:5000 -v /var/run/docker.sock:/var/run/docker.sock cecn-data-programming-image
 mlflow run /code -e pipelines -P pipeline_data=./label/data/energyeastframe.pkl
+mlflow server --host 0.0.0.0
 
 Social media convos connect or reflect or respond to a hearing -- person applies to CER and can be referrenced to by folks on social media
 linkage between platforms
@@ -83,3 +84,17 @@ Sentiment, framing, networks
 spill explosion leak cancer fire Lesfrud et al. 2015
 
 http://206.12.93.193:10000/files/energyeastframe.pkl?_xsrf=2%7Cc7e064bd%7C08fffed8fac758db5f061ab8af69ef32%7C1596819379
+
+%	
+1	Values_SE
+2	Values_CO
+3	Values_TR
+4	Values_BE
+5	Values_UN
+6	Values_SD
+7	Values_ST
+8	Values_HE
+9	Values_AC
+10	Values_PO
+%
+SE	

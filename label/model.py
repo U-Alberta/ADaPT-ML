@@ -8,11 +8,11 @@ from snorkel.utils import probs_to_preds
 import numpy as np
 import pandas as pd
 
-from label import DEMO_DF_FILENAME, DEMO_MATRIX_FILENAME, DEMO_LABEL_MODEL_FILENAME, DEMO_TRAINING_DATA_FILENAME
+from label import (DEMO_DF_FILENAME, DEMO_MATRIX_FILENAME, DEMO_LABEL_MODEL_FILENAME, DEMO_TRAINING_DATA_FILENAME,
+                   parsed_args)
 from label.lfs import FrameLabel
 from label.matrix import load_label_matrix
 from utils.config import read_config
-
 
 INIT_PARAMS = {
     'cardinality': len(FrameLabel),

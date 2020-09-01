@@ -1,5 +1,5 @@
 from label import (parsed_args, matrix, model, TRAIN_DF_FILENAME, TRAIN_MATRIX_FILENAME,
-                   LABEL_MODEL_FILENAME, TRAINING_DATA_FILENAME)
+                   LABEL_MODEL_FILENAME, TRAINING_DATA_FILENAME, REGISTERED_MODEL_NAME)
 import mlflow
 import mlflow.tensorflow as mltf
 from urllib.parse import urlparse
@@ -22,7 +22,7 @@ if __name__ == '__main__':
             mlflow.log_params(model.train_params_dict(label_model))
             tracking_url_type_store = urlparse(mlflow.get_tracking_uri()).scheme
             if tracking_url_type_store != 'file':
-                mltf.log_model(label_model, 'model', registered_model_name='ATSCLabelModel')
+                mltf.log_model(label_model, 'model', registered_model_name=REGISTERED_MODEL_NAME)
             else:
                 mltf.log_model(label_model, 'model')
             mltf.save_model()
