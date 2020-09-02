@@ -1,32 +1,44 @@
-import sys
 import logging
+import sys
 
+import numpy as np
+import pandas as pd
 from snorkel.labeling import filter_unlabeled_dataframe
 from snorkel.labeling.model import LabelModel
 from snorkel.utils import probs_to_preds
 
-import numpy as np
-import pandas as pd
-
-from label import (DEMO_DF_FILENAME, DEMO_MATRIX_FILENAME, DEMO_LABEL_MODEL_FILENAME, DEMO_TRAINING_DATA_FILENAME,
-                   parsed_args)
-from label.lfs import FrameLabel
-from label.matrix import load_label_matrix
-from utils.config import read_config
+from label.lfs import ValueLabel
 
 INIT_PARAMS = {
-    'cardinality': len(FrameLabel),
+    'cardinality': len(ValueLabel),
     'verbose': True,
     'device': 'cpu'
 }
 
+LM_OPTIMIZER_SETTINGS = {
+    'sgd': {
+        'lr': 0.01,
+        'l2': 1e-5,                     # keep this between 0 and 0.1
+        'lr_scheduler': 'constant'
+    },
+    'adam': {
+        'lr': 0.001,
+        'l2': 1e-5,
+        'lr_scheduler': 'constant'
+    },
+    'adamax': {
+        'lr': 0.002,
+        'l2': 1e-5,
+        'lr_scheduler': 'constant'
+    }
+}
 
-def train_label_model(L_train: np.ndarray, label_model_filename: str) -> LabelModel:
-    train_params = read_config('label_model')
+
+def train_label_model(L_train: np.ndarray, label_model_filename: str, train_params: dict) -> LabelModel:
     label_model = LabelModel(**INIT_PARAMS)
+    train_params.update(LM_OPTIMIZER_SETTINGS[train_params['optimizer']])
     label_model.fit(L_train, **train_params)
     label_model.save(label_model_filename)
-
     return label_model
 
 
@@ -45,7 +57,7 @@ def apply_label_model(L_train: np.ndarray, label_model: LabelModel, train_df: pd
     logging.info("data points filtered out: {0}".format(train_df.shape[0]-filtered_df.shape[0]))
     logging.info("data points remaining: {0}".format(filtered_df.shape[0]))
     preds = probs_to_preds(probs)
-    pred_labels = [FrameLabel(pred).name if pred != -1 else 'ABSTAIN' for pred in preds]
+    pred_labels = [ValueLabel(pred).name if pred != -1 else 'ABSTAIN' for pred in preds]
     filtered_df.insert(len(filtered_df.columns), 'label', pred_labels)
     filtered_df.to_pickle(training_data_filename)
     return filtered_df
@@ -64,12 +76,3 @@ def train_params_dict(label_model: LabelModel) -> dict:
         return train_params
     except AttributeError:
         sys.exit("Label Model hasn't been trained yet.")
-
-
-if __name__ == '__main__':
-    demo_df = pd.read_pickle(DEMO_DF_FILENAME)
-    demo_matrix = np.load(DEMO_MATRIX_FILENAME)
-    demo_label_model = train_label_model(demo_matrix, DEMO_LABEL_MODEL_FILENAME)
-    training_df = apply_label_model(demo_matrix, demo_label_model, demo_df, DEMO_TRAINING_DATA_FILENAME)
-    with pd.option_context('display.max_colwidth', -1, 'display.width', None, 'display.max_columns', None):
-        print("Here's a peek at the training data:\n", training_df.head())
