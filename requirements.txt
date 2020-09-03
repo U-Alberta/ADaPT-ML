@@ -1,9 +1,9 @@
 Cython
-tensorflow
+tensorflow < 2.0.0
 snorkel == 0.9.6
 # git+https://gitlab.com/UAlberta/cecn/cecn-snorkel.git
 # nltk == 3.4.5
-pickle5
+# pickle5
 # pyyaml
 spacy >=2.3.0,<2.4.0
 https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-2.3.1/en_core_web_lg-2.3.1.tar.gz#egg=en_core_web_lg
