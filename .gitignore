@@ -1,6 +1,7 @@
 # Project-specific
 label/resources/*.pkl
 label/resources/*.npy
+mlruns
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
