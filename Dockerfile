@@ -13,6 +13,13 @@ RUN apt-get update \
         curl \
         gnupg-agent \
         software-properties-common
+
+RUN apt-get update \
+    && apt-get install -y \
+        postgresql \
+        postgresql-contrib \
+        postgresql-server-dev-all
+
 RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
 RUN apt-key fingerprint 0EBFCD88
 RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
@@ -24,7 +31,7 @@ RUN apt-get update \
 
 COPY requirements.txt requirements.txt
 RUN pip install --upgrade pip \
-    && pip install --use-feature=2020-resolver --no-cache-dir -r requirements.txt
+    && pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 CMD [ "/bin/bash" ]

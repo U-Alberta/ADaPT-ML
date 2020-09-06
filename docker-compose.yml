@@ -1,0 +1,11 @@
+version: '3.1'
+
+services:
+  mlflow_label:
+    build: .
+    ports:
+    - "5000:5000"
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - .:/code
+    - /data1/ANDREA/CECN/mlflow_label:/mlflow_label

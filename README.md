@@ -70,7 +70,7 @@ Approach this as a question answering task?
 
 docker build -t cecn-data-programming-image -f Dockerfile .
 docker run -i -t -p 5000:5000 -v /var/run/docker.sock:/var/run/docker.sock cecn-data-programming-image
-mlflow run /code -e pipelines -P pipeline_data=./label/data/energyeastframe.pkl
+mlflow run -e pv -P pv_data=./label/data/energyeastframe.pkl .
 mlflow server --host 0.0.0.0
 
 Social media convos connect or reflect or respond to a hearing -- person applies to CER and can be referrenced to by folks on social media
@@ -98,3 +98,5 @@ http://206.12.93.193:10000/files/energyeastframe.pkl?_xsrf=2%7Cc7e064bd%7C08fffe
 10	Values_PO
 %
 SE	
+
+when we move the code to a new server we will have to change the volumes in the docker compose file
