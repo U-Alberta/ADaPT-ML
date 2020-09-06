@@ -1,5 +1,4 @@
 Cython
-tensorflow < 2.0.0
 snorkel == 0.9.6
 # git+https://gitlab.com/UAlberta/cecn/cecn-snorkel.git
 # nltk == 3.4.5

@@ -37,7 +37,7 @@ def load_keyword_dictionary():
     for i in range(10):
         select_statement = """SELECT term FROM value_dict WHERE value = {0};""".format(i)
         cur.execute(select_statement)
-        terms = cur.fetchall()
+        terms = [item[0] for item in cur.fetchall()]
         term_docs = list(nlp.pipe(terms))
         value_doc_dict[ValueLabel(i).name] = term_docs
     return value_doc_dict

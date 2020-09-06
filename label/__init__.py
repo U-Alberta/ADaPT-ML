@@ -15,7 +15,7 @@ parsed_args = parser.parse_args()
 
 TRAIN_PARAMS = {
     'n_epochs': parsed_args.n_epochs,
-    'optimizer:': parsed_args.optimizer,
+    'optimizer': parsed_args.optimizer,
     'prec_init': parsed_args.prec_init
 }
 
