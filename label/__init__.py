@@ -28,4 +28,5 @@ TRAINING_DATA_FILENAME = os.path.join('label', 'data', 'training_data.pkl')
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
-mlflow.set_tracking_uri('http://0.0.0.0:5000')
+# mlflow.set_tracking_uri('http://0.0.0.0:5000')
+mlflow.set_tracking_uri(os.path.join('/mlflow_label'))

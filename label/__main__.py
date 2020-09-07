@@ -27,7 +27,6 @@ if __name__ == '__main__':
     if parsed_args.step in (0, 2):
         with mlflow.start_run():
             label_model = model.train_label_model(L_train, LABEL_MODEL_FILENAME, TRAIN_PARAMS)
-
             mlflow.log_params(model.train_params_dict(label_model))
             tracking_url_type_store = urlparse(mlflow.get_tracking_uri()).scheme
             if tracking_url_type_store != 'file':
