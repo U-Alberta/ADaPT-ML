@@ -71,7 +71,13 @@ Approach this as a question answering task?
 docker build -t cecn-data-programming-image -f Dockerfile .
 docker run -i -t -p 5000:5000 -v /var/run/docker.sock:/var/run/docker.sock cecn-data-programming-image
 mlflow run -e pv -P pv_data=./label/data/energyeastframe.pkl .
-mlflow server --host 0.0.0.0
+
+mlflow server \
+--backend-store-uri postgresql://mlflow_user@localhost/mlflow_label/mlflow_db \
+--default-artifact-root file:/mlflow_label/artifact_root \
+--host 0.0.0.0 \
+--port 5000
+
 docker-compose run mlflow_label bash
 
 Social media convos connect or reflect or respond to a hearing -- person applies to CER and can be referrenced to by folks on social media
