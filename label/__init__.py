@@ -1,6 +1,7 @@
 import argparse
 import logging
 import os
+import mlflow
 
 parser = argparse.ArgumentParser(description='Perform data programming.')
 parser.add_argument('data_path', help='File path or URL to the unlabeled training data')
@@ -26,3 +27,5 @@ REGISTERED_MODEL_NAME = 'ValueLabelModel'
 TRAINING_DATA_FILENAME = os.path.join('label', 'data', 'training_data.pkl')
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+
+mlflow.set_tracking_uri('http://0.0.0.0:5000')
