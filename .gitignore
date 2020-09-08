@@ -2,6 +2,7 @@
 label/resources/*.pkl
 label/resources/*.npy
 mlruns
+dbdata
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
