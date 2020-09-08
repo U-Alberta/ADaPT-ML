@@ -4,7 +4,6 @@ docker_env:
     image: cecn-data-programming-image
 
 entry_points:
-
     pv:
         parameters:
             pv_data: path

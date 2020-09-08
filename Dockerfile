@@ -31,19 +31,19 @@ RUN pip install --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
 # Install  postgreSQL
-RUN apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8
-RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main" > /etc/apt/sources.list.d/pgdg.list
-RUN apt-get update \
-    && apt-get install -y \
-    postgresql \
-    postgresql-client \
-    postgresql-contrib
+#RUN apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8
+#RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main" > /etc/apt/sources.list.d/pgdg.list
+#RUN apt-get update \
+#    && apt-get install -y \
+#    postgresql \
+#    postgresql-client \
+#    postgresql-contrib
+#
+#USER postgres
+#RUN /etc/init.d/postgresql start \
+#    && psql --command "CREATE USER mlflow_user WITH SUPERUSER PASSWORD 'mlflow';" \
+#    && createdb -O mlflow_user /mlflow_label/mlflow_label_db
+#USER root
 
-USER postgres
-RUN /etc/init.d/postgresql start \
-    && psql --command "CREATE USER mlflow_user WITH SUPERUSER PASSWORD 'mlflow';" \
-    && createdb -O mlflow_user /mlflow_label/mlflow_label_db
-
-USER root
 COPY . .
 CMD [ "/bin/bash" ]

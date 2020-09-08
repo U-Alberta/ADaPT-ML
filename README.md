@@ -73,11 +73,9 @@ docker run -i -t -p 5000:5000 -v /var/run/docker.sock:/var/run/docker.sock cecn-
 mlflow run -e pv -P pv_data=./label/data/energyeastframe.pkl .
 
 mlflow server \
---backend-store-uri postgresql://mlflow_user@localhost/mlflow_label/mlflow_db \
---default-artifact-root file:/mlflow_label/artifact_root \
---host 0.0.0.0 \
---port 5000
-
+--backend-store-uri mysql+pymysql://mlflow:strongpassword@db:3306/db \
+--default-artifact-root s3://mlflow_bucket/mlflow/
+--host 0.0.0.0
 docker-compose run mlflow_label bash
 
 Social media convos connect or reflect or respond to a hearing -- person applies to CER and can be referrenced to by folks on social media

@@ -1,11 +1,37 @@
-version: '3.1'
+version: '3.3'
 
 services:
+  db:
+    restart: always
+    image: mysql/mysql-server:5.7.28
+    container_name: mlflow_db
+    expose:
+      - "3306"
+    networks:
+      - backend
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - dbdata:/var/lib/mysql
+  web:
+    restart: always
+    build: .
+    image: cecn-data-programming-image
+    container_name: mlflow_server
+    ports:
+      - "5000:5000"
+    command: mlflow server \
+             --backend-store-uri mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@db:3306/${MYSQL_DATABASE} \
+             --default-artifact-root file:~/artifact_root \
+             --host 0.0.0.0
   mlflow_label:
     build: .
-    ports:
-    - "5000:5000"
+    image: cecn-data-programming-image
+    container_name: mlflow_label
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock
     - .:/code
-    - /data1/ANDREA/CECN/mlflow_label:/mlflow_label
+    command: mlflow run -e pv -P pv_data=./label/data/energyeastframe.pkl .
