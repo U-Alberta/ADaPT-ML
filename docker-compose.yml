@@ -16,20 +16,30 @@ services:
       - ./dbdata:/var/lib/mysql
   web:
     restart: always
-    build: .
+    build:
+      context: .
+      args:
+        - USER_ID=$(id -u)
+        - GROUP_ID=$(id -g)
     image: cecn-data-programming-image
     container_name: mlflow_server
     ports:
       - "5000:5000"
+    environment:
+      - HOST_NAME=${HOST_NAME}
     command: mlflow server \
-             --backend-store-uri mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@db:3306/${MYSQL_DATABASE} \
+             --backend-store-uri mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@${HOST_NAME}:3306/${MYSQL_DATABASE} \
              --default-artifact-root file:~/artifact_root \
              --host 0.0.0.0
   mlflow_label:
-    build: .
+    build:
+      context: .
+      args:
+        - USER_ID=$(id -u)
+        - GROUP_ID=$(id -g)
     image: cecn-data-programming-image
     container_name: mlflow_label
     volumes:
-    - /var/run/docker.sock:/var/run/docker.sock
-    - .:/code
+      - /var/run/docker.sock:/var/run/docker.sock
+      - .:/code
     command: mlflow run -e pv -P pv_data=./label/data/energyeastframe.pkl .

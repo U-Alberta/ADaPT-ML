@@ -5,6 +5,7 @@ needing answers are always changing.
 
 https://towardsdatascience.com/targeted-sentiment-analysis-vs-traditional-sentiment-analysis-4d9f2c12a476
 https://github.com/songyouwei/ABSA-PyTorch
+https://hub.docker.com/_/mysql?tab=description
 
 ## First Time Setup
 
