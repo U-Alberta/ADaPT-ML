@@ -1,12 +1,5 @@
 FROM python:3.8-slim-buster
 
-ARG USER_ID
-ARG GROUP_ID
-
-RUN addgroup --gid $GROUP_ID user
-RUN adduser --disabled-password --gecos '' --uid $USER_ID --gid $GROUP_ID user
-USER user
-
 WORKDIR /code
 
 # Install essentials
@@ -22,7 +15,9 @@ RUN apt-get update \
         ca-certificates \
         curl \
         gnupg-agent \
-        software-properties-common
+        software-properties-common \
+        libyaml-cpp-dev \
+        libyaml-dev
 
 # Install Docker
 RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
