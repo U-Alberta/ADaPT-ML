@@ -27,6 +27,8 @@ services:
     command: mlflow server \
              --backend-store-uri mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@${HOST_NAME}:3306/${MYSQL_DATABASE} \
              --host 0.0.0.0
+    depends_on:
+      - db
   mlflow_label:
     build:
       context: .
@@ -38,3 +40,5 @@ services:
     environment:
       - MLFLOW_TRACKING_URI=mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@${HOST_NAME}:3306/${MYSQL_DATABASE}
     command: mlflow run -e pv --experiment-name energyeast -P pv_data=./label/data/energyeastframe.pkl .
+    depends_on:
+      - db
