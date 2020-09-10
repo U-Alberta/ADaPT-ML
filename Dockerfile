@@ -13,7 +13,8 @@ WORKDIR /code
 RUN apt update \
     && apt install -y \
         build-essential \
-        git
+        git \
+        wait-for-it
 
 # install essentials for Docker
 RUN apt-get update \
