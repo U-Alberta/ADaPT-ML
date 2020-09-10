@@ -7,6 +7,8 @@ services:
     container_name: mlflow_db
     expose:
       - "3306"
+    networks:
+      - backend
     environment:
       - MYSQL_DATABASE=${MYSQL_DATABASE}
       - MYSQL_USER=${MYSQL_USER}
@@ -22,6 +24,9 @@ services:
     container_name: mlflow_server
     ports:
       - "5000:5000"
+    networks:
+      - backend
+      - frontend
     environment:
       - HOST_NAME=${HOST_NAME}
     command: mlflow server \
@@ -37,8 +42,20 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - .:/code
+    networks:
+      - backend
+      - frontend
     environment:
       - MLFLOW_TRACKING_URI=mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@${HOST_NAME}:3306/${MYSQL_DATABASE}
     command: mlflow run -e pv --experiment-name energyeast -P pv_data=./label/data/energyeastframe.pkl .
     depends_on:
       - db
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+
+volumes:
+  dbdata:

@@ -48,5 +48,6 @@ RUN pip install --upgrade pip \
 #    && createdb -O mlflow_user /mlflow_label/mlflow_label_db
 #USER root
 
-COPY . .
+COPY ./label ./label
+COPY ./MLproject .
 CMD [ "/bin/bash" ]
