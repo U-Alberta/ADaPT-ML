@@ -5,7 +5,7 @@ services:
     restart: always
     image: mysql/mysql-server:5.7.28
     container_name: mlflow_db
-    user: ${USER_ID}:${GROUP_ID}
+#    user: ${USER_ID}:${GROUP_ID}
     expose:
       - "3306"
     networks:
