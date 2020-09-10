@@ -2,23 +2,23 @@ version: '3.3'
 
 services:
   db:
-    restart: always
-    image: mysql/mysql-server:5.7.28
+    restart: on-failure
+    image: mysql/mysql-server:8.0
     container_name: mlflow_db
-#    user: ${USER_ID}:${GROUP_ID}
     expose:
       - "3306"
     networks:
-      - backend
+      - mlflow_net
     environment:
       - MYSQL_DATABASE=${MYSQL_DATABASE}
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_HOST=${MYSQL_ROOT_HOST}
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
     volumes:
       - ./dbdata:/var/lib/mysql
   web:
-    restart: always
+    restart: on-failure
     build:
       context: .
     image: cecn-data-programming-image
@@ -26,8 +26,7 @@ services:
     ports:
       - "5000:5000"
     networks:
-      - backend
-      - frontend
+      - mlflow_net
     environment:
       - HOST_NAME=${HOST_NAME}
     command: mlflow server \
@@ -42,10 +41,9 @@ services:
     container_name: mlflow_label
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - .:/code
+#      - .:/code
     networks:
-      - backend
-      - frontend
+      - mlflow_net
     environment:
       - MLFLOW_TRACKING_URI=mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@${HOST_NAME}:3306/${MYSQL_DATABASE}
     command: mlflow run -e pv --experiment-name energyeast -P pv_data=./label/data/energyeastframe.pkl .
@@ -53,9 +51,7 @@ services:
       - db
 
 networks:
-  frontend:
-    driver: bridge
-  backend:
+  mlflow_net:
     driver: bridge
 
 volumes:
