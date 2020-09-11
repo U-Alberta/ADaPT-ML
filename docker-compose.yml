@@ -29,9 +29,9 @@ services:
       - mlflow_net
     environment:
       - HOST_NAME=${HOST_NAME}
-    command: wait-for-it ${HOST_NAME}:3306 -s -- mlflow server \
-             --backend-store-uri mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@${HOST_NAME}:3306/${MYSQL_DATABASE} \
-             --host 0.0.0.0
+    command: wait-for-it ${HOST_NAME}:3306 -s -- mlflow server --backend-store-uri mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@${HOST_NAME}:3306/${MYSQL_DATABASE} --default-artifact-root ./mlruns --host 0.0.0.0
+    volumes:
+      - ./mlruns:./mlruns
     depends_on:
       - db
   mlflow_label:
@@ -41,6 +41,7 @@ services:
     container_name: mlflow_label
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - ./mlruns:./mlruns
 #      - .:/code
     networks:
       - mlflow_net
