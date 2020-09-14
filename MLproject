@@ -1,7 +1,9 @@
 name: cecn-data-programming
 
-docker_env:
-    image: cecn-data-programming-image
+# docker_env:
+#     image: cecn-data-programming-image
+
+conda_env: conda.yaml
 
 entry_points:
     pv:

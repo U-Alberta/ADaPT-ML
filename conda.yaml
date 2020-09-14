@@ -1,0 +1,20 @@
+name: cecn_env
+channels:
+  - defaults
+  - conda-forge
+  - pytorch
+dependencies:
+  - python>=3.6
+  - networkx>=2.2,<2.4
+  - numpy>=1.16.0,<2.0.0
+  - jupyter==1.0.0
+  - pip>19.0
+  - pip:
+    - snorkel == 0.9.6
+    - pyyaml
+    - spacy >=2.3.0,<2.4.0
+    - https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-2.3.1/en_core_web_lg-2.3.1.tar.gz#egg=en_core_web_lg
+    - mlflow
+    - git+https://github.com/crazyfrogspb/RedditScore.git
+    - dask[complete]>=2.1.0,<3.0.0
+    - pymysql
