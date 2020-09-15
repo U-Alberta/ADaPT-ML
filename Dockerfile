@@ -37,7 +37,7 @@ RUN apt-get update \
         docker-ce-cli \
         containerd.io
 
-COPY requirements.txt requirements.txt
+COPY ./requirements.txt .
 RUN pip install --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
@@ -58,4 +58,5 @@ RUN pip install --upgrade pip \
 
 COPY ./label ./label
 COPY ./MLproject .
+COPY ./conda.yaml .
 CMD [ "/bin/bash" ]
