@@ -55,6 +55,13 @@ RUN pip install --upgrade pip \
 #    && psql --command "CREATE USER mlflow_user WITH SUPERUSER PASSWORD 'mlflow';" \
 #    && createdb -O mlflow_user /mlflow_label/mlflow_label_db
 #USER root
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-4.5.4-Linux-x86_64.sh -O ~/anaconda.sh \
+    && /bin/bash ~/anaconda.sh -b -p /opt/conda \
+    && rm ~/anaconda.sh \
+    && ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh \
+    && echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc
+
+ENV PATH /opt/conda/bin:$PATH
 
 COPY ./label ./label
 COPY ./MLproject .
