@@ -22,6 +22,7 @@ RUN apt-get update \
         apt-transport-https \
         ca-certificates \
         curl \
+        wget \
         gnupg-agent \
         software-properties-common \
         libyaml-cpp-dev \
