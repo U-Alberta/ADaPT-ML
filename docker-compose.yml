@@ -48,12 +48,13 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./mlruns:/code/mlruns
-#      - .:/code
+      - ./label:/code/label
+      - ./MLproject:/code/MLproject
     networks:
       - mlflow_net
     environment:
       - MLFLOW_TRACKING_URI=mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@${HOST_NAME}:3306/${MYSQL_DATABASE}
-#    command: wait-for-it ${HOST_NAME}:3306 -s -- mlflow run -e pv --experiment-name energyeast -P pv_data=./label/data/energyeastframe.pkl .
+    command: wait-for-it ${HOST_NAME}:3306 -s -- mlflow run -e pv --experiment-name energyeast -P pv_data=./label/data/energyeastframe.pkl .
     stdin_open: true
     tty: true
     depends_on:
