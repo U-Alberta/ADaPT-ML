@@ -8,6 +8,7 @@ dependencies:
   - networkx>=2.2,<2.4
   - numpy>=1.16.0,<2.0.0
   - jupyter==1.0.0
+  - torchvision
   - pip>19.0
   - pip:
     - snorkel == 0.9.6
