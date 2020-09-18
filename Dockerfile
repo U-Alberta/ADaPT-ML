@@ -38,9 +38,9 @@ RUN apt-get update \
         docker-ce-cli \
         containerd.io
 
-COPY ./requirements.txt .
-RUN pip install --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
+#COPY ./requirements.txt .
+#RUN pip install --upgrade pip \
+#    && pip install --no-cache-dir -r requirements.txt
 
 # Install  postgreSQL
 #RUN apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8
@@ -64,7 +64,10 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-4.5.4-Linux-x86_
 
 ENV PATH /opt/conda/bin:$PATH
 
+COPY ./conda.yaml .
+RUN conda env create -f conda.yaml
+RUN echo "conda activate cecn_env" >> ~/.bashrc
+
 COPY ./label ./label
 COPY ./MLproject .
-COPY ./conda.yaml .
 CMD [ "/bin/bash" ]
