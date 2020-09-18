@@ -50,6 +50,7 @@ services:
       - ./mlruns:/code/mlruns
       - ./label:/code/label
       - ./MLproject:/code/MLproject
+      - ./conda.yaml:/code/conda.yaml
     networks:
       - mlflow_net
     environment:
