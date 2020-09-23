@@ -36,12 +36,12 @@ if __name__ == '__main__':
                 # LabelModel subclasses torch.nn.Module
                 mlflow.pytorch.log_model(
                     label_model,
-                    './mlruns',
+                    'label_model',
                     registered_model_name=REGISTERED_MODEL_NAME,
                     signature=signature,
                     input_example=input_example)
             else:
-                mlflow.pytorch.log_model(label_model, './mlruns')
+                mlflow.pytorch.log_model(label_model, 'label_model')
         else:
             label_model = model.load_label_model(LABEL_MODEL_FILENAME)
 

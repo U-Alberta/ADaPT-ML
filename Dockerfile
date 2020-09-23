@@ -65,8 +65,7 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-4.5.4-Linux-x86_
 ENV PATH /opt/conda/bin:$PATH
 
 COPY ./conda.yaml .
-RUN conda update -n base conda \
-    && conda env create -f conda.yaml
+RUN conda env create -f conda.yaml
 RUN echo "conda activate cecn_env" >> ~/.bashrc
 
 COPY ./label ./label

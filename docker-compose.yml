@@ -29,17 +29,13 @@ services:
       - mlflow_net
     environment:
       - HOST_NAME=${HOST_NAME}
-    command: wait-for-it ${HOST_NAME}:3306 -s -- mlflow server --backend-store-uri mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@${HOST_NAME}:3306/${MYSQL_DATABASE} --default-artifact-root ./mlruns --host 0.0.0.0
+#    command: wait-for-it ${HOST_NAME}:3306 -s -- mlflow server --backend-store-uri mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@${HOST_NAME}:3306/${MYSQL_DATABASE} --default-artifact-root ./mlruns --host 0.0.0.0
+    stdin_open: true
+    tty: true
     volumes:
       - ./mlruns:/code/mlruns
     depends_on:
       - db
-#    healthcheck:
-#      test: ["CMD", "curl", "-f", "http://localhost"]
-#      interval: 1m30s
-#      timeout: 10s
-#      retries: 3
-#      start_period: 40s
   mlflow_label:
     build:
       context: .
@@ -51,11 +47,12 @@ services:
       - ./label:/code/label
       - ./MLproject:/code/MLproject
       - ./conda.yaml:/code/conda.yaml
+      - ./conda_envs:/opt/conda/envs
     networks:
       - mlflow_net
     environment:
       - MLFLOW_TRACKING_URI=mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@${HOST_NAME}:3306/${MYSQL_DATABASE}
-#    command: wait-for-it ${HOST_NAME}:3306 -s -- mlflow run -e pv --experiment-name energyeast -P pv_data=./label/data/energyeastframe.pkl .
+#    command: wait-for-it ${HOST_NAME}:3306 -s -- mlflow run --no-conda -e pv --experiment-name energyeast -P pv_data=./label/data/energyeastframe.pkl .
     stdin_open: true
     tty: true
     depends_on:
