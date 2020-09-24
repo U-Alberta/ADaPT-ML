@@ -7,6 +7,7 @@ from snorkel.labeling import filter_unlabeled_dataframe
 from snorkel.labeling.model import LabelModel
 from snorkel.utils import probs_to_preds
 
+from label import LABEL_MODEL_FILENAME, TRAINING_DATA_FILENAME, TRAINING_DATA_HTML_FILENAME, TRAIN_PARAMS
 from label.lfs import ValueLabel
 
 INIT_PARAMS = {
@@ -34,24 +35,24 @@ LM_OPTIMIZER_SETTINGS = {
 }
 
 
-def train_label_model(L_train: np.ndarray, label_model_filename: str, train_params: dict) -> LabelModel:
+def train_label_model(L_train: np.ndarray) -> LabelModel:
     label_model = LabelModel(**INIT_PARAMS)
-    train_params.update(LM_OPTIMIZER_SETTINGS[train_params['optimizer']])
-    label_model.fit(L_train, **train_params)
-    label_model.save(label_model_filename)
+    TRAIN_PARAMS.update(LM_OPTIMIZER_SETTINGS[TRAIN_PARAMS['optimizer']])
+    label_model.fit(L_train, **TRAIN_PARAMS)
+    label_model.save(LABEL_MODEL_FILENAME)
     return label_model
 
 
-def load_label_model(label_model_filename) -> LabelModel:
+def load_label_model() -> LabelModel:
     label_model = LabelModel(**INIT_PARAMS)
     try:
-        label_model.load(label_model_filename)
+        label_model.load(LABEL_MODEL_FILENAME)
         return label_model
     except IOError:
         sys.exit("Label model not found. Please run Step 2 first.")
 
 
-def apply_label_model(L_train: np.ndarray, label_model: LabelModel, train_df: pd.DataFrame, training_data_filename: str) -> pd.DataFrame:
+def apply_label_model(L_train: np.ndarray, label_model: LabelModel, train_df: pd.DataFrame) -> pd.DataFrame:
     probs = label_model.predict_proba(L_train)
     filtered_df, probs = filter_unlabeled_dataframe(train_df, probs, L_train)
     logging.info("data points filtered out: {0}".format(train_df.shape[0]-filtered_df.shape[0]))
@@ -59,7 +60,8 @@ def apply_label_model(L_train: np.ndarray, label_model: LabelModel, train_df: pd
     preds = probs_to_preds(probs)
     pred_labels = [ValueLabel(pred).name if pred != -1 else 'ABSTAIN' for pred in preds]
     filtered_df.insert(len(filtered_df.columns), 'label', pred_labels)
-    filtered_df.to_pickle(training_data_filename)
+    filtered_df.to_pickle(TRAINING_DATA_FILENAME)
+    filtered_df.to_html(TRAINING_DATA_HTML_FILENAME)
     return filtered_df
 
 

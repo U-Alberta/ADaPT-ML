@@ -24,5 +24,6 @@ LABEL_MODEL_FILENAME = os.path.join('label', 'resources', 'label_model.pkl')
 REGISTERED_MODEL_NAME = 'ValueLabelModel'
 
 TRAINING_DATA_FILENAME = os.path.join('label', 'data', 'training_data.pkl')
+TRAINING_DATA_HTML_FILENAME = os.path.join('label', 'data', 'training_data.html')
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)

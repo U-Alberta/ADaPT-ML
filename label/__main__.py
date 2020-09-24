@@ -7,8 +7,8 @@ import mlflow.pytorch
 from mlflow.models.signature import infer_signature
 import pandas as pd
 
-from label import (parsed_args, matrix, model, LABEL_MATRIX_FILENAME,
-                   LABEL_MODEL_FILENAME, TRAINING_DATA_FILENAME, REGISTERED_MODEL_NAME, TRAIN_PARAMS)
+from label import (parsed_args, matrix, model, LABEL_MATRIX_FILENAME, TRAINING_DATA_FILENAME,
+                   TRAINING_DATA_HTML_FILENAME, REGISTERED_MODEL_NAME, TRAIN_PARAMS)
 
 if __name__ == '__main__':
 
@@ -21,13 +21,13 @@ if __name__ == '__main__':
 
         # Step 1: create the label matrix
         if parsed_args.step in (0, 1):
-            L_train = matrix.create_label_matrix(train_df, LABEL_MATRIX_FILENAME)
+            L_train = matrix.create_label_matrix(train_df)
         else:
-            L_train = matrix.load_label_matrix(LABEL_MATRIX_FILENAME)
+            L_train = matrix.load_label_matrix()
 
         # Step 2: train the label model
         if parsed_args.step in (0, 2):
-            label_model = model.train_label_model(L_train, LABEL_MODEL_FILENAME, TRAIN_PARAMS)
+            label_model = model.train_label_model(L_train)
             mlflow.log_params(model.train_params_dict(label_model))
             signature = infer_signature(L_train, label_model.predict(L_train))
             input_example = L_train[:5, :]
@@ -43,13 +43,14 @@ if __name__ == '__main__':
             else:
                 mlflow.pytorch.log_model(label_model, 'label_model')
         else:
-            label_model = model.load_label_model(LABEL_MODEL_FILENAME)
+            label_model = model.load_label_model()
 
         # Step 3: apply the label model to the training data
         if parsed_args.step in (0, 3):
-            filtered_train_df = model.apply_label_model(L_train, label_model, train_df, TRAINING_DATA_FILENAME)
+            filtered_train_df = model.apply_label_model(L_train, label_model, train_df)
 
         # Log the data points, label matrix, and labeled training data as artifacts
         mlflow.log_artifact(parsed_args.data_path)
         mlflow.log_artifact(LABEL_MATRIX_FILENAME)
         mlflow.log_artifact(TRAINING_DATA_FILENAME)
+        mlflow.log_artifact(TRAINING_DATA_HTML_FILENAME)
