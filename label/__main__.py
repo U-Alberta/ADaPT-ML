@@ -2,13 +2,12 @@ import logging
 import sys
 from urllib.parse import urlparse
 
-import mlflow
 import mlflow.pytorch
-from mlflow.models.signature import infer_signature
 import pandas as pd
+from mlflow.models.signature import infer_signature
 
-from label import (parsed_args, matrix, model, LABEL_MATRIX_FILENAME, TRAINING_DATA_FILENAME,
-                   TRAINING_DATA_HTML_FILENAME, REGISTERED_MODEL_NAME, TRAIN_PARAMS)
+from label import (parsed_args, matrix, model, evaluate, LABEL_MATRIX_FILENAME, TRAINING_DATA_FILENAME,
+                   TRAINING_DATA_HTML_FILENAME, REGISTERED_MODEL_NAME, CONFUSION_MATRIX_FILENAME)
 
 if __name__ == '__main__':
 
@@ -29,6 +28,10 @@ if __name__ == '__main__':
         if parsed_args.step in (0, 2):
             label_model = model.train_label_model(L_train)
             mlflow.log_params(model.train_params_dict(label_model))
+            #metrics = evaluate.label_model_summary(L_train, label_model, y)
+            #mlflow.log_metrics(metrics)
+            evaluate.lf_summary(L_train, label_model)
+
             signature = infer_signature(L_train, label_model.predict(L_train))
             input_example = L_train[:5, :]
             tracking_url_type_store = urlparse(mlflow.get_tracking_uri()).scheme
@@ -54,3 +57,4 @@ if __name__ == '__main__':
         mlflow.log_artifact(LABEL_MATRIX_FILENAME)
         mlflow.log_artifact(TRAINING_DATA_FILENAME)
         mlflow.log_artifact(TRAINING_DATA_HTML_FILENAME)
+        # mlflow.log_artifact(CONFUSION_MATRIX_FILENAME)

@@ -23,6 +23,9 @@ LABEL_MATRIX_FILENAME = os.path.join('label', 'resources', 'label_matrix.npy')
 LABEL_MODEL_FILENAME = os.path.join('label', 'resources', 'label_model.pkl')
 REGISTERED_MODEL_NAME = 'ValueLabelModel'
 
+LF_SUMMARY_FILENAME = 'lf_summary.html'
+CONFUSION_MATRIX_FILENAME = 'confusion_matrix.jpg'
+
 TRAINING_DATA_FILENAME = os.path.join('label', 'data', 'training_data.pkl')
 TRAINING_DATA_HTML_FILENAME = os.path.join('label', 'data', 'training_data.html')
 
