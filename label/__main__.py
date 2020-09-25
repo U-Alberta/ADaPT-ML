@@ -7,7 +7,7 @@ import pandas as pd
 from mlflow.models.signature import infer_signature
 
 from label import (parsed_args, matrix, model, evaluate, LABEL_MATRIX_FILENAME, TRAINING_DATA_FILENAME,
-                   TRAINING_DATA_HTML_FILENAME, REGISTERED_MODEL_NAME, CONFUSION_MATRIX_FILENAME)
+                   TRAINING_DATA_HTML_FILENAME, LF_SUMMARY_FILENAME, REGISTERED_MODEL_NAME, CONFUSION_MATRIX_FILENAME)
 
 if __name__ == '__main__':
 
@@ -57,4 +57,5 @@ if __name__ == '__main__':
         mlflow.log_artifact(LABEL_MATRIX_FILENAME)
         mlflow.log_artifact(TRAINING_DATA_FILENAME)
         mlflow.log_artifact(TRAINING_DATA_HTML_FILENAME)
+        mlflow.log_artifact(LF_SUMMARY_FILENAME)
         # mlflow.log_artifact(CONFUSION_MATRIX_FILENAME)
