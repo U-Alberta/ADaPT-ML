@@ -28,8 +28,6 @@ parser.add_argument('--tol', default=1e-4, help='Tolerance for stopping criteria
 parser.add_argument('--C', default=1.0, help='Inverse of regularization strength; must be a positive float. Like '
                                              'in support vector machines, smaller values specify stronger '
                                              'regularization')
-parser.add_argument('--fit_intercept', default=True, help='Specifies if a constant (a.k.a. bias or intercept) '
-                                                          'should be added to the decision function')
 parser.add_argument('--max_iter', default=100, help='Maximum number of iterations taken for the solvers to converge')
 parser.add_argument('--multi_class', default='auto', help='If the option chosen is ‘ovr’, then a binary problem '
                                                           'is fit for each label. For ‘multinomial’ the loss '
@@ -38,9 +36,6 @@ parser.add_argument('--multi_class', default='auto', help='If the option chosen 
                                                           'binary')
 parser.add_argument('--verbose', default=10000, help='For the liblinear and lbfgs solvers set verbose to any '
                                                      'positive number for verbosity.')
-parser.add_argument('--warm_start', default=False, help='When set to True, reuse the solution of the previous '
-                                                        'call to fit as initialization, otherwise, just erase the'
-                                                        ' previous solution')
 parser.add_argument('--n_jobs', default=-1, help='Number of CPU cores used when parallelizing over classes if '
                                                  'multi_class=’ovr’.This parameter is ignored when the solver is '
                                                  'set to ‘liblinear’ regardless of whether ‘multi_class’ is '
@@ -72,11 +67,9 @@ TRAIN_PARAMS = {
     'solver': parsed_args.solver,
     'tol': parsed_args.tol,
     'C': parsed_args.C,
-    'fit_intercept': parsed_args.fit_intercept,
     'max_iter': parsed_args.max_iter,
     'multi_class': parsed_args.multi_class,
     'verbose': parsed_args.verbose,
-    'warm_start': parsed_args.warm_start,
     'n_jobs': parsed_args.n_jobs
 }.update({
     'newton-cg': {

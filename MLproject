@@ -7,24 +7,20 @@ entry_points:
         parameters:
             train_data: path
             test_data: path
-            solver: string
-            tol: float
-            C: float
-            fit_intercept: bool
-            max_iter: int
-            multi_class: string
-            verbose: int
-            warm_start: bool
-            n_jobs: int
+            solver: {type: string, default: lbfgs}
+            tol: {type: float, default: 1e-4}
+            C: {type: float, default: 1.0}
+            max_iter: {type: int, default: 100}
+            multi_class: {type: string, default: auto}
+            verbose: {type: int, default: 10000}
+            n_jobs: {type: int, default: -1}
         command: "python modeling/mlogit.py
          --solver {n_epochs}
          --tol {optimizer}
          --C {prec_init}
-         --fit_intercept {fit_intercept)
          --max_iter {max_iter}
          --multi_class {multi_class}
          --verbose {verbose}
-         --warm_start {warm_start}
          --n_jobs {n_jobs}
          {train_data}
          {test_data}"
