@@ -1,7 +1,8 @@
 # Project-specific stuff
 *.pkl
 *.jpg
-
+dbdata/
+mlruns/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
