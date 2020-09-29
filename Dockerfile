@@ -43,7 +43,7 @@ ENV PATH /opt/conda/bin:$PATH
 
 COPY ./conda.yaml .
 RUN conda env create -f conda.yaml
-RUN echo "conda activate cecn_env" >> ~/.bashrc
+RUN echo "conda activate cecn_class_env" >> ~/.bashrc
 
 # Finish up
 COPY ./modeling ./modeling
