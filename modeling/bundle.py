@@ -28,6 +28,7 @@ phrase_tokenizer = CrazyTokenizer(lowercase=False,
                                   urls='',
                                   whitespaces_to_underscores=False)
 
+
 class BaseModelBundle(ABC):
     """
     This base model is designed to have functions for preprocessing, featurizing, and modeling bundled into one
