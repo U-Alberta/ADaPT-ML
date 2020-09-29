@@ -1,0 +1,66 @@
+version: '3.3'
+
+services:
+  db:
+    restart: on-failure
+    image: mysql/mysql-server:8.0
+    container_name: mlflow_class_db
+    expose:
+      - "3306"
+    networks:
+      - mlflow_class_net
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_HOST=${MYSQL_ROOT_HOST}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - ./dbdata:/var/lib/mysql
+  web:
+    restart: on-failure
+    build:
+      context: .
+    image: cecn-classification-image
+    container_name: mlflow_class_server
+    ports:
+      - "5000:5000"
+    networks:
+      - mlflow_class_net
+    environment:
+      - HOST_NAME=${HOST_NAME}
+#    command: wait-for-it ${HOST_NAME}:3306 -s -- mlflow server --backend-store-uri mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@${HOST_NAME}:3306/${MYSQL_DATABASE} --default-artifact-root ./mlruns --host 0.0.0.0
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./mlruns:/code/mlruns
+    depends_on:
+      - db
+  mlflow_label:
+    build:
+      context: .
+    image: cecn-classification-image
+    container_name: mlflow_class
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./mlruns:/code/mlruns
+      - ./modeling:/code/modeling
+      - ./MLproject:/code/MLproject
+      - ./conda.yaml:/code/conda.yaml
+      - ./conda_envs:/opt/conda/envs
+    networks:
+      - mlflow_class_net
+    environment:
+      - MLFLOW_TRACKING_URI=mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@${HOST_NAME}:3306/${MYSQL_DATABASE}
+#    command: wait-for-it ${HOST_NAME}:3306 -s -- mlflow run --no-conda -e mlogit --experiment-name energyeast -P training_data=./modeling/data/training_data.pkl .
+    stdin_open: true
+    tty: true
+    depends_on:
+      - db
+
+networks:
+  mlflow_net:
+    driver: bridge
+
+volumes:
+  dbdata:

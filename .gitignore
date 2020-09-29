@@ -1,3 +1,8 @@
+# Project-specific stuff
+*.pkl
+*.jpg
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -64,6 +69,9 @@ instance/
 
 # Scrapy stuff:
 .scrapy
+
+# PyCharm stuff:
+.idea
 
 # Sphinx documentation
 docs/_build/

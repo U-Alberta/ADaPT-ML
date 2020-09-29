@@ -1,0 +1,31 @@
+name: cecn-classification
+
+conda_env: conda.yaml
+
+entry_points:
+    mlogit:
+        parameters:
+            train_data: path
+            test_data: path
+            solver: string
+            tol: float
+            C: float
+            fit_intercept: bool
+            max_iter: int
+            multi_class: string
+            verbose: int
+            warm_start: bool
+            n_jobs: int
+        command: "python modeling/mlogit.py
+         --solver {n_epochs}
+         --tol {optimizer}
+         --C {prec_init}
+         --fit_intercept {fit_intercept)
+         --max_iter {max_iter}
+         --multi_class {multi_class}
+         --verbose {verbose}
+         --warm_start {warm_start}
+         --n_jobs {n_jobs}
+         {train_data}
+         {test_data}"
+
