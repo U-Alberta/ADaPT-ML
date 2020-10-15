@@ -44,7 +44,7 @@ services:
       context: .
     image: cecn-classification-image
     container_name: mlflow_class_server
-#    ports:
+    ports:
       - "5001:5000"
     networks:
       - mlflow_class_net
