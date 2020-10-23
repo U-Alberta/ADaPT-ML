@@ -26,7 +26,6 @@ services:
       - MYSQL_DATABASE=${DP_MYSQL_DATABASE}
       - MYSQL_USER=${DP_MYSQL_USER}
       - MYSQL_PASSWORD=${DP_MYSQL_PASSWORD}
-      - MYSQL_ROOT_HOST=${DP_MYSQL_ROOT_HOST}
       - MYSQL_ROOT_PASSWORD=${DP_MYSQL_ROOT_PASSWORD}
     volumes:
       - ${DP_DATA_PATH}/dbdata:/var/lib/mysql
@@ -42,7 +41,7 @@ services:
       - dp_network
     environment:
       - MLFLOW_TRACKING_URI=${DP_MLFLOW_TRACKING_URI}
-    command: wait-for-it dp-mlflow-db:3306 -s -- mlflow server --backend-store-uri $MLFLOW_TRACKING_URI --default-artifact-root ./mlruns --host 0.0.0.0
+    command: wait-for-it dp-mlflow-db:3306 -s -- mlflow server --backend-store-uri ${DP_MLFLOW_TRACKING_URI} --default-artifact-root ./mlruns --host 0.0.0.0
     stdin_open: true
     tty: true
     volumes:

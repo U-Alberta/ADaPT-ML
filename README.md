@@ -59,7 +59,7 @@ This will import the JSON-formatted list of data points in each file in the inpu
 [
   {
     "tweet_text": "Opossum is great",
-    "tweet_id": 5555555,
+    "ref_id": "<tweet_id>",
     "meta_info": {
       "timestamp": "2020-03-09 18:15:28.212882",
       "location": "North Pole"
