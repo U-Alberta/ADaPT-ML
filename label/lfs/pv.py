@@ -8,7 +8,8 @@ import sqlite3
 import en_core_web_lg
 from snorkel.labeling import LabelingFunction, LFAnalysis
 
-from label.lfs import ValueLabel, LEXICONS_PATH, ABSTAIN
+from label import LEXICONS_PATH
+from label.lfs import ValueLabel, ABSTAIN
 from label.lfs.preprocessors import spacy_preprocessor
 
 nlp = en_core_web_lg.load()

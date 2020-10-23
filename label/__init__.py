@@ -18,15 +18,17 @@ TRAIN_PARAMS = {
     'optimizer': parsed_args.optimizer,
     'prec_init': parsed_args.prec_init
 }
+LEXICONS_PATH = os.path.join(os.environ['RESOURCES_PATH'], 'lexicons.db')
+TMP_ARTIFACTS = os.path.join(os.environ['DP_DATA_PATH'], 'tmp_artifacts')
 
-LABEL_MATRIX_FILENAME = os.path.join('label', 'resources', 'label_matrix.npy')
-LABEL_MODEL_FILENAME = os.path.join('label', 'resources', 'label_model.pkl')
+LABEL_MATRIX_FILENAME = os.path.join(TMP_ARTIFACTS, 'label_matrix.npy')
+LABEL_MODEL_FILENAME = os.path.join(TMP_ARTIFACTS, 'label_model.pkl')
 REGISTERED_MODEL_NAME = 'ValueLabelModel'
 
-LF_SUMMARY_FILENAME = 'lf_summary.html'
-CONFUSION_MATRIX_FILENAME = 'confusion_matrix.jpg'
+LF_SUMMARY_FILENAME = os.path.join(TMP_ARTIFACTS, 'lf_summary.html')
+CONFUSION_MATRIX_FILENAME = os.path.join(TMP_ARTIFACTS, 'confusion_matrix.jpg')
 
-TRAINING_DATA_FILENAME = os.path.join('label', 'data', 'training_data.pkl')
-TRAINING_DATA_HTML_FILENAME = os.path.join('label', 'data', 'training_data.html')
+TRAINING_DATA_FILENAME = os.path.join(TMP_ARTIFACTS, 'training_data.pkl')
+TRAINING_DATA_HTML_FILENAME = os.path.join(TMP_ARTIFACTS, 'training_data.html')
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)

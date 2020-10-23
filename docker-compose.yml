@@ -1,66 +1,75 @@
 version: '3.3'
 
 services:
-  db:
+  label_studio:
+    restart: on-failure
+    image: heartexlabs/label-studio:latest
+    container_name: label-studio
+    ports:
+    - "8080:8080"
+    volumes:
+    - ${DP_DATA_PATH}/label_studio/pv_project:/label-studio/pv_project
+    - ${DP_DATA_PATH}/label_studio/tasks:/label-studio/tasks
+    - ./config.xml:/label-studio/config.xml
+    stdin_open: true
+    tty: true
+    command: label-studio start pv_project --init --force --label-config /label_studio/config.xml
+  dp_db:
     restart: on-failure
     image: mysql/mysql-server:8.0
-    container_name: mlflow_db
+    container_name: dp-mlflow-db
     expose:
       - "3306"
     networks:
-      - mlflow_net
+      - dp_network
     environment:
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-      - MYSQL_ROOT_HOST=${MYSQL_ROOT_HOST}
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${DP_MYSQL_DATABASE}
+      - MYSQL_USER=${DP_MYSQL_USER}
+      - MYSQL_PASSWORD=${DP_MYSQL_PASSWORD}
+      - MYSQL_ROOT_HOST=${DP_MYSQL_ROOT_HOST}
+      - MYSQL_ROOT_PASSWORD=${DP_MYSQL_ROOT_PASSWORD}
     volumes:
-      - ./dbdata:/var/lib/mysql
-  web:
+      - ${DP_DATA_PATH}/dbdata:/var/lib/mysql
+  dp_web:
     restart: on-failure
     build:
       context: .
-    image: cecn-data-programming-image
-    container_name: mlflow_server
+    image: data-programming-image
+    container_name: dp-mlflow-server
     ports:
       - "5000:5000"
     networks:
-      - mlflow_net
+      - dp_network
     environment:
-      - HOST_NAME=${HOST_NAME}
-#    command: wait-for-it ${HOST_NAME}:3306 -s -- mlflow server --backend-store-uri mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@${HOST_NAME}:3306/${MYSQL_DATABASE} --default-artifact-root ./mlruns --host 0.0.0.0
+      - MLFLOW_TRACKING_URI=${DP_MLFLOW_TRACKING_URI}
+    command: wait-for-it dp-mlflow-db:3306 -s -- mlflow server --backend-store-uri $MLFLOW_TRACKING_URI --default-artifact-root ./mlruns --host 0.0.0.0
     stdin_open: true
     tty: true
     volumes:
-      - ./mlruns:/code/mlruns
+      - ${DP_DATA_PATH}/mlruns:/code/mlruns
     depends_on:
-      - db
-  mlflow_label:
+      - dp_db
+  dp:
     build:
       context: .
-    image: cecn-data-programming-image
-    container_name: mlflow_label
+    image: data-programming-image
+    container_name: dp-mlflow
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./mlruns:/code/mlruns
+      - ${DP_DATA_PATH}/mlruns:/code/mlruns
+      - ${DP_DATA_PATH}/unlabeled_data:/unlabeled_data
       - ./label:/code/label
       - ./MLproject:/code/MLproject
       - ./conda.yaml:/code/conda.yaml
-      - ./conda_envs:/opt/conda/envs
     networks:
-      - mlflow_net
+      - dp_network
     environment:
-      - MLFLOW_TRACKING_URI=mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@${HOST_NAME}:3306/${MYSQL_DATABASE}
-#    command: wait-for-it ${HOST_NAME}:3306 -s -- mlflow run --no-conda -e pv --experiment-name energyeast -P pv_data=./label/data/energyeastframe.pkl .
+      - MLFLOW_TRACKING_URI=${DP_MLFLOW_TRACKING_URI}
     stdin_open: true
     tty: true
     depends_on:
-      - db
+      - dp_db
 
 networks:
-  mlflow_net:
+  dp_network:
     driver: bridge
-
-volumes:
-  dbdata:

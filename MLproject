@@ -1,15 +1,12 @@
-name: cecn-data-programming
-
-# docker_env:
-#     image: cecn-data-programming-image
+name: data-programming
 
 conda_env: conda.yaml
 
 entry_points:
     pv:
         parameters:
-            pv_data: path
+            data: path
             n_epochs: {type: int, default: 1000}
             optimizer: {type: string, default: sgd}
             prec_init: {type: float, default: 0.7}
-        command: "python -m label --n_epochs {n_epochs} --optimizer {optimizer} --prec_init {prec_init} {pv_data}"
+        command: "python -m label --n_epochs {n_epochs} --optimizer {optimizer} --prec_init {prec_init} {data}"

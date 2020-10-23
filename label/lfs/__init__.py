@@ -1,7 +1,5 @@
 from enum import Enum
-import os
 
-LEXICONS_PATH = os.path.join('label', 'resources', 'lexicons.db')
 ABSTAIN = -1
 
 
