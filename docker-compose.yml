@@ -64,6 +64,7 @@ services:
     environment:
       - MLFLOW_TRACKING_URI=${DP_MLFLOW_TRACKING_URI}
       - RESOURCES_PATH=${RESOURCES_PATH}
+      - DP_DATA_PATH=${DP_DATA_PATH}
     stdin_open: true
     tty: true
     depends_on:
