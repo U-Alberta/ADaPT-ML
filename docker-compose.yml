@@ -54,7 +54,6 @@ services:
     image: data-programming-image
     container_name: dp-mlflow
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
       - ${DP_DATA_PATH}/mlruns:/code/mlruns
       - ${DP_DATA_PATH}/unlabeled_data:/unlabeled_data
       - ./label:/code/label

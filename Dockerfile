@@ -10,15 +10,14 @@ FROM python:3.8-slim-buster
 WORKDIR /code
 
 # Install essentials
-RUN apt update \
-    && apt install -y \
+RUN apt-get update \
+    && apt-get install -y \
         build-essential \
         git \
         wait-for-it
 
-# Install essentials for Docker
-RUN apt-get update \
-    && apt-get install -y \
+RUN apt update \
+    && apt install -y \
         apt-transport-https \
         ca-certificates \
         curl \
@@ -27,16 +26,6 @@ RUN apt-get update \
         software-properties-common \
         libyaml-cpp-dev \
         libyaml-dev
-
-# Install Docker
-RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
-RUN apt-key fingerprint 0EBFCD88
-RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
-RUN apt-get update \
-    && apt-get install -y \
-        docker-ce \
-        docker-ce-cli \
-        containerd.io
 
 # Install Miniconda and create conda env
 RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-4.5.4-Linux-x86_64.sh -O ~/anaconda.sh \
