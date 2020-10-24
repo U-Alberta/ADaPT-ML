@@ -53,10 +53,11 @@ def load_label_model() -> LabelModel:
 
 
 def apply_label_model(L_train: np.ndarray, label_model: LabelModel, train_df: pd.DataFrame) -> pd.DataFrame:
-    preds, probs = label_model.predict(L_train, return_probs=True)
+    probs = label_model.predict_proba(L_train)
     filtered_df, probs = filter_unlabeled_dataframe(train_df, probs, L_train)
     logging.info("data points filtered out: {0}".format(train_df.shape[0]-filtered_df.shape[0]))
     logging.info("data points remaining: {0}".format(filtered_df.shape[0]))
+    preds = probs_to_preds(probs)
     pred_labels = [ValueLabel(pred).name if pred != -1 else 'ABSTAIN' for pred in preds]
     filtered_df.insert(len(filtered_df.columns), 'label', pred_labels)
     filtered_df.insert(len(filtered_df.columns), 'probs', probs)
