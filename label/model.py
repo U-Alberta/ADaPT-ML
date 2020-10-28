@@ -60,7 +60,7 @@ def apply_label_model(L_train: np.ndarray, label_model: LabelModel, train_df: pd
     preds = probs_to_preds(probs)
     pred_labels = [ValueLabel(pred).name if pred != -1 else 'ABSTAIN' for pred in preds]
     filtered_df.insert(len(filtered_df.columns), 'label', pred_labels)
-    filtered_df.insert(len(filtered_df.columns), 'probs', probs)
+    filtered_df.insert(len(filtered_df.columns), 'probs', probs.tolist())
     filtered_df.to_pickle(TRAINING_DATA_FILENAME)
     filtered_df.to_html(TRAINING_DATA_HTML_FILENAME)
     return filtered_df
