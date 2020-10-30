@@ -18,7 +18,7 @@ TRAIN_PARAMS = {
     'optimizer': parsed_args.optimizer,
     'prec_init': parsed_args.prec_init
 }
-LEXICONS_PATH = os.path.join('/resources', 'lexicons.db')
+LEXICONS_PATH = os.path.join('/lf_resources', 'lexicons.db')
 TMP_ARTIFACTS = '/tmp_artifacts'
 
 LABEL_MATRIX_FILENAME = os.path.join(TMP_ARTIFACTS, 'label_matrix.npy')
@@ -31,4 +31,4 @@ CONFUSION_MATRIX_FILENAME = os.path.join(TMP_ARTIFACTS, 'confusion_matrix.jpg')
 TRAINING_DATA_FILENAME = os.path.join(TMP_ARTIFACTS, 'training_data.pkl')
 TRAINING_DATA_HTML_FILENAME = os.path.join(TMP_ARTIFACTS, 'training_data.html')
 
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)

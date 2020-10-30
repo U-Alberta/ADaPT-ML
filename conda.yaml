@@ -1,4 +1,4 @@
-name: cecn_env
+name: dp_env
 channels:
   - defaults
   - conda-forge
