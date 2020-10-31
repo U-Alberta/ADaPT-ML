@@ -56,7 +56,7 @@ services:
     volumes:
       - ${DP_DATA_PATH}/mlruns:/code/mlruns
       - ${DP_DATA_PATH}/unlabeled_data:/unlabeled_data
-      - ${RESOURCES_PATH}:/lf_resources
+      - ${LF_RESOURCES_PATH}:/lf_resources
       - ${DP_DATA_PATH}/tmp_artifacts:/tmp_artifacts
       - ./label:/code/label
       - ./MLproject:/code/MLproject
