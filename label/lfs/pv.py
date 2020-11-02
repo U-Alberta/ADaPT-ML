@@ -35,7 +35,7 @@ def load_keyword_dictionary():
     conn = sqlite3.connect(LEXICONS_PATH)
     cur = conn.cursor()
     value_doc_dict = {}
-    for i in range(10):
+    for i in range(len(ValueLabel)):
         select_statement = """SELECT term FROM value_dict WHERE value = {0};""".format(i)
         cur.execute(select_statement)
         terms = [item[0] for item in cur.fetchall()]
@@ -44,7 +44,7 @@ def load_keyword_dictionary():
     return value_doc_dict
 
 
-def lemma_keyword_lookup(x, keyword_docs, label):
+def lemma_keyword_lookup(x, keyword_doc, label):
     """
     This function looks for all of the word lemmas for a given PV in the given data point x.
     :param x: data point
@@ -52,26 +52,23 @@ def lemma_keyword_lookup(x, keyword_docs, label):
     :param label: the label for the given PV
     :return:
     """
-    doc_lemma_list = []
     x_lemma_list = [token.lemma_ if not token.is_stop else '' for token in x.spacy_doc]
-    for doc in keyword_docs:
-        doc_lemma_list = doc_lemma_list + [token.lemma_ for token in doc]
-    return label if any(token in x_lemma_list for token in doc_lemma_list) else ABSTAIN
+    return label if keyword_doc.lemma_ in x_lemma_list else ABSTAIN
 
 
-def make_keyword_lf(name, keyword_docs, label):
+def make_keyword_lf(name, keyword_doc, label):
     """
     This function makes all of the keyword lfs by calling the lemma_keyword_lookup helper and attaches the SpaCy
     preprocessor.
     :param name: the prefix 'keywords_' followed by the PV abbreviation
-    :param keyword_docs: the SpaCy docs for the given PV
+    :param keyword_doc: the SpaCy docs for the given PV
     :param label: the integer value for the given PV
     :return: a keyword-based LabelingFunction for a given PV
     """
     return LabelingFunction(
         name=name,
         f=lemma_keyword_lookup,
-        resources=dict(keyword_docs=keyword_docs, label=label),
+        resources=dict(keyword_doc=keyword_doc, label=label),
         pre=[spacy_preprocessor]
     )
 
@@ -86,7 +83,8 @@ def evaluate_keyword_lfs(L_train):
 
 
 keyword_dict = load_keyword_dictionary()
-keyword_lfs = [make_keyword_lf('keywords_{0}'.format(label.name),
-                               keyword_dict[label.name],
-                               label.value)
-               for label in ValueLabel]
+keyword_lfs = []
+for label in ValueLabel:
+    keyword_lfs = keyword_lfs + [make_keyword_lf('keyword_{0}_{1}'.format(label.name, keyword_doc.lemma_),
+                                                 keyword_doc,
+                                                 label.value) for keyword_doc in keyword_dict[label.name]]
