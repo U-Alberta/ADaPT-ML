@@ -1,4 +1,4 @@
-name: cecn_class_env
+name: modelling_env
 channels:
   - defaults
   - conda-forge

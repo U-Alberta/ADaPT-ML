@@ -1,9 +1,4 @@
 # Project-specific stuff
-*.pkl
-*.jpg
-dbdata/
-mlruns/
-conda_envs/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

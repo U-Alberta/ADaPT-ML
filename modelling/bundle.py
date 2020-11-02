@@ -31,7 +31,7 @@ phrase_tokenizer = CrazyTokenizer(lowercase=False,
 
 class BaseModelBundle(ABC):
     """
-    This base model is designed to have functions for preprocessing, featurizing, and modeling bundled into one
+    This base model is designed to have functions for preprocessing, featurizing, and modelling bundled into one
     tensorflow servable object
     """
 

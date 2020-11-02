@@ -1,6 +1,6 @@
-# CECN classification
+# CECN modelling
 
-Repo for data validation, data transformation, modeling, model analysis, and model serving
+Repo for data validation, data transformation, modelling, model analysis, and model serving
 
 ## References
 https://medium.com/analytics-vidhya/serving-ml-with-flask-tensorflow-serving-and-docker-compose-fe69a9c1e369
@@ -12,6 +12,10 @@ https://www.tensorflow.org/tfx/serving/api_rest
 https://www.kdnuggets.com/2020/07/building-rest-api-tensorflow-serving-part-1.html
 https://github.com/deepopinion/domain-adapted-atsc
 
-```bash script
-mlflow models serve -m /Users/mlflow/mlflow-prototype/mlruns/0/7c1a0d5c42844dcdb8f5191146925174/artifacts/model -p 1234
+```shell script
+mlflow models serve --no-conda -m <runs:/my-run-id/model-path> -p 5001 -h 0.0.0.0 
+```
+
+```shell script
+mlflow run --no-conda -e <mlogit> --experiment-name <energyeast> -P train_data=/train_data</path/to/train_data.pkl> -P test_data=/test_data</path/to/test_data.pkl> .
 ```

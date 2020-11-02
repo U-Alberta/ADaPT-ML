@@ -1,4 +1,4 @@
-name: cecn-classification
+name: modelling
 
 conda_env: conda.yaml
 

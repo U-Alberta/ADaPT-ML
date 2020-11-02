@@ -1,67 +1,63 @@
 version: '3.3'
 
 services:
-  db:
+  modelling_db:
     restart: on-failure
     image: mysql/mysql-server:8.0
-    container_name: mlflow_class_db
+    container_name: modelling-mlflow-db
     expose:
       - "3306"
     networks:
-      - mlflow_class_net
+      - modelling_network
     environment:
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-      - MYSQL_ROOT_HOST=${MYSQL_ROOT_HOST}
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MO_MYSQL_DATABASE}
+      - MYSQL_USER=${MO_MYSQL_USER}
+      - MYSQL_PASSWORD=${MO_MYSQL_PASSWORD}
+      - MYSQL_ROOT_HOST=${MO_MYSQL_ROOT_HOST}
+      - MYSQL_ROOT_PASSWORD=${MO_MYSQL_ROOT_PASSWORD}
     volumes:
-      - ./dbdata:/var/lib/mysql
-  mlflow_class:
+      - ${MO_DATA_PATH}/dbdata:/var/lib/mysql
+  modelling:
     build:
       context: .
-    image: cecn-classification-image
-    container_name: mlflow_class
+    image: modelling-image
+    container_name: modelling-mlflow
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./mlruns:/code/mlruns
-      - ./modeling:/code/modeling
+      - ${MO_DATA_PATH}/mlruns:/code/mlruns
+      - ${MO_DATA_PATH}/train_data:/train_data
+      - ${MO_DATA_PATH}/test_data:/test_data
+      - ${MO_DATA_PATH}/tmp_artifacts:/tmp_artifacts
+      - ./modelling:/code/modelling
       - ./MLproject:/code/MLproject
       - ./conda.yaml:/code/conda.yaml
-      - ./conda_envs:/opt/conda/envs
     networks:
-      - mlflow_class_net
+      - modelling_network
     environment:
-      - MLFLOW_TRACKING_URI=mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@${HOST_NAME}:3306/${MYSQL_DATABASE}
-#    command: wait-for-it ${HOST_NAME}:3306 -s -- mlflow run --no-conda -e mlogit --experiment-name energyeast -P train_data=./modeling/data/training_data.pkl test_data=./modeling/data/training_data.pkl .
+      - MLFLOW_TRACKING_URI=${MO_MLFLOW_TRACKING_URI}
     stdin_open: true
     tty: true
     depends_on:
-      - db
-  web:
+      - modelling_db
+  modelling_web:
     restart: on-failure
     build:
       context: .
-    image: cecn-classification-image
-    container_name: mlflow_class_server
+    image: modelling-image
+    container_name: modelling-mlflow-server
     ports:
       - "5001:5000"
     networks:
-      - mlflow_class_net
+      - modelling_network
     environment:
-      - HOST_NAME=${HOST_NAME}
-#    command: wait-for-it ${HOST_NAME}:3306 -s -- mlflow server --backend-store-uri mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@${HOST_NAME}:3306/${MYSQL_DATABASE} --default-artifact-root ./mlruns --host 0.0.0.0
+      - MLFLOW_TRACKING_URI=${MO_MLFLOW_TRACKING_URI}
+#    command: wait-for-it modelling-mlflow-db:3306 -s -- mlflow server --backend-store-uri $MLFLOW_TRACKING_URI --default-artifact-root ./mlruns --host 0.0.0.0
     stdin_open: true
     tty: true
     volumes:
-      - ./mlruns:/code/mlruns
+      - ${MO_DATA_PATH}/mlruns:/code/mlruns
     depends_on:
-      - db
-
+      - modelling_db
 
 networks:
-  mlflow_class_net:
+  modelling_network:
     driver: bridge
-
-volumes:
-  dbdata:

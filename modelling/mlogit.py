@@ -3,9 +3,9 @@ References:
     https://keras.io/examples/imdb_bidirectional_lstm/
     https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html?highligh:logistic%20regression#sklearn.linear_model.LogisticRegression
 """
-from modeling import (X_TRAIN_FILENAME, TRAIN_DF_HTML_FILENAME, TEST_DF_FILENAME, TEST_DF_HTML_FILENAME,
-                      ROC_CURVE_FILENAME, CONFUSION_MATRIX_FILENAME)
-from modeling.bundle import MlogitModelBundle
+from modelling import (X_TRAIN_FILENAME, TRAIN_DF_HTML_FILENAME, TEST_DF_FILENAME, TEST_DF_HTML_FILENAME,
+                       ROC_CURVE_FILENAME, CONFUSION_MATRIX_FILENAME)
+from modelling.bundle import MlogitModelBundle
 import pickle
 import pandas as pd
 import argparse
