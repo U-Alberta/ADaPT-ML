@@ -1,19 +1,6 @@
 version: '3.3'
 
 services:
-  label_studio:
-    restart: on-failure
-    image: heartexlabs/label-studio:latest
-    container_name: label-studio
-    ports:
-    - "8080:8080"
-    volumes:
-    - ${DP_DATA_PATH}/label_studio/pv_project:/label-studio/pv_project
-    - ${DP_DATA_PATH}/label_studio/tasks:/label-studio/tasks
-    - ./config.xml:/label-studio/config.xml
-    stdin_open: true
-    tty: true
-    command: label-studio start pv_project --init --force --label-config /label-studio/config.xml
   dp_db:
     restart: on-failure
     image: mysql/mysql-server:8.0
