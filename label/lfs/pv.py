@@ -34,17 +34,17 @@ def load_keyword_dictionary():
     """
     conn = sqlite3.connect(LEXICONS_PATH)
     cur = conn.cursor()
-    value_doc_dict = {}
+    value_token_dict = {}
     for i in range(len(ValueLabel)):
         select_statement = """SELECT term FROM value_dict WHERE value = {0};""".format(i)
         cur.execute(select_statement)
         terms = [item[0] for item in cur.fetchall()]
         term_docs = list(nlp.pipe(terms))
-        value_doc_dict[ValueLabel(i).name] = term_docs
-    return value_doc_dict
+        value_token_dict[ValueLabel(i).name] = [term[0] for term in term_docs]
+    return value_token_dict
 
 
-def lemma_keyword_lookup(x, keyword_doc, label):
+def lemma_keyword_lookup(x, lemma, label):
     """
     This function looks for all of the word lemmas for a given PV in the given data point x.
     :param x: data point
@@ -53,10 +53,10 @@ def lemma_keyword_lookup(x, keyword_doc, label):
     :return:
     """
     x_lemma_list = [token.lemma_ if not token.is_stop else '' for token in x.spacy_doc]
-    return label if keyword_doc.lemma_ in x_lemma_list else ABSTAIN
+    return label if lemma in x_lemma_list else ABSTAIN
 
 
-def make_keyword_lf(name, keyword_doc, label):
+def make_keyword_lf(name, lemma, label):
     """
     This function makes all of the keyword lfs by calling the lemma_keyword_lookup helper and attaches the SpaCy
     preprocessor.
@@ -68,7 +68,7 @@ def make_keyword_lf(name, keyword_doc, label):
     return LabelingFunction(
         name=name,
         f=lemma_keyword_lookup,
-        resources=dict(keyword_doc=keyword_doc, label=label),
+        resources=dict(lemma=lemma, label=label),
         pre=[spacy_preprocessor]
     )
 
@@ -82,9 +82,10 @@ def evaluate_keyword_lfs(L_train):
     return LFAnalysis(L_train, lfs=keyword_lfs).lf_summary()
 
 
-keyword_dict = load_keyword_dictionary()
+value_token_dict = load_keyword_dictionary()
 keyword_lfs = []
 for label in ValueLabel:
-    keyword_lfs = keyword_lfs + [make_keyword_lf('keyword_{0}_{1}'.format(label.name, keyword_doc.lemma_),
-                                                 keyword_doc,
-                                                 label.value) for keyword_doc in keyword_dict[label.name]]
+    lemmas = set([token.lemma_ for token in value_token_dict[label.name]])
+    keyword_lfs = keyword_lfs + [make_keyword_lf('keyword_{0}_{1}'.format(label.name, lemma),
+                                                 lemma,
+                                                 label.value) for lemma in lemmas]
