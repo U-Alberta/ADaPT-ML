@@ -6,8 +6,9 @@ import mlflow.pytorch
 import pandas as pd
 from mlflow.models.signature import infer_signature
 
-from label import (parsed_args, matrix, model, evaluate, LABEL_MATRIX_FILENAME, TRAINING_DATA_FILENAME,
-                   TRAINING_DATA_HTML_FILENAME, LF_SUMMARY_FILENAME, REGISTERED_MODEL_NAME, CONFUSION_MATRIX_FILENAME)
+from label import (parsed_args, matrix, model, evaluate, LOGGING_FILENAME, LABEL_MATRIX_FILENAME,
+                   TRAINING_DATA_FILENAME, TRAINING_DATA_HTML_FILENAME, LF_SUMMARY_FILENAME, REGISTERED_MODEL_NAME,
+                   CONFUSION_MATRIX_FILENAME)
 
 if __name__ == '__main__':
 
@@ -53,6 +54,7 @@ if __name__ == '__main__':
             filtered_train_df = model.apply_label_model(L_train, label_model, train_df)
 
         # Log the data points, label matrix, and labeled training data as artifacts
+        mlflow.log_artifact(LOGGING_FILENAME)
         mlflow.log_artifact(parsed_args.data_path)
         mlflow.log_artifact(LABEL_MATRIX_FILENAME)
         mlflow.log_artifact(TRAINING_DATA_FILENAME)

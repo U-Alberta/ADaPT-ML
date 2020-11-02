@@ -31,4 +31,5 @@ CONFUSION_MATRIX_FILENAME = os.path.join(TMP_ARTIFACTS, 'confusion_matrix.jpg')
 TRAINING_DATA_FILENAME = os.path.join(TMP_ARTIFACTS, 'training_data.pkl')
 TRAINING_DATA_HTML_FILENAME = os.path.join(TMP_ARTIFACTS, 'training_data.html')
 
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
+LOGGING_FILENAME = os.path.join(TMP_ARTIFACTS, 'log.txt')
+logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO, filename=LOGGING_FILENAME)
