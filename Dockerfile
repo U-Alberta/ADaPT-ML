@@ -40,4 +40,9 @@ RUN echo "conda activate modelling_env" >> ~/.bashrc
 
 COPY ./modelling ./modelling
 COPY ./MLproject .
+COPY ./setup.cfg .
+COPY ./setup.py .
+
+RUN python -m pip install -e .
+
 CMD [ "/bin/bash" ]
