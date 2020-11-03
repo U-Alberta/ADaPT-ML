@@ -13,7 +13,6 @@ services:
       - MYSQL_DATABASE=${MO_MYSQL_DATABASE}
       - MYSQL_USER=${MO_MYSQL_USER}
       - MYSQL_PASSWORD=${MO_MYSQL_PASSWORD}
-      - MYSQL_ROOT_HOST=${MO_MYSQL_ROOT_HOST}
       - MYSQL_ROOT_PASSWORD=${MO_MYSQL_ROOT_PASSWORD}
     volumes:
       - ${MO_DATA_PATH}/dbdata:/var/lib/mysql
@@ -30,7 +29,7 @@ services:
       - modelling_network
     environment:
       - MLFLOW_TRACKING_URI=${MO_MLFLOW_TRACKING_URI}
-    command: wait-for-it modelling-mlflow-db:3306 -s -- mlflow server --backend-store-uri $MLFLOW_TRACKING_URI --default-artifact-root ./mlruns --host 0.0.0.0
+    command: wait-for-it modelling-mlflow-db:3306 -s -- mlflow server --backend-store-uri ${MO_MLFLOW_TRACKING_URI} --default-artifact-root ./mlruns --host 0.0.0.0
     stdin_open: true
     tty: true
     volumes:
