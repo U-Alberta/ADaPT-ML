@@ -20,7 +20,8 @@ services:
     restart: on-failure
     build:
       context: .
-    image: data-programming-image
+      dockerfile: Dockerfile-server
+    image: dp-server-image
     container_name: dp-mlflow-server
     ports:
       - "5000:5000"
@@ -29,8 +30,6 @@ services:
     environment:
       - MLFLOW_TRACKING_URI=${DP_MLFLOW_TRACKING_URI}
     command: wait-for-it dp-mlflow-db:3306 -s -- mlflow server --backend-store-uri ${DP_MLFLOW_TRACKING_URI} --default-artifact-root ./mlruns --host 0.0.0.0
-    stdin_open: true
-    tty: true
     volumes:
       - ${DP_DATA_PATH}/mlruns:/code/mlruns
     depends_on:
@@ -38,6 +37,7 @@ services:
   dp:
     build:
       context: .
+      dockerfile: Dockerfile
     image: data-programming-image
     container_name: dp-mlflow
     volumes:

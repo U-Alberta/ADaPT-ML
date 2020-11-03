@@ -24,6 +24,10 @@ interface for running MLFlow experiments. Will also start the Label Studio serve
 docker attach dp-mlflow-server
 wait-for-it dp-mlflow-db:3306 -s -- mlflow server --backend-store-uri $MLFLOW_TRACKING_URI --default-artifact-root ./mlruns --host 0.0.0.0
 ```
+or
+```shell script
+docker exec dp-mlflow-server 'wait-for-it dp-mlflow-db:3306 -s -- mlflow server --backend-store-uri $MLFLOW_TRACKING_URI --default-artifact-root ./mlruns --host 0.0.0.0'
+```
 Will start the MLFlow server manually
 
 ## Main Usage
@@ -44,14 +48,8 @@ Go to http://129.128.215.241:5000 to view the experiments
 
 ## Labeling data with Label Studio
 
-after running the [Setup](#Setup), do
 ```shell script
-docker attach label-studio
-label-studio init --input-path=./tasks --input-format=json-dir
-```
-or
-```shell script
-docker exec label-studio 'label-studio init --input-path=./tasks --input-format=json-dir'
+docker run -p 8080:8080 -v $MO_DATA_PATH/my_project:/label-studio/my_project --name label-studio heartexlabs/label-studio:latest label-studio start my_project --init --force
 ```
 
 This will import the JSON-formatted list of data points in each file in the input path. The files should look like this:
