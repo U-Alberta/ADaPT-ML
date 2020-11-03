@@ -15,9 +15,9 @@ entry_points:
             verbose: {type: int, default: 10000}
             n_jobs: {type: int, default: -1}
         command: "python modeling/mlogit.py
-         --solver {n_epochs}
-         --tol {optimizer}
-         --C {prec_init}
+         --solver {solver}
+         --tol {tol}
+         --C {C}
          --max_iter {max_iter}
          --multi_class {multi_class}
          --verbose {verbose}
