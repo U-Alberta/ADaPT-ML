@@ -14,7 +14,7 @@ entry_points:
             multi_class: {type: string, default: auto}
             verbose: {type: int, default: 10000}
             n_jobs: {type: int, default: -1}
-        command: "python modeling/mlogit.py
+        command: "python modelling/mlogit.py
          --solver {solver}
          --tol {tol}
          --C {C}
