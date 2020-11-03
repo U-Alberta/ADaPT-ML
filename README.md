@@ -17,5 +17,5 @@ mlflow models serve --no-conda -m <runs:/my-run-id/model-path> -p 5001 -h 0.0.0.
 ```
 
 ```shell script
-mlflow run --no-conda -e <mlogit> --experiment-name <energyeast> -P train_data=/train_data</path/to/train_data.pkl> -P test_data=/test_data</path/to/test_data.pkl> .
+mlflow run --no-conda -e <mlogit> --experiment-name <energyeast> -P train_data=/train_data</path/to/train_data.pkl> test_data=/test_data</path/to/test_data.pkl> .
 ```
