@@ -12,4 +12,4 @@ ROC_CURVE_FILENAME = os.path.join(TMP_ARTIFACTS, 'roc.jpg')
 CONFUSION_MATRIX_FILENAME = os.path.join(TMP_ARTIFACTS, 'confusion_matrix.jpg')
 
 LOGGING_FILENAME = os.path.join(TMP_ARTIFACTS, 'log.txt')
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO, filename=TMP_ARTIFACTS)
+logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO, filename=LOGGING_FILENAME)
