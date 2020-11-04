@@ -18,7 +18,6 @@ from mlflow.models.signature import infer_signature
 from sklearn.metrics import plot_confusion_matrix, plot_roc_curve, f1_score
 import matplotlib.pyplot as plt
 
-
 parser = argparse.ArgumentParser(description='Train a classifier.')
 parser.add_argument('train_path', help='File path or URL to the training data')
 parser.add_argument('test_path', help='File path or URL to the test data')
@@ -71,32 +70,34 @@ TRAIN_PARAMS = {
     'multi_class': parsed_args.multi_class,
     'verbose': parsed_args.verbose,
     'n_jobs': parsed_args.n_jobs
-}.update({
-    'newton-cg': {
-        'penalty': 'l2'
-    },
-    'lbfgs': {
-        'penalty': 'l2',
-        'verbose': 10000
-    },
-    'liblinear': {
-        'penalty': 'l1',
-        'fit_intercept': True,
-        'intercept_scaling': 1,
-        'random_state': 42,
-        'multi_class': 'ovr',
-        'verbose': 10000
-    },
-    'sag': {
-        'penalty': 'l2',
-        'random_state': 42,
-    },
-    'saga': {
-        'penalty': 'elasticnet',
-        'random_state': 42,
-        'l1_ratio': 0.7
-    }
-}[parsed_args.solver])
+}
+TRAIN_PARAMS.update(
+    {
+        'newton-cg': {
+            'penalty': 'l2'
+        },
+        'lbfgs': {
+            'penalty': 'l2',
+            'verbose': 10000
+        },
+        'liblinear': {
+            'penalty': 'l1',
+            'fit_intercept': True,
+            'intercept_scaling': 1,
+            'random_state': 42,
+            'multi_class': 'ovr',
+            'verbose': 10000
+        },
+        'sag': {
+            'penalty': 'l2',
+            'random_state': 42,
+        },
+        'saga': {
+            'penalty': 'elasticnet',
+            'random_state': 42,
+            'l1_ratio': 0.7
+        }
+    }[parsed_args.solver])
 
 REGISTERED_MODEL_NAME = 'MLogitBundle'
 
@@ -113,7 +114,6 @@ def evaluate_model(bundle, x_test, y_true, y_pred):
 
 
 def main():
-
     with mlflow.start_run():
         logging.info("Getting train and test data ...")
         try:
