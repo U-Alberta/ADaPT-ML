@@ -137,7 +137,7 @@ def main():
 
         logging.info("Saving bundle ...")
         _, y_pred = mlogit_bundle.predict(test_df.text.tolist())
-        signature = infer_signature(x_test, y_pred)
+        signature = infer_signature(x_test.toarray(), y_pred)
         input_example = x_train[:5, :]
         tracking_url_type_store = urlparse(mlflow.get_tracking_uri()).scheme
         if tracking_url_type_store != 'file':
