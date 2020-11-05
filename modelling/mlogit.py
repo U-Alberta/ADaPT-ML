@@ -18,7 +18,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 
 from mlflow.models.signature import infer_signature
-from sklearn.metrics import plot_confusion_matrix, plot_roc_curve, f1_score
+from sklearn.metrics import plot_confusion_matrix, f1_score
 import matplotlib.pyplot as plt
 
 parser = argparse.ArgumentParser(description='Train a classifier.')
@@ -111,13 +111,13 @@ def evaluate_model(pipe, x_test, y_true, y_pred):
     f1 = {'f1_micro': f1_score(y_true, y_pred, average='micro'),
           'f1_macro': f1_score(y_true, y_pred, average='macro'),
           'f1_weighted': f1_score(y_true, y_pred, average='weighted')}
-    plot_roc_curve(pipe, x_test, y_true)
-    plt.savefig(ROC_CURVE_FILENAME)
-    plt.close()
+    # plot_roc_curve(pipe, x_test, y_true)
+    # plt.savefig(ROC_CURVE_FILENAME)
+    # plt.close()
     plot_confusion_matrix(pipe, x_test, y_true)
     plt.savefig(CONFUSION_MATRIX_FILENAME)
     plt.close()
-    return {'F1': f1}
+    return f1
 
 
 def main():
