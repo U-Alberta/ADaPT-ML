@@ -135,12 +135,8 @@ def main():
         x_train = mlogit_bundle.train(train_df.text.tolist(), y_train)
         x_test = mlogit_bundle.featurize(mlogit_bundle.preprocess(test_df.text.tolist()))
 
-        logging.info("Evaluating model ...")
-        y_pred = mlogit_bundle.predict(test_df.text.tolist())
-        metrics = evaluate_model(mlogit_bundle, x_test, y_test, y_pred)
-        mlflow.log_metrics(metrics)
-
         logging.info("Saving bundle ...")
+        _, y_pred = mlogit_bundle.predict(test_df.text.tolist())
         signature = infer_signature(x_test, y_pred)
         input_example = x_train[:5, :]
         tracking_url_type_store = urlparse(mlflow.get_tracking_uri()).scheme
@@ -154,6 +150,10 @@ def main():
                 input_example=input_example)
         else:
             mlflow.tensorflow.log_model(mlogit_bundle, 'mlogit_bundle')
+
+        logging.info("Evaluating model ...")
+        metrics = evaluate_model(mlogit_bundle, x_test, y_test, y_pred)
+        mlflow.log_metrics(metrics)
 
         logging.info("Saving artifacts ...")
         test_df.insert(len(test_df.columns), 'pred', y_pred)
