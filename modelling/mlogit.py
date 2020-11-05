@@ -108,7 +108,9 @@ REGISTERED_MODEL_NAME = 'Tfidf_MLogit'
 
 
 def evaluate_model(pipe, x_test, y_true, y_pred):
-    f1 = f1_score(y_true, y_pred)
+    f1 = {'f1_micro': f1_score(y_true, y_pred, average='micro'),
+          'f1_macro': f1_score(y_true, y_pred, average='macro'),
+          'f1_weighted': f1_score(y_true, y_pred, average='weighted')}
     plot_roc_curve(pipe, x_test, y_true)
     plt.savefig(ROC_CURVE_FILENAME)
     plt.close()
@@ -135,7 +137,7 @@ def main():
         y_train = train_df.label.tolist()
         y_test = test_df.label.tolist()
 
-        mlflow.sklearn.autolog()
+        # mlflow.sklearn.autolog()
         pipe = Pipeline([('vectorizer', TfidfVectorizer(ngram_range=(1, 2), max_features=10000)),
                          ('mlogit', LogisticRegression(**TRAIN_PARAMS))])
 
@@ -144,7 +146,7 @@ def main():
         y_pred = pipe.predict(x_test)
 
         logging.info("Saving pipe ...")
-        signature = infer_signature(x_test, y_pred)
+        # signature = infer_signature(x_test, y_pred)
         input_example = x_train[:5]
         tracking_url_type_store = urlparse(mlflow.get_tracking_uri()).scheme
         if tracking_url_type_store != 'file':
@@ -152,7 +154,7 @@ def main():
                 pipe,
                 'tfidf_mlogit',
                 registered_model_name=REGISTERED_MODEL_NAME,
-                signature=signature,
+                # signature=signature,
                 input_example=input_example)
         else:
             mlflow.sklearn.log_model(pipe, 'tfidf_mlogit')
