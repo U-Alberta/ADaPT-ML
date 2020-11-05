@@ -69,15 +69,12 @@ class MlogitModelBundle(BaseModelBundle, tf.Module):
         self.featurizer = TfidfVectorizer(ngram_range=(1, 2), max_features=10000)
         self.model = LogisticRegression(**self.params)
 
-    @tf.function
     def preprocess(self, raw_docs: [str]):
         return [' '.join(self.tokenizer.tokenize(doc)) for doc in raw_docs]
 
-    @tf.function
     def featurize(self, docs: [str]):
         return self.featurizer.transform(docs)
 
-    @tf.function
     def train(self, raw_docs: [str], y: [str]):
         docs = self.preprocess(raw_docs)
         x_train = self.featurizer.fit_transform(docs)

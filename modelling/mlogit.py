@@ -23,23 +23,25 @@ parser.add_argument('train_path', help='File path or URL to the training data')
 parser.add_argument('test_path', help='File path or URL to the test data')
 
 parser.add_argument('--solver', default='lbfgs', help='Algorithm to use in the optimization problem.')
-parser.add_argument('--tol', default=1e-4, help='Tolerance for stopping criteria')
-parser.add_argument('--C', default=1.0, help='Inverse of regularization strength; must be a positive float. Like '
-                                             'in support vector machines, smaller values specify stronger '
-                                             'regularization')
-parser.add_argument('--max_iter', default=100, help='Maximum number of iterations taken for the solvers to converge')
+parser.add_argument('--tol', default=1e-4, type=float, help='Tolerance for stopping criteria')
+parser.add_argument('--C', default=1.0, type=float, help='Inverse of regularization strength; must be a positive '
+                                                         'float. Like in support vector machines, smaller values '
+                                                         'specify stronger regularization')
+parser.add_argument('--max_iter', default=100, type=int, help='Maximum number of iterations taken for the solvers to '
+                                                              'converge')
 parser.add_argument('--multi_class', default='auto', help='If the option chosen is ‘ovr’, then a binary problem '
                                                           'is fit for each label. For ‘multinomial’ the loss '
                                                           'minimised is the multinomial loss fit across the '
                                                           'entire probability distribution, even when the data is '
                                                           'binary')
-parser.add_argument('--verbose', default=10000, help='For the liblinear and lbfgs solvers set verbose to any '
-                                                     'positive number for verbosity.')
-parser.add_argument('--n_jobs', default=-1, help='Number of CPU cores used when parallelizing over classes if '
-                                                 'multi_class=’ovr’.This parameter is ignored when the solver is '
-                                                 'set to ‘liblinear’ regardless of whether ‘multi_class’ is '
-                                                 'specified or not. None means 1 unless in a '
-                                                 'joblib.parallel_backend context. -1 means using all processors')
+parser.add_argument('--verbose', default=10000, type=int, help='For the liblinear and lbfgs solvers set verbose to any '
+                                                               'positive number for verbosity.')
+parser.add_argument('--n_jobs', default=-1, type=int,
+                    help='Number of CPU cores used when parallelizing over classes if '
+                         'multi_class=’ovr’.This parameter is ignored when the solver is '
+                         'set to ‘liblinear’ regardless of whether ‘multi_class’ is '
+                         'specified or not. None means 1 unless in a '
+                         'joblib.parallel_backend context. -1 means using all processors')
 parsed_args = parser.parse_args()
 
 """

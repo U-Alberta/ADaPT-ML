@@ -20,7 +20,7 @@ dependencies:
     - dask[complete]>=2.1.0,<3.0.0
     - pymysql
     - sentence-transformers == 0.2.5
-    - .
+    - "-e ."
 #    - tensorflow-data-validation == 0.22.2
 #    - tensorflow-transform == 0.22.0
 #    - tensorflow-model-analysis == 0.22.2

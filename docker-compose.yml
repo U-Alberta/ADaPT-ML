@@ -50,6 +50,7 @@ services:
       - ./modelling:/code/modelling
       - ./MLproject:/code/MLproject
       - ./conda.yaml:/code/conda.yaml
+      - /usr/local/share/nltk_data:/usr/local/share/nltk_data
     networks:
       - modelling_network
     environment:
