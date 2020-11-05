@@ -99,7 +99,7 @@ TRAIN_PARAMS.update(
             'random_state': 42,
             'l1_ratio': 0.7
         }
-    }[parsed_args.solver])
+    }[TRAIN_PARAMS.solver])
 
 REGISTERED_MODEL_NAME = 'MLogitBundle'
 
@@ -129,7 +129,6 @@ def main():
         y_train = train_df.label.tolist()
         y_test = test_df.label.tolist()
 
-        mlflow.log_params(TRAIN_PARAMS)
         mlogit_bundle = MlogitModelBundle(TRAIN_PARAMS)
 
         logging.info("Training mlogit bundle ...")
@@ -161,6 +160,7 @@ def main():
         pd.to_pickle(test_df, TEST_DF_FILENAME)
         test_df.to_html(TEST_DF_HTML_FILENAME)
 
+        mlflow.log_params(mlogit_bundle.model.get_params(deep=False))
         mlflow.log_artifact(parsed_args.train_path)
         mlflow.log_artifact(parsed_args.test_path)
         mlflow.log_artifact(TEST_DF_FILENAME)
