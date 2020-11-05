@@ -1,7 +1,6 @@
 """
 https://docs.python.org/3/library/abc.html
 """
-import tensorflow as tf
 from abc import ABC, abstractmethod
 import pickle
 
@@ -60,7 +59,7 @@ class BaseModelBundle(ABC):
         pass
 
 
-class MlogitModelBundle(BaseModelBundle, tf.Module):
+class MlogitModelBundle(BaseModelBundle):
 
     def __init__(self, params):
         super().__init__()
@@ -90,8 +89,8 @@ class MlogitModelBundle(BaseModelBundle, tf.Module):
             pickle.dump(self, outfile)
 
 
-class RobertaLSTMModelBundle(BaseModelBundle, tf.keras.Model):
-
-    def __init__(self, params):
-        super().__init__()
-        self.params = params
+# class RobertaLSTMModelBundle(BaseModelBundle, tf.keras.Model):
+#
+#     def __init__(self, params):
+#         super().__init__()
+#         self.params = params

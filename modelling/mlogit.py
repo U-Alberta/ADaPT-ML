@@ -5,7 +5,6 @@ References:
 """
 from modelling import (X_TRAIN_FILENAME, TRAIN_DF_HTML_FILENAME, TEST_DF_FILENAME, TEST_DF_HTML_FILENAME,
                        ROC_CURVE_FILENAME, CONFUSION_MATRIX_FILENAME)
-from modelling.bundle import MlogitModelBundle
 import pickle
 import pandas as pd
 import argparse
@@ -13,7 +12,11 @@ import sys
 import logging
 from urllib.parse import urlparse
 
-import mlflow.tensorflow
+import mlflow.sklearn
+from sklearn.pipeline import Pipeline
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
+
 from mlflow.models.signature import infer_signature
 from sklearn.metrics import plot_confusion_matrix, plot_roc_curve, f1_score
 import matplotlib.pyplot as plt
@@ -101,15 +104,15 @@ TRAIN_PARAMS.update(
         }
     }[TRAIN_PARAMS['solver']])
 
-REGISTERED_MODEL_NAME = 'MLogitBundle'
+REGISTERED_MODEL_NAME = 'Tfidf_MLogit'
 
 
-def evaluate_model(bundle, x_test, y_true, y_pred):
+def evaluate_model(pipe, x_test, y_true, y_pred):
     f1 = f1_score(y_true, y_pred)
-    plot_roc_curve(bundle.model, x_test, y_true)
+    plot_roc_curve(pipe, x_test, y_true)
     plt.savefig(ROC_CURVE_FILENAME)
     plt.close()
-    plot_confusion_matrix(bundle.model, x_test, y_true)
+    plot_confusion_matrix(pipe, x_test, y_true)
     plt.savefig(CONFUSION_MATRIX_FILENAME)
     plt.close()
     return {'F1': f1}
@@ -126,33 +129,36 @@ def main():
         except IOError:
             sys.exit("Could not read data")
 
+        x_train = train_df.text.tolist()
+        x_test = test_df.text.tolist()
+
         y_train = train_df.label.tolist()
         y_test = test_df.label.tolist()
 
-        mlogit_bundle = MlogitModelBundle(TRAIN_PARAMS)
+        mlflow.sklearn.autolog()
+        pipe = Pipeline([('vectorizer', TfidfVectorizer(ngram_range=(1, 2), max_features=10000)),
+                         ('mlogit', LogisticRegression(**TRAIN_PARAMS))])
 
-        logging.info("Training mlogit bundle ...")
-        x_train = mlogit_bundle.train(train_df.text.tolist(), y_train)
-        x_test = mlogit_bundle.featurize(mlogit_bundle.preprocess(test_df.text.tolist()))
+        logging.info("Transforming training data and training mlogit ...")
+        pipe.fit(x_train, y_train)
+        y_pred = pipe.predict(x_test)
 
-        logging.info("Saving bundle ...")
-        _, y_pred = mlogit_bundle.predict(test_df.text.tolist())
-        signature = infer_signature(x_test.toarray(), y_pred)
-        input_example = x_train[:5, :]
+        logging.info("Saving pipe ...")
+        signature = infer_signature(x_test, y_pred)
+        input_example = x_train[:5]
         tracking_url_type_store = urlparse(mlflow.get_tracking_uri()).scheme
         if tracking_url_type_store != 'file':
-            # mlogit bundle subclasses tf.Module
-            mlflow.tensorflow.log_model(
-                mlogit_bundle,
-                'mlogit_bundle',
+            mlflow.sklearn.log_model(
+                pipe,
+                'tfidf_mlogit',
                 registered_model_name=REGISTERED_MODEL_NAME,
                 signature=signature,
                 input_example=input_example)
         else:
-            mlflow.tensorflow.log_model(mlogit_bundle, 'mlogit_bundle')
+            mlflow.sklearn.log_model(pipe, 'tfidf_mlogit')
 
         logging.info("Evaluating model ...")
-        metrics = evaluate_model(mlogit_bundle, x_test, y_test, y_pred)
+        metrics = evaluate_model(pipe, x_test, y_test, y_pred)
         mlflow.log_metrics(metrics)
 
         logging.info("Saving artifacts ...")
@@ -160,7 +166,6 @@ def main():
         pd.to_pickle(test_df, TEST_DF_FILENAME)
         test_df.to_html(TEST_DF_HTML_FILENAME)
 
-        mlflow.log_params(mlogit_bundle.model.get_params(deep=False))
         mlflow.log_artifact(parsed_args.train_path)
         mlflow.log_artifact(parsed_args.test_path)
         mlflow.log_artifact(TEST_DF_FILENAME)
