@@ -99,7 +99,7 @@ TRAIN_PARAMS.update(
             'random_state': 42,
             'l1_ratio': 0.7
         }
-    }[TRAIN_PARAMS.solver])
+    }[TRAIN_PARAMS['solver']])
 
 REGISTERED_MODEL_NAME = 'MLogitBundle'
 
