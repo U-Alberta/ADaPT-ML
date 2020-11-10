@@ -137,7 +137,7 @@ def main():
         y_train = train_df.label.tolist()
         y_test = test_df.label.tolist()
 
-        # mlflow.sklearn.autolog()
+        mlflow.sklearn.autolog()
         pipe = Pipeline([('vectorizer', TfidfVectorizer(ngram_range=(1, 2), max_features=10000)),
                          ('mlogit', LogisticRegression(**TRAIN_PARAMS))])
 
