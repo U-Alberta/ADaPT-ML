@@ -1,6 +1,7 @@
 version: '3.3'
 
 services:
+
   modelling_db:
     restart: on-failure
     image: mysql/mysql-server:8.0
@@ -16,6 +17,7 @@ services:
       - MYSQL_ROOT_PASSWORD=${MO_MYSQL_ROOT_PASSWORD}
     volumes:
       - ${MO_DATA_PATH}/dbdata:/var/lib/mysql
+
   modelling_web:
     restart: on-failure
     build:
@@ -30,12 +32,11 @@ services:
     environment:
       - MLFLOW_TRACKING_URI=${MO_MLFLOW_TRACKING_URI}
     command: wait-for-it modelling-mlflow-db:3306 -s -- mlflow server --backend-store-uri ${MO_MLFLOW_TRACKING_URI} --default-artifact-root ./mlruns --host 0.0.0.0
-    stdin_open: true
-    tty: true
     volumes:
-      - ${MO_DATA_PATH}/mlruns:/code/mlruns
+      - ${MO_DATA_PATH}/mlruns:/mlflow/mlruns
     depends_on:
       - modelling_db
+
   modelling:
     build:
       context: .
@@ -57,6 +58,21 @@ services:
       - MLFLOW_TRACKING_URI=${MO_MLFLOW_TRACKING_URI}
     stdin_open: true
     tty: true
+    depends_on:
+      - modelling_db
+
+  modelling_deploy:
+    build:
+      context: .
+      dockerfile: Dockerfile-server
+    image: modelling-server-image
+    container_name: modelling-mlflow-deploy
+    stdin_open: true
+    tty: true
+    expose:
+      - "5000"
+    volumes:
+    - ${MO_DATA_PATH}/mlruns:/mlflow/mlruns
     depends_on:
       - modelling_db
 

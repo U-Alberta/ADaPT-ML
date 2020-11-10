@@ -172,7 +172,6 @@ def main():
         mlflow.log_artifact(parsed_args.test_path)
         mlflow.log_artifact(TEST_DF_FILENAME)
         mlflow.log_artifact(TEST_DF_HTML_FILENAME)
-        mlflow.log_artifact(ROC_CURVE_FILENAME)
         mlflow.log_artifact(CONFUSION_MATRIX_FILENAME)
 
 
