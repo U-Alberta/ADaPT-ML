@@ -34,8 +34,12 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-4.5.4-Linux-x86_
     && ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh \
     && echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc
 ENV PATH /opt/conda/bin:$PATH
-COPY . .
+COPY ./conda.yaml .
 RUN conda env create -f conda.yaml
 RUN echo "conda activate modelling_env" >> ~/.bashrc
 
+COPY ./modelling ./modelling
+COPY ./MLproject .
+COPY ./setup.cfg .
+COPY ./setup.py .
 CMD [ "/bin/bash" ]
