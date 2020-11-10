@@ -1,5 +1,7 @@
 FROM python:3.8-slim-buster
 
+WORKDIR /mlflow
+
 RUN apt-get update \
     && apt-get install -y wait-for-it
 

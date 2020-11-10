@@ -31,7 +31,7 @@ services:
       - MLFLOW_TRACKING_URI=${DP_MLFLOW_TRACKING_URI}
     command: wait-for-it dp-mlflow-db:3306 -s -- mlflow server --backend-store-uri ${DP_MLFLOW_TRACKING_URI} --default-artifact-root ./mlruns --host 0.0.0.0
     volumes:
-      - ${DP_DATA_PATH}/mlruns:/code/mlruns
+      - ${DP_DATA_PATH}/mlruns:/mlflow/mlruns
     depends_on:
       - dp_db
   dp:
