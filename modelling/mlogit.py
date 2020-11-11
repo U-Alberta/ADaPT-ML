@@ -4,7 +4,7 @@ References:
     https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html?highligh:logistic%20regression#sklearn.linear_model.LogisticRegression
 """
 from modelling import (X_TRAIN_FILENAME, TRAIN_DF_HTML_FILENAME, TEST_DF_FILENAME, TEST_DF_HTML_FILENAME,
-                       ROC_CURVE_FILENAME, CONFUSION_MATRIX_FILENAME)
+                       ROC_CURVE_FILENAME, CONFUSION_MATRIX_FILENAME, LOGGING_FILENAME)
 import pickle
 import pandas as pd
 import argparse
@@ -173,6 +173,7 @@ def main():
         mlflow.log_artifact(TEST_DF_FILENAME)
         mlflow.log_artifact(TEST_DF_HTML_FILENAME)
         mlflow.log_artifact(CONFUSION_MATRIX_FILENAME)
+        mlflow.log_artifact(LOGGING_FILENAME)
 
 
 if __name__ == '__main__':
