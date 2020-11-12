@@ -108,9 +108,9 @@ REGISTERED_MODEL_NAME = 'Tfidf_MLogit'
 
 
 def evaluate_model(pipe, x_test, y_true, y_pred):
-    f1 = {'f1_micro': f1_score(y_true, y_pred, average='micro'),
-          'f1_macro': f1_score(y_true, y_pred, average='macro'),
-          'f1_weighted': f1_score(y_true, y_pred, average='weighted')}
+    f1 = {'F1 micro': float(f1_score(y_true, y_pred, average='micro')),
+          'F1 macro': float(f1_score(y_true, y_pred, average='macro')),
+          'F1 weighted': float(f1_score(y_true, y_pred, average='weighted'))}
     # plot_roc_curve(pipe, x_test, y_true)
     # plt.savefig(ROC_CURVE_FILENAME)
     # plt.close()
@@ -137,7 +137,7 @@ def main():
         y_train = train_df.label.tolist()
         y_test = test_df.label.tolist()
 
-        mlflow.sklearn.autolog()
+        # mlflow.sklearn.autolog()
         pipe = Pipeline([('vectorizer', TfidfVectorizer(ngram_range=(1, 2), max_features=10000)),
                          ('mlogit', LogisticRegression(**TRAIN_PARAMS))])
 
