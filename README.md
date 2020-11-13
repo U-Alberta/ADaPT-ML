@@ -13,7 +13,7 @@ https://www.kdnuggets.com/2020/07/building-rest-api-tensorflow-serving-part-1.ht
 https://github.com/deepopinion/domain-adapted-atsc
 
 ```shell script
-mlflow models serve --no-conda -m <runs:/my-run-id/model-path> -p 5001 -h 0.0.0.0 
+mlflow models serve --no-conda -m <runs:/my-run-id/model-path> -h 0.0.0.0 
 ```
 
 ```shell script

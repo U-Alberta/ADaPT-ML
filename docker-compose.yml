@@ -75,6 +75,8 @@ services:
       - MLFLOW_TRACKING_URI=${MO_MLFLOW_TRACKING_URI}
     volumes:
     - ${MO_DATA_PATH}/mlruns:/mlflow/mlruns
+    networks:
+      - modelling_network
     depends_on:
       - modelling_db
 
