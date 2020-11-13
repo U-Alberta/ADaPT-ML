@@ -71,6 +71,8 @@ services:
     tty: true
     expose:
       - "5000"
+    environment:
+      - MLFLOW_TRACKING_URI=${MO_MLFLOW_TRACKING_URI}
     volumes:
     - ${MO_DATA_PATH}/mlruns:/mlflow/mlruns
     depends_on:
