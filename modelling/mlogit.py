@@ -105,6 +105,7 @@ TRAIN_PARAMS.update(
     }[TRAIN_PARAMS['solver']])
 
 REGISTERED_MODEL_NAME = 'Tfidf_MLogit'
+mlflow.sklearn.autolog()
 
 
 def evaluate_model(pipe, x_test, y_true, y_pred):
@@ -122,6 +123,7 @@ def evaluate_model(pipe, x_test, y_true, y_pred):
 
 def main():
     with mlflow.start_run():
+
         logging.info("Getting train and test data ...")
         try:
             with open(parsed_args.train_path, 'rb') as infile:
@@ -137,12 +139,15 @@ def main():
         y_train = train_df.label.tolist()
         y_test = test_df.label.tolist()
 
-        # mlflow.sklearn.autolog()
+        y_probs_train = train_df.probs.tolist()
+        y_probs_test = test_df.probs.tolist()
+
         pipe = Pipeline([('vectorizer', TfidfVectorizer(ngram_range=(1, 2), max_features=10000)),
                          ('mlogit', LogisticRegression(**TRAIN_PARAMS))])
 
         logging.info("Transforming training data and training mlogit ...")
-        pipe.fit(x_train, y_train)
+        # pipe.fit(x_train, y_train)
+        pipe.fit(x_train, y_probs_train)
         y_pred = pipe.predict(x_test)
 
         logging.info("Saving pipe ...")
