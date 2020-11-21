@@ -1,27 +1,25 @@
-from label import CONFUSION_MATRIX_FILENAME, LF_SUMMARY_FILENAME
-from snorkel.labeling import LFAnalysis
-from label.lfs import ValueLabel
-from label.lfs.pv import keyword_lfs
-from snorkel.labeling.model import MajorityLabelVoter
-from label.model import INIT_PARAMS
-from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
-import json
+from sklearn.metrics import confusion_matrix
+from snorkel.labeling import LFAnalysis
 
-import pandas as pd
+from label import CONFUSION_MATRIX_FILENAME, LF_SUMMARY_FILENAME
 
 METRICS = ['accuracy', 'coverage', 'f1_micro', 'f1_macro']
 
 
-def lf_summary(L_train, label_model):
-    summary = LFAnalysis(L=L_train, lfs=keyword_lfs).lf_summary(est_weights=label_model.get_weights())
+def lf_summary(L_train, lfs, label_model):
+    summary = LFAnalysis(L=L_train, lfs=lfs).lf_summary(est_weights=label_model.get_weights())
     summary.to_html(LF_SUMMARY_FILENAME)
 
 
-def label_model_summary(L_train, label_model, y):
-    lm_metrics = label_model.score(L_train, y, METRICS)
-    c = confusion_matrix(y, label_model.predict(L_train), labels=[label.value for label in ValueLabel])
+def multiclass_summary(L_train, y_dev, label_model, labels):
+    lm_metrics = label_model.score(L_train, y_dev, METRICS)
+    c = confusion_matrix(y_dev, label_model.predict(L_train), labels=[label.value for label in labels])
     plt.matshow(c)
     plt.colorbar()
     plt.savefig(CONFUSION_MATRIX_FILENAME, format='jpg')
     return lm_metrics
+
+
+def multilabel_summary(labeled_train_df, label_model):
+    pass

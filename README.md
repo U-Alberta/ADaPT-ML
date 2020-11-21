@@ -17,8 +17,8 @@ docker-compose up -d --build
 ```
 *Note:* make sure that you export values for the environment variables in docker-compose.yml
 
-Will create and start the MySQL backend store, the MLFlow server (start it manually for now though, see below), and the
-interface for running MLFlow experiments. Will also start the Label Studio server for annotating development / test data.
+Will create and start the MySQL backend store, the MLFlow server, and the
+interface for running MLFlow experiments.
 
 ```shell script
 docker attach dp-mlflow-server
@@ -49,7 +49,19 @@ Go to http://129.128.215.241:5000 to view the experiments
 ## Labeling data with Label Studio
 
 ```shell script
-docker run -p 8080:8080 -v $MO_DATA_PATH/my_project:/label-studio/my_project --name label-studio heartexlabs/label-studio:latest label-studio start my_project --init --force
+docker run \
+-p 8080:8080 \
+-v $LS_PATH:/label-studio/session_projects \
+-v $LS_PATH/pv_config.xml:/pv_config.xml \
+-v $LS_PATH/pv_tasks.json:/pv_tasks.json \
+--name label-studio \
+heartexlabs/label-studio:latest \
+label-studio start-multi-session \
+--root-dir ./session_projects \
+--force \
+--label-config /pv_config.xml \
+--input-path /pv_tasks.json \
+--initial-project-description personal_values
 ```
 
 This will import the JSON-formatted list of data points in each file in the input path. The files should look like this:
