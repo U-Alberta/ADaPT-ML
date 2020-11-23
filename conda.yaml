@@ -20,3 +20,4 @@ dependencies:
     - git+https://github.com/crazyfrogspb/RedditScore.git
     - dask[complete]>=2.1.0,<3.0.0
     - pymysql
+    - "-e ."
