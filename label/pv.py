@@ -31,8 +31,8 @@ def main():
         labeled_train_df = model.apply_multilabel(train_L, label_model, ValueLabel)
 
         # validate the training data
-        print("Validating training data ...")
-        model.validate_training_data(labeled_train_df, ValueLabel)
+        # print("Validating training data ...")
+        # model.validate_training_data(labeled_train_df, ValueLabel)
 
         if parsed_args.dev_data:
             # TODO: figure out how do get the label studio project uuid and switch then export the completions

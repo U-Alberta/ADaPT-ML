@@ -59,8 +59,8 @@ def train_label_model(L_train: np.ndarray, labels) -> LabelModel:
 def apply_multiclass(L_train: np.ndarray, label_model: LabelModel, labels) -> pd.DataFrame:
     logging.info("Applying Label Model as multiclass ...")
     filtered_df, probs = filter_df(L_train, label_model)
-    filtered_df['label'] = [labels(pred).name for pred in probs_to_preds(probs).tolist()]
-    filtered_df['label_probs'] = probs.tolist()
+    filtered_df.insert(len(filtered_df), 'label', [labels(pred).name for pred in probs_to_preds(probs).tolist()])
+    filtered_df.insert(len(filtered_df), 'label_probs', probs.tolist())
     filtered_df.to_pickle(TRAINING_DATA_FILENAME)
     filtered_df.to_html(TRAINING_DATA_HTML_FILENAME)
     return filtered_df
@@ -81,8 +81,8 @@ def apply_multilabel(L_train: np.ndarray, label_model: LabelModel, labels) -> pd
                               direction="increasing")
         chosen = [labels(pair[0]) for pair in pairs if pair[1] >= kneedle.knee]
         multilabels.append(chosen)
-    filtered_df['label'] = multilabels
-    filtered_df['label_probs'] = probs_list
+    filtered_df.insert(len(filtered_df), 'label', multilabels)
+    filtered_df.insert(len(filtered_df), 'label_probs', probs_list)
     filtered_df.to_pickle(TRAINING_DATA_FILENAME)
     filtered_df.to_html(TRAINING_DATA_HTML_FILENAME)
     return filtered_df
@@ -99,7 +99,10 @@ def filter_df(L_train: np.ndarray, label_model: LabelModel):
 def validate_training_data(filtered_df, labels):
     logging.info("Validating the training data ...")
     # Make sure each class is represented in the data
-    assert (not set(flatten(filtered_df['label'].tolist())).difference(set([label.name for label in labels]))), "Not all classes are represented in this training data."
+    try:
+        assert (not set(flatten(filtered_df['label'].tolist())).difference(set([label.name for label in labels])))
+    except AssertionError:
+        logging.warning("Not all classes are represented in this training data.")
 
 
 def train_params_dict(label_model: LabelModel) -> dict:
