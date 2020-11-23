@@ -72,7 +72,7 @@ def apply_multilabel(L_train: np.ndarray, label_model: LabelModel, labels) -> pd
     probs_list = probs_array.tolist()
     multilabels = []
     for probs in probs_list:
-        pairs = list(zip([label.name for label in labels], probs))
+        pairs = list(zip([label.value for label in labels], probs))
         pairs.sort(key=lambda t: t[1])
         kneedle = KneeLocator([pair[0] for pair in pairs],
                               [pair[1] for pair in pairs],
