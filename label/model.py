@@ -79,8 +79,8 @@ def apply_multilabel(L_train: np.ndarray, label_model: LabelModel, labels) -> pd
                               S=1.0,
                               curve="convex",
                               direction="increasing")
-        labels = [pair[0] for pair in pairs if pair[1] >= kneedle.knee]
-        multilabels.append(labels)
+        chosen = [labels(pair[0]) for pair in pairs if pair[1] >= kneedle.knee]
+        multilabels.append(chosen)
     filtered_df['label'] = multilabels
     filtered_df['label_probs'] = probs_list
     filtered_df.to_pickle(TRAINING_DATA_FILENAME)
