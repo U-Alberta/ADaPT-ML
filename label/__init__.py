@@ -16,7 +16,7 @@ parsed_args = parser.parse_args()
 TMP_ARTIFACTS = '/tmp_artifacts'
 
 LOGGING_FILENAME = os.path.join(TMP_ARTIFACTS, 'log.txt')
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO, filename=LOGGING_FILENAME)
+logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO, filename=LOGGING_FILENAME, filemode='w')
 
 logging.info("Loading unlabeled training data ...")
 TRAIN_DF_FILENAME = parsed_args.train_data

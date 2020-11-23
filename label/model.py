@@ -97,9 +97,9 @@ def filter_df(L_train: np.ndarray, label_model: LabelModel):
 
 
 def validate_training_data(filtered_df, labels):
+    logging.info("Validating the training data ...")
     # Make sure each class is represented in the data
-    assert (set(flatten(filtered_df['label'].tolist())) == set([label.name for label in labels]),
-            "Not all classes are represented in this training data.")
+    assert (not set(flatten(filtered_df['label'].tolist())).difference(set([label.name for label in labels]))), "Not all classes are represented in this training data."
 
 
 def train_params_dict(label_model: LabelModel) -> dict:

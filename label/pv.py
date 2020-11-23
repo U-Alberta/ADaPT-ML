@@ -19,15 +19,19 @@ def main():
     with mlflow.start_run():
 
         # create the label matrix
+        print("Creating label matrix ...")
         train_L = model.create_label_matrix(keyword_lfs)
 
         # train the label model
+        print("Training label model ...")
         label_model = model.train_label_model(train_L, ValueLabel)
 
         # evaluate the label model
+        print("Predicting multilabels ...")
         labeled_train_df = model.apply_multilabel(train_L, label_model, ValueLabel)
 
         # validate the training data
+        print("Validating training data ...")
         model.validate_training_data(labeled_train_df, ValueLabel)
 
         if parsed_args.dev_data:
@@ -36,6 +40,7 @@ def main():
             metrics = evaluate.multilabel_summary(labeled_train_df, label_model)
             pass
 
+        print("Saving ...")
         evaluate.lf_summary(train_L, keyword_lfs, label_model)
 
         signature = infer_signature(train_L, label_model.predict(train_L))
