@@ -34,11 +34,11 @@ Will start the MLFlow server manually
 
 ```shell script
 docker attach dp-mlflow
-wait-for-it dp-mlflow-db:3306 -s -- mlflow run --no-conda -e <pv> --experiment-name <energyeast> -P data=/unlabeled_data</path/to/data.pkl> .
+wait-for-it dp-mlflow-db:3306 -s -- mlflow run --no-conda -e <pv> --experiment-name <energyeast> -P train_data=/unlabeled_data</path/to/data.pkl> .
 ```
 or
 ```shell script
-docker exec dp-mlflow 'wait-for-it dp-mlflow-db:3306 -s -- mlflow run --no-conda -e <entrypoint> --experiment-name <name> -P data=/unlabeled_data</path/to/data.pkl> .'
+docker exec dp-mlflow 'wait-for-it dp-mlflow-db:3306 -s -- mlflow run --no-conda -e <entrypoint> --experiment-name <name> -P train_data=/unlabeled_data</path/to/data.pkl> .'
 ```
 *-e pv*: the entrypoint is for assessing personal values
 
