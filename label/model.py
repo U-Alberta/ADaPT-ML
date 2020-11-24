@@ -59,33 +59,34 @@ def train_label_model(L_train: np.ndarray, labels) -> LabelModel:
 def apply_multiclass(L_train: np.ndarray, label_model: LabelModel, labels) -> pd.DataFrame:
     logging.info("Applying Label Model as multiclass ...")
     filtered_df, probs = filter_df(L_train, label_model)
-    filtered_df.insert(len(filtered_df), 'label', [labels(pred).name for pred in probs_to_preds(probs).tolist()])
-    filtered_df.insert(len(filtered_df), 'label_probs', probs.tolist())
-    filtered_df.to_pickle(TRAINING_DATA_FILENAME)
-    filtered_df.to_html(TRAINING_DATA_HTML_FILENAME)
-    return filtered_df
+    return add_labels(filtered_df, [labels(pred).name for pred in probs_to_preds(probs).tolist()], probs.tolist())
 
 
 def apply_multilabel(L_train: np.ndarray, label_model: LabelModel, labels) -> pd.DataFrame:
     logging.info("Applying Label Model as multilabel ...")
     filtered_df, probs_array = filter_df(L_train, label_model)
     probs_list = probs_array.tolist()
+    label_values = [label.value for label in labels]
     multilabels = []
     for probs in probs_list:
-        pairs = list(zip([label.value for label in labels], probs))
+        pairs = list(zip(label_values, probs))
         pairs.sort(key=lambda t: t[1])
         kneedle = KneeLocator([pair[0] for pair in pairs],
                               [pair[1] for pair in pairs],
                               S=1.0,
                               curve="convex",
                               direction="increasing")
-        chosen = [labels(pair[0]) for pair in pairs if pair[1] >= kneedle.knee]
+        chosen = [labels(pair[0]) for pair in pairs if pair[1] > kneedle.knee_y]
         multilabels.append(chosen)
-    filtered_df.insert(len(filtered_df), 'label', multilabels)
-    filtered_df.insert(len(filtered_df), 'label_probs', probs_list)
-    filtered_df.to_pickle(TRAINING_DATA_FILENAME)
-    filtered_df.to_html(TRAINING_DATA_HTML_FILENAME)
-    return filtered_df
+    return add_labels(filtered_df, multilabels, probs_list)
+
+
+def add_labels(df, labels, label_probs):
+    df.insert(len(df.columns), 'label', labels)
+    df.insert(len(df.columns), 'label_probs', label_probs)
+    df.to_pickle(TRAINING_DATA_FILENAME)
+    df.to_html(TRAINING_DATA_HTML_FILENAME)
+    return df
 
 
 def filter_df(L_train: np.ndarray, label_model: LabelModel):
