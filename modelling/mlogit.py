@@ -3,23 +3,22 @@ References:
     https://keras.io/examples/imdb_bidirectional_lstm/
     https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html?highligh:logistic%20regression#sklearn.linear_model.LogisticRegression
 """
-from modelling import (X_TRAIN_FILENAME, TRAIN_DF_HTML_FILENAME, TEST_DF_FILENAME, TEST_DF_HTML_FILENAME,
-                       ROC_CURVE_FILENAME, CONFUSION_MATRIX_FILENAME, LOGGING_FILENAME)
-import pickle
-import pandas as pd
 import argparse
-import sys
 import logging
-from urllib.parse import urlparse
+import sys
 
+import matplotlib.pyplot as plt
 import mlflow.sklearn
-from sklearn.pipeline import Pipeline
+import pandas as pd
+from mlflow.models.signature import infer_signature
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
-
-from mlflow.models.signature import infer_signature
 from sklearn.metrics import plot_confusion_matrix, f1_score
-import matplotlib.pyplot as plt
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import MultiLabelBinarizer
+
+from modelling import (TEST_DF_FILENAME, TEST_DF_HTML_FILENAME,
+                       CONFUSION_MATRIX_FILENAME, LOGGING_FILENAME)
 
 parser = argparse.ArgumentParser(description='Train a classifier.')
 parser.add_argument('train_path', help='File path or URL to the training data')
@@ -139,30 +138,30 @@ def main():
         y_train = train_df.label.tolist()
         y_test = test_df.label.tolist()
 
-        y_probs_train = train_df.probs.tolist()
-        y_probs_test = test_df.probs.tolist()
+        try:
+            assert type(y_train[0]) != list
+            assert type(y_test[0]) != list
+        except AssertionError:
+            mlb = MultiLabelBinarizer()
+            y_train = mlb.fit_transform(y_train)
+            y_test = mlb.transform(y_test)
 
         pipe = Pipeline([('vectorizer', TfidfVectorizer(ngram_range=(1, 2), max_features=10000)),
                          ('mlogit', LogisticRegression(**TRAIN_PARAMS))])
 
         logging.info("Transforming training data and training mlogit ...")
-        # pipe.fit(x_train, y_train)
-        pipe.fit(x_train, y_probs_train)
+        pipe.fit(x_train, y_train)
         y_pred = pipe.predict(x_test)
 
         logging.info("Saving pipe ...")
-        # signature = infer_signature(x_test, y_pred)
+        signature = infer_signature(x_test, y_pred)
         input_example = x_train[:5]
-        tracking_url_type_store = urlparse(mlflow.get_tracking_uri()).scheme
-        if tracking_url_type_store != 'file':
-            mlflow.sklearn.log_model(
-                pipe,
-                'tfidf_mlogit',
-                registered_model_name=REGISTERED_MODEL_NAME,
-                # signature=signature,
-                input_example=input_example)
-        else:
-            mlflow.sklearn.log_model(pipe, 'tfidf_mlogit')
+        mlflow.sklearn.log_model(
+            pipe,
+            'tfidf_mlogit',
+            registered_model_name=REGISTERED_MODEL_NAME,
+            signature=signature,
+            input_example=input_example)
 
         logging.info("Evaluating model ...")
         metrics = evaluate_model(pipe, x_test, y_test, y_pred)
