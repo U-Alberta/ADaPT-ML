@@ -71,11 +71,12 @@ def apply_multilabel(L_train: np.ndarray, label_model: LabelModel, labels) -> pd
     for probs in probs_list:
         pairs = list(zip(label_values, probs))
         pairs.sort(key=lambda t: t[1])
-        kneedle = KneeLocator([pair[0] for pair in pairs],
+        kneedle = KneeLocator(label_values,
                               [pair[1] for pair in pairs],
                               S=1.0,
                               curve="convex",
-                              direction="increasing")
+                              direction="increasing",
+                              online=True)
         try:
             assert kneedle.knee_y is not None
             chosen = [labels(pair[0]).name for pair in pairs if pair[1] > kneedle.knee_y]

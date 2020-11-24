@@ -43,12 +43,10 @@ def main():
         print("Saving ...")
         evaluate.lf_summary(train_L, keyword_lfs, label_model)
 
-        signature = infer_signature(train_L, label_model.predict(train_L))
         input_example = train_L[:5, :]
 
         tracking.log(model.train_params_dict(label_model),
                      metrics,
-                     signature,
                      input_example,
                      REGISTERED_MODEL_NAME,
                      label_model)

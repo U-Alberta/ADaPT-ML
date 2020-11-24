@@ -5,7 +5,7 @@ from label import (LOGGING_FILENAME, TRAIN_DF_FILENAME, LABEL_MATRIX_FILENAME, T
 import mlflow.pytorch
 
 
-def log(train_params, metrics, signature, input_example, model_name, label_model):
+def log(train_params, metrics, input_example, model_name, label_model):
 
     # Log the data points, label matrix, and labeled training data as artifacts
     mlflow.log_params(train_params)
@@ -19,7 +19,6 @@ def log(train_params, metrics, signature, input_example, model_name, label_model
         label_model,
         'label_model',
         registered_model_name=model_name,
-        signature=signature,
         input_example=input_example)
 
     try:
