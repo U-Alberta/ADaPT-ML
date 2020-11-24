@@ -76,7 +76,11 @@ def apply_multilabel(L_train: np.ndarray, label_model: LabelModel, labels) -> pd
                               S=1.0,
                               curve="convex",
                               direction="increasing")
-        chosen = [labels(pair[0]) for pair in pairs if pair[1] > kneedle.knee_y]
+        try:
+            assert kneedle.knee_y is not None
+            chosen = [labels(pair[0]).name for pair in pairs if pair[1] > kneedle.knee_y]
+        except AssertionError:
+            chosen = [labels(pairs[-1][0]).name]
         multilabels.append(chosen)
     return add_labels(filtered_df, multilabels, probs_list)
 
