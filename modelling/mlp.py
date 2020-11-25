@@ -131,8 +131,8 @@ def main():
         y_pred = pipe.predict(x_test_list)
 
         logging.info("Saving pipe ...")
-        signature = infer_signature(x_test, y_pred)
-        input_example = x_train[:5]
+        signature = infer_signature(x_test.to_frame(), y_pred)
+        input_example = x_train.to_frame()[:5]
         mlflow.sklearn.log_model(
             pipe,
             'tfidf_mlp',
