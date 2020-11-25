@@ -117,8 +117,8 @@ def main():
         except AssertionError:
             is_multilabel = True
             mlb = MultiLabelBinarizer()
-            y_train = mlb.fit_transform(y_train_list)
-            y_test = mlb.transform(y_test_list)
+            y_train_list = mlb.fit_transform(y_train_list)
+            y_test_list = mlb.transform(y_test_list)
             with open(MLB_FILENAME, 'wb') as outfile:
                 pickle.dump(mlb, outfile)
             mlflow.log_artifact(MLB_FILENAME)
