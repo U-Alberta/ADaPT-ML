@@ -114,7 +114,8 @@ def main():
             mlb = MultiLabelBinarizer()
             y_train = mlb.fit_transform(y_train)
             y_test = mlb.transform(y_test)
-            pickle.dump(mlb, MLB_FILENAME)
+            with open(MLB_FILENAME, 'wb') as outfile:
+                pickle.dump(mlb, outfile)
             mlflow.log_artifact(MLB_FILENAME)
 
         pipe = Pipeline([('vectorizer', TfidfVectorizer(ngram_range=(1, 2), max_features=10000)),
