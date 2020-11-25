@@ -68,7 +68,6 @@ TRAIN_PARAMS.update(
             'learning_rate_init': parsed_args.learning_rate_init,
             'power_t': parsed_args.power_t,
             'momentum': parsed_args.momentum,                                           # keep this between 0 and 1
-            'nesterovs_momentum': parsed_args.nesterovs_momentum,
             'early_stopping': True,
             'n_iter_no_change': parsed_args.n_iter_no_change
         }
