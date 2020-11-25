@@ -29,7 +29,6 @@ parser.add_argument('test_path', type=str, help='File path or URL to the test da
 parser.add_argument('--activation', default='relu', type=str, help='Activation function for the hidden layer.')
 parser.add_argument('--solver', default='adam', type=str, help='The solver for weight optimization.')
 parser.add_argument('--alpha', default=0.0001, type=float, help='L2 penalty (regularization term) parameter.')
-parser.add_argument('--batch_size', default='auto', type=int, help='Size of minibatches for stochastic optimizers.')
 parser.add_argument('--learning_rate', default='constant', type=str, help='Learning rate schedule for weight updates.')
 parser.add_argument('--learning_rate_init', default=0.001, type=float, help='The initial learning rate used. It controls the step-size in updating the weights.')
 parser.add_argument('--power_t', default=0.5, type=float, help='The exponent for inverse scaling rate.')
@@ -48,7 +47,6 @@ TRAIN_PARAMS = {
     'activation': parsed_args.activation,
     'solver': parsed_args.solver,
     'alpha': parsed_args.alpha,
-    'batch_size': parsed_args.batch_size,
     'max_iter': parsed_args.max_iter,
     'tol': parsed_args.tol
 }

@@ -31,7 +31,6 @@ entry_points:
             activation: {type: string, default: relu}
             solver: {type: str, default: adam}
             alpha: {type: float, default: 0.0001}
-            batch_size: {type: int, default: auto}
             learning_rate: {type: str, default: constant}
             learning_rate_init: {type: float, default: 0.001}
             power_t: {type: float, default: 0.5}
@@ -47,7 +46,6 @@ entry_points:
          --activation {activation}
          --solver {solver}
          --alpha {alpha}
-         --batch_size {batch_size}
          --learning_rate {learning_rate}
          --learning_rate_init {learning_rate_init}
          --power_t {power_t}
