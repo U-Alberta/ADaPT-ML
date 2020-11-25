@@ -48,7 +48,8 @@ TRAIN_PARAMS = {
     'solver': parsed_args.solver,
     'alpha': parsed_args.alpha,
     'max_iter': parsed_args.max_iter,
-    'tol': parsed_args.tol
+    'tol': parsed_args.tol,
+    'verbose': True
 }
 TRAIN_PARAMS.update(
     {
@@ -99,11 +100,15 @@ def main():
 
         train_df, test_df = data.load(parsed_args.train_path, parsed_args.test_path)
 
-        x_train = train_df.text.tolist()
-        y_train = train_df.label.tolist()
+        x_train = train_df.text
+        y_train = train_df.label
+        x_train_list = x_train.tolist()
+        y_train_list = y_train.tolist()
 
-        x_test = test_df.text.tolist()
-        y_test = test_df.label.tolist()
+        x_test = test_df.text
+        y_test = test_df.label
+        x_test_list = x_test.tolist()
+        y_test_list = y_test.tolist()
 
         try:
             assert type(y_train[0]) != list
@@ -112,8 +117,8 @@ def main():
         except AssertionError:
             is_multilabel = True
             mlb = MultiLabelBinarizer()
-            y_train = mlb.fit_transform(y_train)
-            y_test = mlb.transform(y_test)
+            y_train = mlb.fit_transform(y_train_list)
+            y_test = mlb.transform(y_test_list)
             with open(MLB_FILENAME, 'wb') as outfile:
                 pickle.dump(mlb, outfile)
             mlflow.log_artifact(MLB_FILENAME)
@@ -122,8 +127,8 @@ def main():
                          ('mlp', MLPClassifier(**TRAIN_PARAMS))])
 
         logging.info("Transforming training data and training mlp ...")
-        pipe.fit(x_train, y_train)
-        y_pred = pipe.predict(x_test)
+        pipe.fit(x_train_list, y_train_list)
+        y_pred = pipe.predict(x_test_list)
 
         logging.info("Saving pipe ...")
         signature = infer_signature(x_test, y_pred)
@@ -139,7 +144,7 @@ def main():
         if is_multilabel:
             pass
         else:
-            metrics = evaluate_multiclass(pipe, x_test, y_test, y_pred)
+            metrics = evaluate_multiclass(pipe, x_test_list, y_test_list, y_pred)
             mlflow.log_metrics(metrics)
 
         logging.info("Saving artifacts ...")
