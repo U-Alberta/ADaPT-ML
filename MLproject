@@ -24,4 +24,40 @@ entry_points:
          --n_jobs {n_jobs}
          {train_data}
          {test_data}"
-
+    mlp:
+        parameters:
+            train_data: path
+            test_data: path
+            activation: {type: string, default: relu}
+            solver: {type: str, default: adam}
+            alpha: {type: float, default: 0.0001}
+            batch_size: {type: int, default: auto}
+            learning_rate: {type: str, default: constant}
+            learning_rate_init: {type: float, default: 0.001}
+            power_t: {type: float, default: 0.5}
+            max_iter: {type: int, default: 200}
+            tol: {type: float, default: 1e-4}
+            momentum: {type: float, default: 0.9}
+            beta_1: {type: float, default: 0.9}
+            beta_2: {type: float, default: 0.999}
+            epsilon: {type: float, default: 1e-8}
+            n_iter_no_change: {type: int, default: 10}
+            max_fun: {type: int, default: 15000}
+        command: "python ./modelling/mlp.py
+         --activation {activation}
+         --solver {solver}
+         --alpha {alpha}
+         --batch_size {batch_size}
+         --learning_rate {learning_rate}
+         --learning_rate_init {learning_rate_init}
+         --power_t {power_t}
+         --max_iter {max_iter}
+         --tol {tol}
+         --momentum {momentum}
+         --beta_1 {beta_1}
+         --beta_2 {beta_2}
+         --epsilon {epsilon}
+         --n_iter_no_change {n_iter_no_change}
+         --max_fun {max_fun}
+         {train_data}
+         {test_data}"
