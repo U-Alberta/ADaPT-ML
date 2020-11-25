@@ -38,7 +38,7 @@ COPY ./conda.yaml .
 COPY ./setup.cfg .
 COPY ./setup.py .
 COPY ./modelling ./modelling
-COPY ./MLproject .
+#COPY ./MLproject .
 RUN conda env create -f conda.yaml
 RUN echo "conda activate modelling_env" >> ~/.bashrc
 
