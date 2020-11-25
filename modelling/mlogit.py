@@ -1,6 +1,5 @@
 """
 References:
-    https://keras.io/examples/imdb_bidirectional_lstm/
     https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html?highligh:logistic%20regression#sklearn.linear_model.LogisticRegression
 """
 import argparse
@@ -15,14 +14,13 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import plot_confusion_matrix, f1_score
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import MultiLabelBinarizer
 
-from modelling import (TEST_DF_FILENAME, TEST_DF_HTML_FILENAME,
+from modelling import (data, TEST_DF_FILENAME, TEST_DF_HTML_FILENAME,
                        CONFUSION_MATRIX_FILENAME, LOGGING_FILENAME)
 
-parser = argparse.ArgumentParser(description='Train a classifier.')
-parser.add_argument('train_path', help='File path or URL to the training data')
-parser.add_argument('test_path', help='File path or URL to the test data')
+parser = argparse.ArgumentParser(description='Train a multinomial logistic regression classifier.')
+parser.add_argument('train_path', type=str, help='File path or URL to the training data')
+parser.add_argument('test_path', type=str, help='File path or URL to the test data')
 
 parser.add_argument('--solver', default='lbfgs', help='Algorithm to use in the optimization problem.')
 parser.add_argument('--tol', default=1e-4, type=float, help='Tolerance for stopping criteria')
@@ -123,28 +121,19 @@ def evaluate_model(pipe, x_test, y_true, y_pred):
 def main():
     with mlflow.start_run():
 
-        logging.info("Getting train and test data ...")
-        try:
-            with open(parsed_args.train_path, 'rb') as infile:
-                train_df = pd.read_pickle(infile)
-            with open(parsed_args.test_path, 'rb') as infile:
-                test_df = pd.read_pickle(infile)
-        except IOError:
-            sys.exit("Could not read data")
+        train_df, test_df = data.load(parsed_args.train_path, parsed_args.test_path)
 
         x_train = train_df.text.tolist()
-        x_test = test_df.text.tolist()
-
         y_train = train_df.label.tolist()
+
+        x_test = test_df.text.tolist()
         y_test = test_df.label.tolist()
 
         try:
             assert type(y_train[0]) != list
             assert type(y_test[0]) != list
         except AssertionError:
-            mlb = MultiLabelBinarizer()
-            y_train = mlb.fit_transform(y_train)
-            y_test = mlb.transform(y_test)
+            sys.exit("This classifier only works with multiclass data, not multilabel. Try using MLP.")
 
         pipe = Pipeline([('vectorizer', TfidfVectorizer(ngram_range=(1, 2), max_features=10000)),
                          ('mlogit', LogisticRegression(**TRAIN_PARAMS))])

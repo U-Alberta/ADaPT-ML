@@ -3,6 +3,7 @@ https://keras.io/examples/nlp/bidirectional_lstm_imdb/
 https://keras.io/models/model/
 https://keras.io/models/model/
 
+
 This model expects three int32 Tensors as input: numeric token ids, an input mask to hold out padding tokens, and input
 types to mark different segments within one input (if any). The separate preprocessing model at
 https://tfhub.dev/tensorflow/bert_en_uncased_preprocess/1 transforms plain text inputs into this format.
