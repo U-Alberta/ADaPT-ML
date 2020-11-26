@@ -111,8 +111,8 @@ def main():
         y_test_list = y_test.tolist()
 
         try:
-            assert type(y_train[0]) != list
-            assert type(y_test[0]) != list
+            assert type(y_train_list[0]) != list
+            assert type(y_test_list[0]) != list
             is_multilabel = False
         except AssertionError:
             is_multilabel = True
