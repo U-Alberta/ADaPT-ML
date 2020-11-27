@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 
 from sklearn.neural_network import MLPClassifier
 import mlflow.sklearn
+import mlflow.pyfunc
 from mlflow.models.signature import infer_signature
 from sklearn.feature_extraction.text import TfidfVectorizer
 import pandas as pd
@@ -78,6 +79,15 @@ REGISTERED_MODEL_NAME = 'Tfidf_MLP'
 # mlflow.sklearn.autolog()
 
 
+class MLBPipe(mlflow.pyfunc.Python):
+    def __init__(self, mlb, pipe):
+        self.mlb = mlb
+        self.pipe = pipe
+
+    def predict(self, model_input):
+        return self.mlb.inverse_transform(self.pipe.predict(model_input.tolist()))
+
+
 def evaluate_multiclass(pipe, x_test, y_true, y_pred):
     f1 = {'F1 micro': float(f1_score(y_true, y_pred, average='micro')),
           'F1 macro': float(f1_score(y_true, y_pred, average='macro')),
@@ -100,55 +110,63 @@ def main():
 
         train_df, test_df = data.load(parsed_args.train_path, parsed_args.test_path)
 
-        x_train = train_df.text
-        y_train = train_df.label
+        x_train = train_df.text.to_frame()
+        y_train = train_df.label.to_frame()
         x_train_list = x_train.tolist()
         y_train_list = y_train.tolist()
 
-        x_test = test_df.text
-        y_test = test_df.label
+        x_test = test_df.text.to_frame()
+        y_test = test_df.label.to_frame()
         x_test_list = x_test.tolist()
         y_test_list = y_test.tolist()
 
         try:
-            assert type(y_train_list[0]) != list
-            assert type(y_test_list[0]) != list
+            assert isinstance(y_train_list[0], list)
+            assert isinstance(y_test_list[0], list)
             is_multilabel = False
         except AssertionError:
             is_multilabel = True
             mlb = MultiLabelBinarizer()
             y_train_list = mlb.fit_transform(y_train_list)
             y_test_list = mlb.transform(y_test_list)
-            with open(MLB_FILENAME, 'wb') as outfile:
-                pickle.dump(mlb, outfile)
-            mlflow.log_artifact(MLB_FILENAME)
+            # with open(MLB_FILENAME, 'wb') as outfile:
+            #     pickle.dump(mlb, outfile)
+            # mlflow.log_artifact(MLB_FILENAME)
 
         pipe = Pipeline([('vectorizer', TfidfVectorizer(ngram_range=(1, 2), max_features=10000)),
                          ('mlp', MLPClassifier(**TRAIN_PARAMS))])
 
         logging.info("Transforming training data and training mlp ...")
         pipe.fit(x_train_list, y_train_list)
-        y_pred = pipe.predict(x_test_list)
+        mlb_pipe = MLBPipe(mlb, pipe)
+        y_pred = mlb_pipe.predict(x_test)
 
-        logging.info("Saving pipe ...")
-        signature = infer_signature(x_test.to_frame(), y_pred)
-        input_example = x_train.to_frame()[:5]
-        mlflow.sklearn.log_model(
-            pipe,
+        logging.info("Saving model ...")
+        signature = infer_signature(x_test, y_pred)
+        input_example = x_train[:5]
+        mlflow.pyfunc.log_model(
+            mlb_pipe,
             'tfidf_mlp',
             registered_model_name=REGISTERED_MODEL_NAME,
             signature=signature,
-            input_example=input_example)
+            input_example=input_example
+        )
+        # mlflow.sklearn.log_model(
+        #     pipe,
+        #     'tfidf_mlp',
+        #     registered_model_name=REGISTERED_MODEL_NAME,
+        #     signature=signature,
+        #     input_example=input_example)
 
         logging.info("Evaluating model ...")
         if is_multilabel:
             pass
         else:
-            metrics = evaluate_multiclass(pipe, x_test_list, y_test_list, y_pred)
+            metrics = evaluate_multiclass(mlb_pipe, x_test_list, y_test_list, y_pred)
             mlflow.log_metrics(metrics)
 
         logging.info("Saving artifacts ...")
-        test_df.insert(len(test_df.columns), 'pred', mlb.inverse_transform(y_pred))
+        test_df.insert(len(test_df.columns), 'pred', y_pred)
         pd.to_pickle(test_df, TEST_DF_FILENAME)
         test_df.to_html(TEST_DF_HTML_FILENAME)
 
