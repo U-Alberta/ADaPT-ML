@@ -112,13 +112,13 @@ def main():
 
         x_train = train_df.text.to_frame()
         y_train = train_df.label.to_frame()
-        x_train_list = x_train.tolist()
-        y_train_list = y_train.tolist()
+        x_train_list = train_df.text.tolist()
+        y_train_list = train_df.label.tolist()
 
         x_test = test_df.text.to_frame()
         y_test = test_df.label.to_frame()
-        x_test_list = x_test.tolist()
-        y_test_list = y_test.tolist()
+        x_test_list = test_df.text.tolist()
+        y_test_list = y_test.label.tolist()
 
         try:
             assert isinstance(y_train_list[0], list)
