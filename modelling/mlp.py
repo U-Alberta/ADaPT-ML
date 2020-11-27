@@ -85,7 +85,7 @@ class MLBPipe(mlflow.pyfunc.PythonModel):
         self.pipe = pipe
 
     def predict(self, model_input):
-        return self.mlb.inverse_transform(self.pipe.predict(model_input.tolist()))
+        return self.mlb.inverse_transform(self.pipe.predict(model_input.text.tolist()))
 
 
 def evaluate_multiclass(pipe, x_test, y_true, y_pred):
