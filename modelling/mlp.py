@@ -79,7 +79,7 @@ REGISTERED_MODEL_NAME = 'Tfidf_MLP'
 # mlflow.sklearn.autolog()
 
 
-class MLBPipe(mlflow.pyfunc.Python):
+class MLBPipe(mlflow.pyfunc.PythonModel):
     def __init__(self, mlb, pipe):
         self.mlb = mlb
         self.pipe = pipe
