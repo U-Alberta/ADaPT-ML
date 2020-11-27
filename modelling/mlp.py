@@ -123,15 +123,16 @@ def main():
         try:
             assert isinstance(y_train_list[0], list)
             assert isinstance(y_test_list[0], list)
-            is_multilabel = False
-        except AssertionError:
             is_multilabel = True
             mlb = MultiLabelBinarizer()
             y_train_list = mlb.fit_transform(y_train_list)
             y_test_list = mlb.transform(y_test_list)
+
             # with open(MLB_FILENAME, 'wb') as outfile:
             #     pickle.dump(mlb, outfile)
             # mlflow.log_artifact(MLB_FILENAME)
+        except AssertionError:
+            is_multilabel = False
 
         pipe = Pipeline([('vectorizer', TfidfVectorizer(ngram_range=(1, 2), max_features=10000)),
                          ('mlp', MLPClassifier(**TRAIN_PARAMS))])
