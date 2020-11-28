@@ -9,7 +9,6 @@ from sys import version_info
 
 import matplotlib.pyplot as plt
 
-import sklearn
 from sklearn.neural_network import MLPClassifier
 import mlflow.sklearn
 import mlflow.pyfunc
@@ -36,8 +35,8 @@ CONDA_ENV = {
         {
             'pip': [
                 'mlflow',
-                'sklearn=={}'.format(sklearn.__version__),
-                'pandas=={}'.format(pd.__version__)
+                'sklearn',
+                'pandas'
             ],
         },
     ],
