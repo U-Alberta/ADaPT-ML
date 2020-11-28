@@ -5,9 +5,11 @@ import argparse
 import logging
 import sys
 import pickle
+from sys import version_info
 
 import matplotlib.pyplot as plt
 
+import sklearn
 from sklearn.neural_network import MLPClassifier
 import mlflow.sklearn
 import mlflow.pyfunc
@@ -22,6 +24,25 @@ from sklearn.metrics import plot_confusion_matrix, multilabel_confusion_matrix, 
 from modelling import (data, TEST_DF_FILENAME, TEST_DF_HTML_FILENAME,
                        CONFUSION_MATRIX_FILENAME, LOGGING_FILENAME, MLB_FILENAME)
 
+PYTHON_VERSION = "{major}.{minor}.{micro}".format(major=version_info.major,
+                                                  minor=version_info.minor,
+                                                  micro=version_info.micro)
+
+CONDA_ENV = {
+    'channels': ['defaults'],
+    'dependencies': [
+        'python={}'.format(PYTHON_VERSION),
+        'pip',
+        {
+            'pip': [
+                'mlflow',
+                'sklearn=={}'.format(sklearn.__version__),
+                'pandas=={}'.format(pd.__version__)
+            ],
+        },
+    ],
+    'name': 'tfidf_mlp_env'
+}
 
 parser = argparse.ArgumentParser(description='Train a multi-layer perceptron classifier.')
 parser.add_argument('train_path', type=str, help='File path or URL to the training data')
@@ -31,15 +52,19 @@ parser.add_argument('--activation', default='relu', type=str, help='Activation f
 parser.add_argument('--solver', default='adam', type=str, help='The solver for weight optimization.')
 parser.add_argument('--alpha', default=0.0001, type=float, help='L2 penalty (regularization term) parameter.')
 parser.add_argument('--learning_rate', default='constant', type=str, help='Learning rate schedule for weight updates.')
-parser.add_argument('--learning_rate_init', default=0.001, type=float, help='The initial learning rate used. It controls the step-size in updating the weights.')
+parser.add_argument('--learning_rate_init', default=0.001, type=float,
+                    help='The initial learning rate used. It controls the step-size in updating the weights.')
 parser.add_argument('--power_t', default=0.5, type=float, help='The exponent for inverse scaling rate.')
 parser.add_argument('--max_iter', default=200, type=int, help='Maximum number of iterations.')
 parser.add_argument('--tol', default=1e-4, type=float, help='Tolerance for the optimization.')
 parser.add_argument('--momentum', default=0.9, type=float, help='Momentum for gradient descent update.')
-parser.add_argument('--beta_1', default=0.9, type=float, help='Exponential decay rate for estimates of first moment vector in adam.')
-parser.add_argument('--beta_2', default=0.999, type=float, help='Exponential decay rate for estimates of second moment vector in adam.')
+parser.add_argument('--beta_1', default=0.9, type=float,
+                    help='Exponential decay rate for estimates of first moment vector in adam.')
+parser.add_argument('--beta_2', default=0.999, type=float,
+                    help='Exponential decay rate for estimates of second moment vector in adam.')
 parser.add_argument('--epsilon', default=1e-8, type=float, help='Value for numerical stability in adam.')
-parser.add_argument('--n_iter_no_change', default=10, type=int, help='Maximum number of epochs to not meet tol improvement.')
+parser.add_argument('--n_iter_no_change', default=10, type=int,
+                    help='Maximum number of epochs to not meet tol improvement.')
 parser.add_argument('--max_fun', default=15000, type=int, help='Maximum number of loss function calls.')
 
 parsed_args = parser.parse_args()
@@ -57,8 +82,8 @@ TRAIN_PARAMS.update(
         'adam': {
             'learning_rate_init': parsed_args.learning_rate_init,
             'early_stopping': True,
-            'beta_1': parsed_args.beta_1,                                               # keep this between 0 and 1
-            'beta_2': parsed_args.beta_2,                                               # keep this between 0 and 1
+            'beta_1': parsed_args.beta_1,  # keep this between 0 and 1
+            'beta_2': parsed_args.beta_2,  # keep this between 0 and 1
             'epsilon': parsed_args.epsilon,
             'n_iter_no_change': parsed_args.n_iter_no_change
         },
@@ -69,13 +94,15 @@ TRAIN_PARAMS.update(
             'learning_rate': parsed_args.learning_rate,
             'learning_rate_init': parsed_args.learning_rate_init,
             'power_t': parsed_args.power_t,
-            'momentum': parsed_args.momentum,                                           # keep this between 0 and 1
+            'momentum': parsed_args.momentum,  # keep this between 0 and 1
             'early_stopping': True,
             'n_iter_no_change': parsed_args.n_iter_no_change
         }
     }[TRAIN_PARAMS['solver']])
 
 REGISTERED_MODEL_NAME = 'Tfidf_MLP'
+
+
 # mlflow.sklearn.autolog()
 
 
@@ -148,6 +175,7 @@ def main():
         mlflow.pyfunc.log_model(
             artifact_path='tfidf_mlp',
             python_model=mlb_pipe,
+            conda_env=CONDA_ENV,
             registered_model_name=REGISTERED_MODEL_NAME,
             # signature=signature,
             input_example=input_example
