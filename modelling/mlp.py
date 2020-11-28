@@ -143,13 +143,13 @@ def main():
         y_pred = mlb_pipe.predict(x_test)
 
         logging.info("Saving model ...")
-        signature = infer_signature(x_test, y_pred)
+        # signature = infer_signature(x_test, pd.DataFrame({'multilabels': y_pred}))
         input_example = x_train[:5]
         mlflow.pyfunc.log_model(
-            mlb_pipe,
-            'tfidf_mlp',
+            artifact_path='tfidf_mlp',
+            python_model=mlb_pipe,
             registered_model_name=REGISTERED_MODEL_NAME,
-            signature=signature,
+            # signature=signature,
             input_example=input_example
         )
         # mlflow.sklearn.log_model(
