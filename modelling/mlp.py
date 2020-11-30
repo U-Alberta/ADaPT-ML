@@ -3,25 +3,21 @@ multi-layer perceptron classifier
 """
 import argparse
 import logging
-import sys
-import pickle
 from sys import version_info
 
 import matplotlib.pyplot as plt
-
-from sklearn.neural_network import MLPClassifier
-import mlflow.sklearn
 import mlflow.pyfunc
-from mlflow.models.signature import infer_signature
-from sklearn.feature_extraction.text import TfidfVectorizer
+import mlflow.sklearn
+from mlflow.models import infer_signature
 import pandas as pd
-from sklearn.preprocessing import MultiLabelBinarizer
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics import plot_confusion_matrix, f1_score
+from sklearn.neural_network import MLPClassifier
 from sklearn.pipeline import Pipeline
-from mlflow.models.signature import infer_signature
-from sklearn.metrics import plot_confusion_matrix, multilabel_confusion_matrix, f1_score
+from sklearn.preprocessing import MultiLabelBinarizer
 
 from modelling import (data, TEST_DF_FILENAME, TEST_DF_HTML_FILENAME,
-                       CONFUSION_MATRIX_FILENAME, LOGGING_FILENAME, MLB_FILENAME)
+                       CONFUSION_MATRIX_FILENAME, LOGGING_FILENAME)
 
 PYTHON_VERSION = "{major}.{minor}.{micro}".format(major=version_info.major,
                                                   minor=version_info.minor,
@@ -111,7 +107,8 @@ class MLBPipe(mlflow.pyfunc.PythonModel):
         self.pipe = pipe
 
     def predict(self, model_input):
-        return self.mlb.inverse_transform(self.pipe.predict(model_input.text.tolist()))
+        preds = self.mlb.inverse_transform(self.pipe.predict(model_input.text.tolist()))
+        return pd.Series(preds)
 
 
 def evaluate_multiclass(pipe, x_test, y_true, y_pred):
@@ -169,14 +166,14 @@ def main():
         y_pred = mlb_pipe.predict(x_test)
 
         logging.info("Saving model ...")
-        # signature = infer_signature(x_test, pd.DataFrame({'multilabels': y_pred}))
+        signature = infer_signature(x_test, y_pred)
         input_example = x_train[:5]
         mlflow.pyfunc.log_model(
             artifact_path='tfidf_mlp',
             python_model=mlb_pipe,
             conda_env=CONDA_ENV,
             registered_model_name=REGISTERED_MODEL_NAME,
-            # signature=signature,
+            signature=signature,
             input_example=input_example
         )
         # mlflow.sklearn.log_model(
