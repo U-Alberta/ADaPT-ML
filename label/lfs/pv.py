@@ -19,7 +19,8 @@ PV_LFS_PATH = os.path.join('/lf_resources', 'lfs.pkl')
 
 def load_lfs():
     try:
-        lfs = pickle.load(PV_LFS_PATH)
+        with open(PV_LFS_PATH, 'rb') as infile:
+            lfs = pickle.load(infile)
         assert len([lf.name for lf in lfs if lf.name.startswith('keyword')]) == 1068
         logging.info("Using existing LFs.")
     except Exception:
