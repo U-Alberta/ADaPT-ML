@@ -63,9 +63,9 @@ def create_label_matrix(train_df, lfs):
     # applier = PandasLFApplier(lfs=lfs)
     applier = PandasParallelLFApplier(lfs=lfs)
     n_parallel = int(multiprocessing.cpu_count() / 2)
-    train_L, metadata = applier.apply(train_df, n_parallel=n_parallel, fault_tolerant=True)
-    if metadata.faults:
-        logging.warning("Some LFs failed:", metadata.faults)
+    train_L = applier.apply(train_df, n_parallel=n_parallel, fault_tolerant=True)
+    # if metadata.faults:
+    #     logging.warning("Some LFs failed:", metadata.faults)
     np.save(LABEL_MATRIX_FILENAME, train_L)
     return train_L
 
