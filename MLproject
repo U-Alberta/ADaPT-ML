@@ -12,9 +12,10 @@ entry_points:
             optimizer: {type: string, default: sgd}
             prec_init: {type: float, default: 0.7}
         command: "python ./label/pv.py
+        --task {task}
         --dev_data {dev_data}
         --n_epochs {n_epochs}
         --optimizer {optimizer}
         --prec_init {prec_init}
         {train_data}
-        {task}"
+        "
