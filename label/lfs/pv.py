@@ -60,8 +60,8 @@ def load_keyword_dictionary():
     try:
         personal_values_dict = requests.get(PV_DICTIONARY_URL).json()
         return personal_values_dict
-    except Exception:
-        sys.exit("Cannot connect to personal values dictionary.")
+    except Exception as e:
+        sys.exit(e.args)
 
 
 def lemma_keyword_lookup(x, lemma, label):
