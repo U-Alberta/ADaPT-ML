@@ -6,6 +6,7 @@ import pandas as pd
 
 parser = argparse.ArgumentParser(description='Perform data programming.')
 parser.add_argument('train_data', help='File path or URL to the unlabeled training data')
+parser.add_argument('--task', default='multilabel', type=str, help='classification task (multiclass or multilabel)')
 parser.add_argument('--dev_data', default=0, help='Use labeled development data for training and evaluation')
 parser.add_argument('--n_epochs', default=1000, type=int, help='the number of epochs to train the Label Model (where '
                                                                'each epoch is a single optimization step)')
@@ -31,7 +32,7 @@ TRAIN_PARAMS = {
     'prec_init': parsed_args.prec_init
 }
 
-LEXICONS_PATH = os.path.join('/lf_resources', 'lexicons.db')
+CRATE_DB_IP = os.environ['CRATE_DB_IP']
 
 LABEL_MATRIX_FILENAME = os.path.join(TMP_ARTIFACTS, 'label_matrix.npy')
 LABEL_MODEL_FILENAME = os.path.join(TMP_ARTIFACTS, 'label_model.pkl')

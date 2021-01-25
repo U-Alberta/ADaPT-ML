@@ -6,29 +6,34 @@ import json
 from glob import glob
 import requests
 
-from label.lfs.pv import keyword_lfs
+from label.lfs.pv import pv_lfs
 from label.lfs.pv import ValueLabel
 
 from label import parsed_args, model, evaluate, tracking
 
-REGISTERED_MODEL_NAME = 'ValueLabelModel'
+REGISTERED_MODEL_NAME = 'PersonalValuesLabelModel'
+LF_COLUMNS = ['id', 'tweet_pv_words_count']
 
 
 def main():
 
     with mlflow.start_run():
 
+        # get the needed information for the pv lfs
+        logging.info("Getting information for lfs ...")
+        train_df = model.load_lf_info(LF_COLUMNS)
+
         # create the label matrix
-        print("Creating label matrix ...")
-        train_L = model.create_label_matrix(keyword_lfs)
+        logging.info("Creating label matrix ...")
+        train_L = model.create_label_matrix(train_df, pv_lfs)
 
         # train the label model
-        print("Training label model ...")
+        logging.info("Training label model ...")
         label_model = model.train_label_model(train_L, ValueLabel)
 
         # evaluate the label model
-        print("Predicting multilabels ...")
-        labeled_train_df = model.apply_multilabel(train_L, label_model, ValueLabel)
+        logging.info("Predicting multilabels ...")
+        labeled_train_df = model.apply_label_preds(train_L, label_model, ValueLabel, parsed_args.task)
 
         # validate the training data
         # print("Validating training data ...")
@@ -40,8 +45,8 @@ def main():
             metrics = evaluate.multilabel_summary(labeled_train_df, label_model)
             pass
 
-        print("Saving ...")
-        evaluate.lf_summary(train_L, keyword_lfs, label_model)
+        logging.info("Saving ...")
+        evaluate.lf_summary(train_L, pv_lfs, label_model)
 
         input_example = train_L[:5, :]
 

@@ -6,6 +6,7 @@ entry_points:
     pv:
         parameters:
             train_data: path
+            task: {type: string, default: multilabel}
             dev_data: {type: int, default: 0}
             n_epochs: {type: int, default: 1000}
             optimizer: {type: string, default: sgd}
@@ -15,4 +16,5 @@ entry_points:
         --n_epochs {n_epochs}
         --optimizer {optimizer}
         --prec_init {prec_init}
-        {train_data}"
+        {train_data}
+        {task}"

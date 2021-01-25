@@ -52,6 +52,8 @@ services:
       - dp_network
     environment:
       - MLFLOW_TRACKING_URI=${DP_MLFLOW_TRACKING_URI}
+      - CRATE_DB_IP=${CRATE_DB_IP}
+      - PERSONAL_VALUES_DICTIONARY=${PERSONAL_VALUES_DICTIONARY}
     stdin_open: true
     tty: true
     depends_on:

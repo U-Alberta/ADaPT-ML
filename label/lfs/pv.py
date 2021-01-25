@@ -3,18 +3,41 @@ References:
     https://www.snorkel.org/use-cases/01-spam-tutorial#a-keyword-lfs
     https://snorkel.readthedocs.io/en/v0.9.5/packages/_autosummary/labeling/snorkel.labeling.LabelingFunction.html
 """
-import sqlite3
-
-import en_core_web_lg
+import os
+import sys
+import logging
+import pickle
 from snorkel.labeling import LabelingFunction, LFAnalysis
 
-from label import LEXICONS_PATH
 from label.lfs import ValueLabel, ABSTAIN
-from label.lfs.preprocessors import spacy_preprocessor
+import requests
 
-nlp = en_core_web_lg.load()
+PV_DICTIONARY_URL = os.environ['PERSONAL_VALUES_DICTIONARY']
+
+PV_LFS_PATH = os.path.join('/lf_resources', 'lfs.pkl')
 
 
+def load_lfs():
+    try:
+        lfs = pickle.load(PV_LFS_PATH)
+        assert len([lf.name for lf in lfs if lf.name.startswith('keyword')]) == 1068
+        logging.info("Using existing LFs.")
+    except Exception:
+        # remake all of the lfs to get updated ones
+        logging.info("Remaking keyword LFs ...")
+        personal_values_dict = load_keyword_dictionary()
+        keyword_lfs = []
+        for label in ValueLabel:
+            keyword_lfs = keyword_lfs + [make_keyword_lf('keyword_{0}_{1}'.format(label.name, lemma),
+                                                         lemma,
+                                                         label.value)
+                                         for lemma in personal_values_dict[label.name]]
+        lfs = keyword_lfs
+        pickle.dump(lfs, PV_LFS_PATH)
+        logging.info("New LFs saved.")
+    return lfs
+
+    
 def load_keyword_dictionary():
     """
     There are 1068 terms in the personal values (PV) dictionary.
@@ -32,16 +55,12 @@ def load_keyword_dictionary():
     SpaCy doc for them, and returns a dict in the form of {V1: [doc, ...], V2: [doc, ...] ...}
     :return:    dict
     """
-    conn = sqlite3.connect(LEXICONS_PATH)
-    cur = conn.cursor()
-    value_token_dict = {}
-    for i in range(len(ValueLabel)):
-        select_statement = """SELECT term FROM value_dict WHERE value = {0};""".format(i)
-        cur.execute(select_statement)
-        terms = [item[0] for item in cur.fetchall()]
-        term_docs = list(nlp.pipe(terms))
-        value_token_dict[ValueLabel(i).name] = [term[0] for term in term_docs]
-    return value_token_dict
+    # TODO: update this so it gets the lemmas in the personal values dictionary
+    try:
+        personal_values_dict = requests.get(PV_DICTIONARY_URL).json()
+        return personal_values_dict
+    except Exception:
+        sys.exit("Cannot connect to personal values dictionary.")
 
 
 def lemma_keyword_lookup(x, lemma, label):
@@ -52,8 +71,7 @@ def lemma_keyword_lookup(x, lemma, label):
     :param label: the label for the given PV
     :return:
     """
-    x_lemma_list = [token.lemma_ if not token.is_stop else '' for token in x.spacy_doc]
-    return label if lemma in x_lemma_list else ABSTAIN
+    return label if lemma in x else ABSTAIN
 
 
 def make_keyword_lf(name, lemma, label):
@@ -68,8 +86,7 @@ def make_keyword_lf(name, lemma, label):
     return LabelingFunction(
         name=name,
         f=lemma_keyword_lookup,
-        resources=dict(lemma=lemma, label=label),
-        pre=[spacy_preprocessor]
+        resources=dict(lemma=lemma, label=label)
     )
 
 
@@ -79,13 +96,7 @@ def evaluate_keyword_lfs(L_train):
     :param L_train: label matrix for the train set
     :return:
     """
-    return LFAnalysis(L_train, lfs=keyword_lfs).lf_summary()
+    return LFAnalysis(L_train, lfs=pv_lfs).lf_summary()
 
 
-value_token_dict = load_keyword_dictionary()
-keyword_lfs = []
-for label in ValueLabel:
-    lemmas = set([token.lemma_ for token in value_token_dict[label.name]])
-    keyword_lfs = keyword_lfs + [make_keyword_lf('keyword_{0}_{1}'.format(label.name, lemma),
-                                                 lemma,
-                                                 label.value) for lemma in lemmas]
+pv_lfs = load_lfs()

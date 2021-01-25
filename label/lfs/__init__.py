@@ -4,23 +4,23 @@ ABSTAIN = -1
 
 
 class ValueLabel(Enum):
-    SE = 0      # Security
     security = 0
-    CO = 1      # Conformity
+    SE = 0
     conformity = 1
-    TR = 2      # Tradition
+    CO = 1
     tradition = 2
-    BE = 3      # Benevolence
+    TR = 2
     benevolence = 3
-    UN = 4      # Universalism
+    BE = 3
     universalism = 4
-    SD = 5      # Self-direction
+    UN = 4
     self_direction = 5
-    ST = 6      # Stimulation
+    SD = 5
     stimulation = 6
-    HE = 7      # Hedonism
+    ST = 6
     hedonism = 7
-    AC = 8      # Achievement
+    HE = 7
     achievement = 8
-    PO = 9      # Power
+    AC = 8
     power = 9
+    PO = 9
