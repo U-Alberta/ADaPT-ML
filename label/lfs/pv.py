@@ -34,7 +34,8 @@ def load_lfs():
                                                          label.value)
                                          for lemma in personal_values_dict[label.name]]
         lfs = keyword_lfs
-        pickle.dump(lfs, PV_LFS_PATH)
+        with open(PV_LFS_PATH, 'wb') as outfile:
+            pickle.dump(lfs, outfile)
         logging.info("New LFs saved.")
     return lfs
 
