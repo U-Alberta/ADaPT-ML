@@ -50,9 +50,9 @@ def load_lf_info(columns):
         ids = tuple(TRAIN_DF.id.tolist())
         table = TRAIN_DF.at[0, 'table']
         data_df = pd.read_sql(GET_LF_INFO_QUERY.format(column=', '.join(columns), table=table, ids=ids), CRATE_DB_IP)
-    except Exception:
+    except Exception as e:
         # TODO: we can't do anything about this error so we should just quit probably
-        sys.exit("Is CrateDB running and is the data imported?")
+        sys.exit(e.args)
     train_df = TRAIN_DF.join(data_df, on='id')
     logging.info("LF info loaded. Here's a peek:")
     logging.info(train_df.head())
