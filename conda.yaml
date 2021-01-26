@@ -12,9 +12,11 @@ dependencies:
   - kneed
   - pip>19.0
   - pip:
-    - snorkel == 0.9.6
+    - snorkel==0.9.6
     - pyyaml
     - mlflow
     - dask[complete]>=2.1.0,<3.0.0
     - pymysql
+    - SQLAlchemy>=1.0.0
+    - crate
     - "-e ."
