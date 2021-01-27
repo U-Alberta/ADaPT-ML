@@ -23,7 +23,7 @@ def load_lfs():
             lfs = pickle.load(infile)
         assert len([lf.name for lf in lfs if lf.name.startswith('keyword')]) == 1068
         logging.info("Using existing LFs.")
-    except (FileNotFoundError, AssertionError):
+    except (FileNotFoundError, AssertionError, EOFError):
         # remake all of the lfs to get updated ones
         logging.info("Remaking keyword LFs ...")
         personal_values_dict = load_keyword_dictionary()

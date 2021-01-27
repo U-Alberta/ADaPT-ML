@@ -53,7 +53,7 @@ def load_lf_info(columns):
     except Exception as e:
         # TODO: we can't do anything about this error so we should just quit probably
         sys.exit(e.args)
-    train_df = TRAIN_DF.join(data_df, on='id')
+    train_df = pd.merge(TRAIN_DF, data_df, on='id')
     logging.info("LF info loaded. Here's a peek:")
     logging.info(train_df.head())
     return train_df
