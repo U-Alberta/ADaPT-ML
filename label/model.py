@@ -145,3 +145,4 @@ def train_params_dict(label_model: LabelModel) -> dict:
         return train_params
     except AttributeError:
         sys.exit("Label Model hasn't been trained yet...?")
+

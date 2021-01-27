@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, multilabel_confusion_matrix
 from snorkel.labeling import LFAnalysis
 
 from label import CONFUSION_MATRIX_FILENAME, LF_SUMMARY_FILENAME
@@ -22,4 +22,8 @@ def multiclass_summary(L_train, y_dev, label_model, labels):
 
 
 def multilabel_summary(labeled_train_df, label_model):
+    pass
+
+
+def get_dev_df():
     pass

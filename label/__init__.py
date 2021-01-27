@@ -19,6 +19,9 @@ TMP_ARTIFACTS = '/tmp_artifacts'
 LOGGING_FILENAME = os.path.join(TMP_ARTIFACTS, 'log.txt')
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO, filename=LOGGING_FILENAME, filemode='w')
 
+# Validate command line args
+assert parsed_args.task in ('multiclass', 'multilabel'), "Invalid argument for task: {}".format(parsed_args.task)
+
 logging.info("Loading unlabeled training data ...")
 TRAIN_DF_FILENAME = parsed_args.train_data
 try:
