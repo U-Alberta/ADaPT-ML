@@ -49,7 +49,7 @@ def main():
         #         metrics = evaluate.multiclass_summary(train_L, y_dev, label_model, labeled_train_df.label.tolist())
         #     elif parsed_args.task == 'multilabel':
         #         metrics = evaluate.multilabel_summary(labeled_train_df, label_model)
-
+        metrics = None
         logging.info("Saving ...")
         input_example = train_L[:5, :]
         tracking.log(model.train_params_dict(label_model),

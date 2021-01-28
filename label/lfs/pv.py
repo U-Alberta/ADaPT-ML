@@ -21,7 +21,7 @@ def load_lfs():
     try:
         with open(PV_LFS_PATH, 'rb') as infile:
             lfs = pickle.load(infile)
-        assert len([lf.name for lf in lfs if lf.name.startswith('keyword')]) == 1068
+        # assert len([lf.name for lf in lfs if lf.name.startswith('keyword')]) == 1068
         logging.info("Using existing LFs.")
     except (FileNotFoundError, AssertionError, EOFError):
         # remake all of the lfs to get updated ones
@@ -31,7 +31,7 @@ def load_lfs():
         for label in ValueLabel:
             keyword_lfs = keyword_lfs + [make_keyword_lf('keyword_{0}_{1}'.format(label.name, lemma),
                                                          lemma,
-                                                         label.value)
+                                                         label)
                                          for lemma in personal_values_dict[label.name]]
         lfs = keyword_lfs
         with open(PV_LFS_PATH, 'wb') as outfile:
@@ -60,6 +60,7 @@ def load_keyword_dictionary():
     # TODO: update this so it gets the lemmas in the personal values dictionary
     try:
         personal_values_dict = requests.get(PV_DICTIONARY_URL).json()
+        assert sorted(personal_values_dict) == sorted([label.name for label in ValueLabel])
         return personal_values_dict
     except Exception as e:
         sys.exit(e.args)
@@ -73,7 +74,7 @@ def lemma_keyword_lookup(x, lemma, label):
     :param label: the label for the given PV
     :return:
     """
-    return label if lemma in x else ABSTAIN
+    return label.value if lemma in x[label.name]['words'] else ABSTAIN
 
 
 def make_keyword_lf(name, lemma, label):
