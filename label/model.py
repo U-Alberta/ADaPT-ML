@@ -1,5 +1,4 @@
 import logging
-import sys
 import multiprocessing
 import requests
 import json
@@ -58,7 +57,7 @@ def load_lf_info(endpoints):
 
     except Exception as e:
         # TODO: we can't do anything about this error so we should just quit probably
-        sys.exit(e.args)
+        logging.error(e.args)
 
     logging.info("LF info loaded. Here's a peek:")
     logging.info(train_df.head())
@@ -151,5 +150,5 @@ def train_params_dict(label_model: LabelModel) -> dict:
         }
         return train_params
     except AttributeError:
-        sys.exit("Label Model hasn't been trained yet...?")
+        logging.error("Label Model hasn't been trained yet...?")
 

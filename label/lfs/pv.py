@@ -4,7 +4,6 @@ References:
     https://snorkel.readthedocs.io/en/v0.9.5/packages/_autosummary/labeling/snorkel.labeling.LabelingFunction.html
 """
 import os
-import sys
 import logging
 import pickle
 from snorkel.labeling import LabelingFunction, LFAnalysis
@@ -63,7 +62,7 @@ def load_keyword_dictionary():
         assert sorted(personal_values_dict) == sorted([label.name for label in ValueLabel])
         return personal_values_dict
     except Exception as e:
-        sys.exit(e.args)
+        logging.error(e.args)
 
 
 def lemma_keyword_lookup(x, lemma, label):
