@@ -74,7 +74,8 @@ def lemma_keyword_lookup(x, lemma, label):
     :param label: the label for the given PV
     :return:
     """
-    return label.value if lemma in x[label.name]['words'] else ABSTAIN
+    return label.value if (label.name in x.tweet_pv_words_count
+                           and lemma in x.tweet_pv_words_count[label.name]['words']) else ABSTAIN
 
 
 def make_keyword_lf(name, lemma, label):

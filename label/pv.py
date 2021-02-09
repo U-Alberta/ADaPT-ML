@@ -12,16 +12,18 @@ from label.lfs.pv import ValueLabel
 from label import parsed_args, model, evaluate, tracking
 
 REGISTERED_MODEL_NAME = 'PersonalValuesLabelModel'
-LF_COLUMNS = ['id', 'tweet_pv_words_count']
+ENDPOINTS = {
+    'tweet_pv_words_count': {
+        'url': 'http://129.128.215.241:81/personal_values/word_count/',
+        'dtype': 'json'}
+}
 
 
 def main():
-
     with mlflow.start_run():
-
         # get the needed information for the pv lfs
         logging.info("Getting information for lfs ...")
-        train_df = model.load_lf_info(LF_COLUMNS)
+        train_df = model.load_lf_info(ENDPOINTS)
 
         # create the label matrix
         logging.info("Creating label matrix ...")

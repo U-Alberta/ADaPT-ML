@@ -1,20 +1,22 @@
 import logging
 import sys
 import multiprocessing
+import requests
+import json
 
 import numpy as np
 import pandas as pd
 from pandas.core.common import flatten
 from snorkel.labeling import filter_unlabeled_dataframe
-# from snorkel.labeling import PandasLFApplier
-from snorkel.labeling.apply.dask import PandasParallelLFApplier
+from snorkel.labeling import PandasLFApplier
+# from snorkel.labeling.apply.dask import PandasParallelLFApplier
 
 # from snorkel.labeling.model import MajorityLabelVoter
 from snorkel.labeling.model import LabelModel
 from snorkel.utils import probs_to_preds
 from kneed import KneeLocator
 
-from label import (CRATE_DB_IP, TRAIN_DF, LABEL_MATRIX_FILENAME, LABEL_MODEL_FILENAME, TRAINING_DATA_FILENAME,
+from label import (TRAIN_DF, LABEL_MATRIX_FILENAME, LABEL_MODEL_FILENAME, TRAINING_DATA_FILENAME,
                    TRAINING_DATA_HTML_FILENAME, TRAIN_PARAMS)
 
 INIT_PARAMS = {
@@ -40,32 +42,37 @@ LM_OPTIMIZER_SETTINGS = {
     }
 }
 
-GET_LF_INFO_QUERY = """
-    SELECT {column} FROM {table} WHERE id IN {ids};
-    """
 
-
-def load_lf_info(columns):
+def load_lf_info(endpoints):
     try:
-        ids = tuple(TRAIN_DF.id.tolist())
-        table = TRAIN_DF.at[0, 'table']
-        data_df = pd.read_sql(GET_LF_INFO_QUERY.format(column=', '.join(columns), table=table, ids=ids), CRATE_DB_IP)
+        ids = TRAIN_DF.id.tolist()
+        data_df = pd.DataFrame({'id': ids})
+        for endpoint in endpoints:
+            lf_info = requests.get(endpoints[endpoint]['url']).json()
+            all_ids, all_data = zip(*lf_info)
+            if endpoints[endpoint]['dtype'] == 'json':
+                all_data = [json.loads(d) for d in all_data]
+            data_df = pd.merge(data_df, pd.DataFrame({'id': all_ids, endpoint: all_data}), on='id')
+
+        train_df = pd.merge(TRAIN_DF, data_df, on='id')
+
     except Exception as e:
         # TODO: we can't do anything about this error so we should just quit probably
         sys.exit(e.args)
-    train_df = pd.merge(TRAIN_DF, data_df, on='id')
+
     logging.info("LF info loaded. Here's a peek:")
     logging.info(train_df.head())
     return train_df
 
 
 def create_label_matrix(train_df, lfs):
-    # applier = PandasLFApplier(lfs=lfs)
-    applier = PandasParallelLFApplier(lfs=lfs)
-    n_parallel = int(multiprocessing.cpu_count() / 2)
-    train_L = applier.apply(train_df, n_parallel=n_parallel, fault_tolerant=True)
-    # if metadata.faults:
-    #     logging.warning("Some LFs failed:", metadata.faults)
+    applier = PandasLFApplier(lfs=lfs)
+    # applier = PandasParallelLFApplier(lfs=lfs)
+    # n_parallel = int(multiprocessing.cpu_count() / 2)
+    # train_L = applier.apply(train_df, n_parallel=n_parallel, fault_tolerant=True)
+    train_L, metadata = applier.apply(train_df, return_meta=True)
+    if metadata.faults:
+        logging.warning("Some LFs failed:", metadata.faults)
     np.save(LABEL_MATRIX_FILENAME, train_L)
     return train_L
 

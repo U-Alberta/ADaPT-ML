@@ -1,3 +1,4 @@
+import os
 import mlflow
 import logging
 from label import (LOGGING_FILENAME, TRAIN_DF_FILENAME, LABEL_MATRIX_FILENAME, TRAINING_DATA_FILENAME,
@@ -29,5 +30,14 @@ def log(train_params, metrics, input_example, model_name, label_model):
         mlflow.log_artifact(TRAINING_DATA_HTML_FILENAME)
         mlflow.log_artifact(LF_SUMMARY_FILENAME)
         mlflow.log_artifact(CONFUSION_MATRIX_FILENAME)
+
+        os.remove(LOGGING_FILENAME)
+        os.remove(TRAIN_DF_FILENAME)
+        os.remove(LABEL_MATRIX_FILENAME)
+        os.remove(TRAINING_DATA_FILENAME)
+        os.remove(TRAINING_DATA_HTML_FILENAME)
+        os.remove(LF_SUMMARY_FILENAME)
+        os.remove(CONFUSION_MATRIX_FILENAME)
+
     except:
         logging.warning("an artifact could not be logged")
