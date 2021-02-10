@@ -1,5 +1,5 @@
 import logging
-import sys
+import os
 import mlflow
 from mlflow.models.signature import infer_signature
 import json
@@ -14,7 +14,7 @@ from label import parsed_args, model, evaluate, tracking
 REGISTERED_MODEL_NAME = 'PersonalValuesLabelModel'
 ENDPOINTS = {
     'tweet_pv_words_count': {
-        'url': 'http://129.128.215.241:81/personal_values/word_count/',
+        'url': os.environ['PV_WORD_COUNT'],
         'dtype': 'json'}
 }
 
