@@ -7,6 +7,7 @@ entry_points:
         parameters:
             train_data: path
             test_data: path
+            features: {type: string, default: tfidf}
             solver: {type: string, default: lbfgs}
             tol: {type: float, default: 1e-4}
             C: {type: float, default: 1.0}
@@ -23,11 +24,13 @@ entry_points:
          --verbose {verbose}
          --n_jobs {n_jobs}
          {train_data}
-         {test_data}"
+         {test_data}
+         {features}"
     mlp:
         parameters:
             train_data: path
             test_data: path
+            features: {type: string, default: tfidf}
             activation: {type: string, default: relu}
             solver: {type: str, default: adam}
             alpha: {type: float, default: 0.0001}
@@ -58,4 +61,5 @@ entry_points:
          --n_iter_no_change {n_iter_no_change}
          --max_fun {max_fun}
          {train_data}
-         {test_data}"
+         {test_data}
+         {features}"

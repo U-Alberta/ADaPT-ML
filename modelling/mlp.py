@@ -1,47 +1,23 @@
 """
 multi-layer perceptron classifier
+https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html
 """
 import argparse
 import logging
-from sys import version_info
 
 import matplotlib.pyplot as plt
-import mlflow.pyfunc
-import mlflow.sklearn
-from mlflow.models import infer_signature
-import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
+import mlflow
 from sklearn.metrics import plot_confusion_matrix, f1_score
 from sklearn.neural_network import MLPClassifier
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import MultiLabelBinarizer
 
-from modelling import (data, TEST_DF_FILENAME, TEST_DF_HTML_FILENAME,
-                       CONFUSION_MATRIX_FILENAME, LOGGING_FILENAME)
-
-PYTHON_VERSION = "{major}.{minor}.{micro}".format(major=version_info.major,
-                                                  minor=version_info.minor,
-                                                  micro=version_info.micro)
-
-CONDA_ENV = {
-    'channels': ['defaults'],
-    'dependencies': [
-        'python={}'.format(PYTHON_VERSION),
-        'pip',
-        {
-            'pip': [
-                'mlflow',
-                'sklearn',
-                'pandas'
-            ],
-        },
-    ],
-    'name': 'tfidf_mlp_env'
-}
+from modelling import CONFUSION_MATRIX_FILENAME
+from modelling.data import load, get_train_features, binarize_labels, log_artifacts
+from modelling.model import LookupClassifier, predict_test, save_model
 
 parser = argparse.ArgumentParser(description='Train a multi-layer perceptron classifier.')
 parser.add_argument('train_path', type=str, help='File path or URL to the training data')
 parser.add_argument('test_path', type=str, help='File path or URL to the test data')
+parser.add_argument('features', default='tfidf', nargs='+', type=str, help='column name(s) of the features to use.')
 
 parser.add_argument('--activation', default='relu', type=str, help='Activation function for the hidden layer.')
 parser.add_argument('--solver', default='adam', type=str, help='The solver for weight optimization.')
@@ -95,20 +71,10 @@ TRAIN_PARAMS.update(
         }
     }[TRAIN_PARAMS['solver']])
 
-REGISTERED_MODEL_NAME = 'Tfidf_MLP'
-
+REGISTERED_MODEL_NAME = '{}_MLP'.format('_'.join(parsed_args.features))
+ARTIFACT_PATH = 'mlp'
 
 # mlflow.sklearn.autolog()
-
-
-class MLBPipe(mlflow.pyfunc.PythonModel):
-    def __init__(self, mlb, pipe):
-        self.mlb = mlb
-        self.pipe = pipe
-
-    def predict(self, model_input):
-        preds = self.mlb.inverse_transform(self.pipe.predict(model_input.text.tolist()))
-        return pd.Series(preds)
 
 
 def evaluate_multiclass(pipe, x_test, y_true, y_pred):
@@ -130,77 +96,30 @@ def evaluate_multilabel():
 
 def main():
     with mlflow.start_run():
+        logging.info("Loading training and testing sets, and feature sets")
+        train_df, test_df = load(parsed_args.train_path, parsed_args.test_path)
+        x_train = get_train_features(train_df, parsed_args.features)
+        mlb, y_train, y_test = binarize_labels(y_train=train_df.label.tolist(),
+                                               y_test=test_df.label.tolist())
 
-        train_df, test_df = data.load(parsed_args.train_path, parsed_args.test_path)
+        logging.info("Training mlp ...")
+        mlp = MLPClassifier(**TRAIN_PARAMS)
+        mlp.fit(x_train, y_train)
+        mlp_model = LookupClassifier(mlb, mlp, parsed_args.features)
 
-        x_train = train_df.text.to_frame()
-        y_train = train_df.label.to_frame()
-        x_train_list = train_df.text.tolist()
-        y_train_list = train_df.label.tolist()
-
-        x_test = test_df.text.to_frame()
-        y_test = test_df.label.to_frame()
-        x_test_list = test_df.text.tolist()
-        y_test_list = y_test.label.tolist()
-
-        try:
-            assert isinstance(y_train_list[0], list)
-            assert isinstance(y_test_list[0], list)
-            is_multilabel = True
-            mlb = MultiLabelBinarizer()
-            y_train_list = mlb.fit_transform(y_train_list)
-            y_test_list = mlb.transform(y_test_list)
-
-            # with open(MLB_FILENAME, 'wb') as outfile:
-            #     pickle.dump(mlb, outfile)
-            # mlflow.log_artifact(MLB_FILENAME)
-        except AssertionError:
-            is_multilabel = False
-
-        pipe = Pipeline([('vectorizer', TfidfVectorizer(ngram_range=(1, 2), max_features=10000)),
-                         ('mlp', MLPClassifier(**TRAIN_PARAMS))])
-
-        logging.info("Transforming training data and training mlp ...")
-        pipe.fit(x_train_list, y_train_list)
-        mlb_pipe = MLBPipe(mlb, pipe)
-        y_pred = mlb_pipe.predict(x_test)
+        logging.info("Predicting test ...")
+        test_pred_df = predict_test(mlp_model, test_df)
 
         logging.info("Saving model ...")
-        signature = infer_signature(x_test, y_pred)
-        input_example = x_train[:5]
-        mlflow.pyfunc.log_model(
-            artifact_path='tfidf_mlp',
-            python_model=mlb_pipe,
-            conda_env=CONDA_ENV,
-            registered_model_name=REGISTERED_MODEL_NAME,
-            signature=signature,
-            input_example=input_example
-        )
-        # mlflow.sklearn.log_model(
-        #     pipe,
-        #     'tfidf_mlp',
-        #     registered_model_name=REGISTERED_MODEL_NAME,
-        #     signature=signature,
-        #     input_example=input_example)
+        save_model(x_train, test_pred_df, mlp_model, ARTIFACT_PATH, REGISTERED_MODEL_NAME)
 
-        logging.info("Evaluating model ...")
-        if is_multilabel:
-            pass
-        else:
-            metrics = evaluate_multiclass(mlb_pipe, x_test_list, y_test_list, y_pred)
-            mlflow.log_metrics(metrics)
+        # logging.info("Evaluating model ...")
 
-        logging.info("Saving artifacts ...")
-        test_df.insert(len(test_df.columns), 'pred', y_pred)
-        pd.to_pickle(test_df, TEST_DF_FILENAME)
-        test_df.to_html(TEST_DF_HTML_FILENAME)
+        # metrics = evaluate_multiclass(mlp_model, x_test, y_test, [list(row) for row in y_pred_df.iterrows()])
+        # mlflow.log_metrics(metrics)
 
-        mlflow.log_artifact(parsed_args.train_path)
-        mlflow.log_artifact(parsed_args.test_path)
-        mlflow.log_artifact(TEST_DF_FILENAME)
-        mlflow.log_artifact(TEST_DF_HTML_FILENAME)
-        mlflow.log_artifact(CONFUSION_MATRIX_FILENAME)
-        mlflow.log_artifact(LOGGING_FILENAME)
+        logging.info("Logging artifacts ...")
+        log_artifacts(parsed_args.train_path, parsed_args.test_path)
 
 
 if __name__ == '__main__':

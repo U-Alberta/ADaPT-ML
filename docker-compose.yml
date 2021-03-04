@@ -56,6 +56,7 @@ services:
       - modelling_network
     environment:
       - MLFLOW_TRACKING_URI=${MO_MLFLOW_TRACKING_URI}
+      - CRATE_DB_IP=${CRATE_DB_IP}
     stdin_open: true
     tty: true
     depends_on:
@@ -64,13 +65,11 @@ services:
   modelling_deploy:
     build:
       context: .
-      dockerfile: Dockerfile-server
-    image: modelling-server-image
+      dockerfile: Dockerfile-deploy
+    image: modelling-deploy-image
     container_name: modelling-mlflow-deploy
-    stdin_open: true
-    tty: true
     ports:
-      - "9000:5000"
+      - "9000:80"
     environment:
       - MLFLOW_TRACKING_URI=${MO_MLFLOW_TRACKING_URI}
     volumes:

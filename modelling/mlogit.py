@@ -4,23 +4,20 @@ References:
 """
 import argparse
 import logging
-import sys
 
 import matplotlib.pyplot as plt
 import mlflow.sklearn
-import pandas as pd
-from mlflow.models.signature import infer_signature
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import plot_confusion_matrix, f1_score
-from sklearn.pipeline import Pipeline
 
-from modelling import (data, TEST_DF_FILENAME, TEST_DF_HTML_FILENAME,
-                       CONFUSION_MATRIX_FILENAME, LOGGING_FILENAME)
+from modelling import CONFUSION_MATRIX_FILENAME
+from modelling.data import load, get_train_features, binarize_labels, log_artifacts
+from modelling.model import LookupClassifier, predict_test, save_model
 
 parser = argparse.ArgumentParser(description='Train a multinomial logistic regression classifier.')
 parser.add_argument('train_path', type=str, help='File path or URL to the training data')
 parser.add_argument('test_path', type=str, help='File path or URL to the test data')
+parser.add_argument('features', default='tfidf', nargs='+', type=str, help='column name(s) of the features to use.')
 
 parser.add_argument('--solver', default='lbfgs', help='Algorithm to use in the optimization problem.')
 parser.add_argument('--tol', default=1e-4, type=float, help='Tolerance for stopping criteria')
@@ -101,8 +98,10 @@ TRAIN_PARAMS.update(
         }
     }[TRAIN_PARAMS['solver']])
 
-REGISTERED_MODEL_NAME = 'Tfidf_MLogit'
-mlflow.sklearn.autolog()
+REGISTERED_MODEL_NAME = '{}_MLogit'.format('_'.join(parsed_args.features))
+ARTIFACT_PATH = 'mlogit'
+
+# mlflow.sklearn.autolog()
 
 
 def evaluate_model(pipe, x_test, y_true, y_pred):
@@ -120,53 +119,31 @@ def evaluate_model(pipe, x_test, y_true, y_pred):
 
 def main():
     with mlflow.start_run():
+        logging.info("Loading training and testing sets, and feature sets")
+        train_df, test_df = load(parsed_args.train_path, parsed_args.test_path)
+        x_train = get_train_features(train_df, parsed_args.features)
+        mlb, y_train, y_test = binarize_labels(y_train=train_df.label.tolist(),
+                                               y_test=test_df.label.tolist(),
+                                               return_inverse=True)
 
-        train_df, test_df = data.load(parsed_args.train_path, parsed_args.test_path)
+        logging.info("Training mlogit ...")
+        mlogit = LogisticRegression(**TRAIN_PARAMS)
+        mlogit.fit(x_train, y_train)
+        mlogit_model = LookupClassifier(mlb, mlogit, parsed_args.features, used_inverse_labels=True)
 
-        x_train = train_df.text.tolist()
-        y_train = train_df.label.tolist()
+        logging.info("Predicting test ...")
+        test_pred_df = predict_test(mlogit_model, test_df)
 
-        x_test = test_df.text.tolist()
-        y_test = test_df.label.tolist()
+        logging.info("Saving model ...")
+        save_model(x_train, test_pred_df, mlogit_model, ARTIFACT_PATH, REGISTERED_MODEL_NAME)
 
-        try:
-            assert type(y_train[0]) != list
-            assert type(y_test[0]) != list
-        except AssertionError:
-            sys.exit("This classifier only works with multiclass data, not multilabel. Try using MLP.")
+        # logging.info("Evaluating model ...")
 
-        pipe = Pipeline([('vectorizer', TfidfVectorizer(ngram_range=(1, 2), max_features=10000)),
-                         ('mlogit', LogisticRegression(**TRAIN_PARAMS))])
+        # metrics = evaluate_multiclass(mlp_model, x_test, y_test, [list(row) for row in y_pred_df.iterrows()])
+        # mlflow.log_metrics(metrics)
 
-        logging.info("Transforming training data and training mlogit ...")
-        pipe.fit(x_train, y_train)
-        y_pred = pipe.predict(x_test)
-
-        logging.info("Saving pipe ...")
-        signature = infer_signature(x_test, y_pred)
-        input_example = x_train[:5]
-        mlflow.sklearn.log_model(
-            pipe,
-            'tfidf_mlogit',
-            registered_model_name=REGISTERED_MODEL_NAME,
-            signature=signature,
-            input_example=input_example)
-
-        logging.info("Evaluating model ...")
-        metrics = evaluate_model(pipe, x_test, y_test, y_pred)
-        mlflow.log_metrics(metrics)
-
-        logging.info("Saving artifacts ...")
-        test_df.insert(len(test_df.columns), 'pred', y_pred)
-        pd.to_pickle(test_df, TEST_DF_FILENAME)
-        test_df.to_html(TEST_DF_HTML_FILENAME)
-
-        mlflow.log_artifact(parsed_args.train_path)
-        mlflow.log_artifact(parsed_args.test_path)
-        mlflow.log_artifact(TEST_DF_FILENAME)
-        mlflow.log_artifact(TEST_DF_HTML_FILENAME)
-        mlflow.log_artifact(CONFUSION_MATRIX_FILENAME)
-        mlflow.log_artifact(LOGGING_FILENAME)
+        logging.info("Logging artifacts ...")
+        log_artifacts(parsed_args.train_path, parsed_args.test_path)
 
 
 if __name__ == '__main__':
