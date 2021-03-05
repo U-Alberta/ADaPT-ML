@@ -34,12 +34,14 @@ def binarize_labels(y_train, y_test, return_inverse=False):
 
 
 def get_train_features(train_df, features):
-    train_features_df = pd.read_sql(SQL_QUERY.format(column='id, {}'.format(', '.join(features)),
+    train_features_df = pd.read_sql(SQL_QUERY.format(column=', '.join(features),
                                                      table=train_df.at[0, 'table'],
                                                      ids=str(tuple(train_df.id.tolist()))), CRATE_DB_IP)
-
-    x_train = np.concatenate([np.array(train_features_df[feature].tolist()) for feature in train_features_df],
-                             axis=1)
+    feature_arrays = [np.array(train_features_df[feature].tolist()) for feature in train_features_df]
+    try:
+        x_train = np.concatenate(feature_arrays, axis=1)
+    except np.AxisError:
+        x_train = feature_arrays[0]
     np.save(X_TRAIN_FILENAME, x_train)
     return x_train
 

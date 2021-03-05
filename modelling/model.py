@@ -42,10 +42,14 @@ class LookupClassifier(mlflow.pyfunc.PythonModel):
         self.used_inverse_labels = used_inverse_labels
 
     def get_features(self, id_df):
-        features_df = pd.read_sql(self.query.format(column='id, {}'.format(', '.join(self.features)),
+        features_df = pd.read_sql(self.query.format(column=', '.join(self.features),
                                                     table=id_df.at[0, 'table'],
                                                     ids=str(tuple(id_df.id.tolist()))), self.db)
-        x = np.concatenate([np.array(features_df[feature].tolist()) for feature in features_df], axis=1)
+        feature_arrays = [np.array(features_df[feature].tolist()) for feature in features_df]
+        try:
+            x = np.concatenate(feature_arrays, axis=1)
+        except np.AxisError:
+            x = feature_arrays[0]
         return x
 
     def predict(self, id_df):
@@ -57,7 +61,7 @@ class LookupClassifier(mlflow.pyfunc.PythonModel):
         preds = self.mlp.predict(x)
         if self.used_inverse_labels:
             preds = self.mlb.transform(list(map(lambda p: [p], preds)))
-        result_df = pd.merge(id_df, pd.DataFrame(preds, columns=self.classes), on='id')
+        result_df = pd.merge(id_df, pd.DataFrame(preds, columns=self.classes), left_index=True, right_index=True)
         return result_df
 
 
