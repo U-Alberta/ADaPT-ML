@@ -11,6 +11,7 @@ dependencies:
   - torchvision
   - tensorflow>=2.2.0
   - pip>19.0
+  - matplotlib
   - pip:
     - pyyaml
     - mlflow
