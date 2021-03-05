@@ -12,6 +12,7 @@ dependencies:
   - tensorflow>=2.2.0
   - pip>19.0
   - matplotlib
+  - scikit-learn
   - pip:
     - pyyaml
     - mlflow
