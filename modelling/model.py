@@ -58,7 +58,7 @@ class LookupClassifier(mlflow.pyfunc.PythonModel):
         appropriate features and predict on those.
         """
         x = self.get_features(id_df)
-        preds = self.mlp.predict(x)
+        preds = self.classifier.predict(x)
         if self.used_inverse_labels:
             preds = self.mlb.transform(list(map(lambda p: [p], preds)))
         result_df = pd.merge(id_df, pd.DataFrame(preds, columns=self.classes), left_index=True, right_index=True)
