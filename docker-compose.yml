@@ -74,8 +74,6 @@ services:
     - ${MO_DATA_PATH}/mlruns:/mlruns
     networks:
       - modelling_network
-    depends_on:
-      - modelling_db
 
 networks:
   modelling_network:
