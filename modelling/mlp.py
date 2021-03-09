@@ -17,7 +17,7 @@ from model import LookupClassifier, save_model
 parser = argparse.ArgumentParser(description='Train a multi-layer perceptron classifier.')
 parser.add_argument('train_path', type=str, help='File path or URL to the training data')
 parser.add_argument('test_path', type=str, help='File path or URL to the test data')
-parser.add_argument('features', default='tfidf', nargs='+', type=str, help='column name(s) of the features to use.')
+parser.add_argument('features', default='tweet_use', nargs='+', type=str, help='column name(s) of the features to use.')
 
 parser.add_argument('--activation', default='relu', type=str, help='Activation function for the hidden layer.')
 parser.add_argument('--solver', default='adam', type=str, help='The solver for weight optimization.')

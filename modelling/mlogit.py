@@ -17,7 +17,7 @@ from model import LookupClassifier, save_model
 parser = argparse.ArgumentParser(description='Train a multinomial logistic regression classifier.')
 parser.add_argument('train_path', type=str, help='File path or URL to the training data')
 parser.add_argument('test_path', type=str, help='File path or URL to the test data')
-parser.add_argument('features', default='tfidf', nargs='+', type=str, help='column name(s) of the features to use.')
+parser.add_argument('features', default='tweet_use', nargs='+', type=str, help='column name(s) of the features to use.')
 
 parser.add_argument('--solver', default='lbfgs', help='Algorithm to use in the optimization problem.')
 parser.add_argument('--tol', default=1e-4, type=float, help='Tolerance for stopping criteria')
