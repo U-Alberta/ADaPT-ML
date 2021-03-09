@@ -1,8 +1,6 @@
 # https://fastapi.tiangolo.com/deployment/docker/
 
-FROM tiangolo/uvicorn-gunicorn-fastapi:python3.7
-
-WORKDIR /code
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.8
 
 # Install essentials
 RUN apt-get update \
@@ -22,8 +20,6 @@ RUN apt update \
         libyaml-cpp-dev \
         libyaml-dev
 
-COPY ./app ./app
-
 # Install Miniconda and create conda env
 RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-4.5.4-Linux-x86_64.sh -O ~/anaconda.sh \
     && /bin/bash ~/anaconda.sh -b -p /opt/conda \
@@ -31,7 +27,9 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-4.5.4-Linux-x86_
     && ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh \
     && echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc
 ENV PATH /opt/conda/bin:$PATH
-COPY ./conda-deploy.yaml .
+COPY ./conda-deploy.yaml /conda_env
 
-RUN conda env create -f conda-deploy.yaml
+RUN conda env create -f /conda_env/conda-deploy.yaml
 RUN echo "conda activate lookup_classifier_env" >> ~/.bashrc
+
+COPY ./app /app

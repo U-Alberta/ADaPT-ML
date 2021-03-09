@@ -15,6 +15,12 @@ def read_root():
 
 
 @app.post("/predict")
-def predict(id_df: pd.DataFrame):
+def predict(id_json: str) -> str:
+    """
+    Takes a DataFrame converted to a json string with columns 'id' and 'table'. Looks up the appropriate features,
+    then returns predictions as a DataFrame converted to a json string with columns 'class_1' ... 'class_n' and binary
+    values indicating the presence/absence of the class in the prediction.
+    """
+    id_df = pd.read_json(id_json)
     result_df = model.predict(id_df)
     return result_df.to_json()
