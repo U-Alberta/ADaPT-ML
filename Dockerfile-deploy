@@ -3,6 +3,7 @@
 FROM tiangolo/uvicorn-gunicorn-fastapi:python3.8
 
 # Install requirements with pip
+COPY ./requirements-deploy.txt .
 RUN pip install -r requirements-deploy.txt
 
 COPY ./app /app
