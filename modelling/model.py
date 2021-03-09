@@ -1,5 +1,5 @@
+import os
 from sys import version_info
-from modelling import SQL_QUERY, CRATE_DB_IP, TEST_PRED_DF_FILENAME, TEST_PRED_DF_HTML_FILENAME
 import mlflow
 from mlflow.models import infer_signature
 import pandas as pd
@@ -27,6 +27,11 @@ LOOKUP_CLASSIFIER_CONDA_ENV = {
     ],
     'name': 'lookup_classifier_env'
 }
+
+CRATE_DB_IP = os.environ['CRATE_DB_IP']
+SQL_QUERY = """
+    SELECT {column} FROM {table} WHERE id IN {ids};
+    """
 
 
 class LookupClassifier(mlflow.pyfunc.PythonModel):
@@ -63,13 +68,6 @@ class LookupClassifier(mlflow.pyfunc.PythonModel):
             preds = self.mlb.transform(list(map(lambda p: [p], preds)))
         result_df = pd.merge(id_df, pd.DataFrame(preds, columns=self.classes), left_index=True, right_index=True)
         return result_df
-
-
-def predict_test(model, test_df):
-    test_pred_df = model.predict(test_df)
-    pd.to_pickle(test_pred_df, TEST_PRED_DF_FILENAME)
-    test_pred_df.head().to_html(TEST_PRED_DF_HTML_FILENAME)
-    return test_pred_df
 
 
 def save_model(x_train, test_pred_df, model, artifact_path, registered_model_name):

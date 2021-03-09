@@ -6,7 +6,7 @@ import mlflow
 from sklearn.preprocessing import MultiLabelBinarizer
 from modelling import (X_TRAIN_FILENAME, TRAIN_DF_HTML_FILENAME, TEST_PRED_DF_FILENAME,
                        TEST_PRED_DF_HTML_FILENAME, CONFUSION_MATRIX_FILENAME, LOGGING_FILENAME)
-from modelling import SQL_QUERY, CRATE_DB_IP, X_TRAIN_FILENAME
+from modelling.model import SQL_QUERY, CRATE_DB_IP
 
 
 def load(train_path, test_path):
@@ -44,6 +44,13 @@ def get_train_features(train_df, features):
         x_train = feature_arrays[0]
     np.save(X_TRAIN_FILENAME, x_train)
     return x_train
+
+
+def predict_test(model, test_df):
+    test_pred_df = model.predict(test_df)
+    pd.to_pickle(test_pred_df, TEST_PRED_DF_FILENAME)
+    test_pred_df.head().to_html(TEST_PRED_DF_HTML_FILENAME)
+    return test_pred_df
 
 
 def log_artifacts(train_path, test_path):

@@ -3,10 +3,6 @@ import logging
 
 
 TMP_ARTIFACTS = '/tmp_artifacts'
-CRATE_DB_IP = os.environ['CRATE_DB_IP']
-SQL_QUERY = """
-    SELECT {column} FROM {table} WHERE id IN {ids};
-    """
 
 X_TRAIN_FILENAME = os.path.join(TMP_ARTIFACTS, 'x_train.npy')
 TRAIN_DF_HTML_FILENAME = os.path.join(TMP_ARTIFACTS, 'train.html')
