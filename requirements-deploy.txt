@@ -4,3 +4,4 @@ SQLAlchemy
 sklearn
 numpy
 pandas
+"-e ."
