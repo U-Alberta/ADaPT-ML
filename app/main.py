@@ -1,12 +1,40 @@
+import os
+import json
+from typing import Set, List
 from fastapi import FastAPI
+from fastapi.encoders import jsonable_encoder
+from pydantic import BaseModel
 import pickle
 import pandas as pd
 
-app = FastAPI()
-model_path = '/mlruns/1/66f85b78775344d1afb8db53bb0eab6c/artifacts/mlp/python_model.pkl'
+app = FastAPI(
+    title="Model API",
+    desctiption="API endpoints for the best-performing models of each classification task.",
+    version="0.1"
+)
 
-with open(model_path, 'rb') as infile:
-    model = pickle.load(infile)
+with open(os.environ['PV_MODEL_PATH'], 'rb') as infile:
+    pv_model = pickle.load(infile)
+
+
+class TweetIDItem(BaseModel):
+    table: str
+    ids: Set[str]
+
+
+class PVModelResponse(BaseModel):
+    table: str
+    ids: Set[str]
+    security: [int]
+    conformity: [int]
+    tradition: [int]
+    benevolence: [int]
+    universalism: [int]
+    self_direction: [int]
+    stimulation: [int]
+    hedonism: [int]
+    achievement: [int]
+    power: [int]
 
 
 @app.get("/")
@@ -14,13 +42,29 @@ def read_root():
     return {"Hello": "World"}
 
 
-@app.post("/predict")
-def predict(id_json: str):
+@app.post("/predict_pv", response_model=PVModelResponse)
+def predict_pv(tweet_id_item: TweetIDItem):
     """
-    Takes a DataFrame converted to a json string with columns 'id' and 'table'. Looks up the appropriate features,
-    then returns predictions as a DataFrame converted to a json string with columns 'class_1' ... 'class_n' and binary
+    Takes a list of data point ids from a table. Looks up the appropriate features,
+    then returns predictions as columns 'class_1' ... 'class_n' and binary
     values indicating the presence/absence of the class in the prediction.
     """
+    json_tweet_id_item = jsonable_encoder(tweet_id_item)
+    id_json = json.dumps(json_tweet_id_item)
     id_df = pd.read_json(id_json)
-    result_df = model.predict(id_df)
-    return result_df.to_json()
+    result_df = pv_model.predict(id_df)
+    response_dict = {
+        'table': tweet_id_item.table,
+        'ids': tweet_id_item.ids,
+        'security': result_df.security.tolist(),
+        'conformity': result_df.conformity.tolist(),
+        'tradition': result_df.tradition.tolist(),
+        'benevolence': result_df.benevolence.tolist(),
+        'universalism': result_df.universalism.tolist(),
+        'self_direction': result_df.self_direction.tolist(),
+        'stimulation': result_df.stimulation.tolist(),
+        'hedonism': result_df.hedonism.tolist(),
+        'achievement': result_df.achievement.tolist(),
+        'power': result_df.power.tolist(),
+    }
+    return response_dict

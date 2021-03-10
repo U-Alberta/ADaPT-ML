@@ -74,6 +74,7 @@ services:
       - ${MO_DATA_PATH}/mlruns:/mlruns
     environment:
       - CRATE_DB_IP=${CRATE_DB_IP}
+      - PV_MODEL_PATH=/mlruns/1/66f85b78775344d1afb8db53bb0eab6c/artifacts/mlp/python_model.pkl
     networks:
       - modelling_network
 
