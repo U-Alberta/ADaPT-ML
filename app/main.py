@@ -55,7 +55,7 @@ def predict_pv(tweet_id_item: TweetIDItem):
     result_df = pv_model.predict(id_df)
     response_dict = {
         'table': tweet_id_item.table,
-        'ids': tweet_id_item.ids,
+        'id': tweet_id_item.id,
         'security': result_df.security.tolist(),
         'conformity': result_df.conformity.tolist(),
         'tradition': result_df.tradition.tolist(),
