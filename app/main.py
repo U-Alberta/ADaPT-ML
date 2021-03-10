@@ -25,16 +25,16 @@ class TweetIDItem(BaseModel):
 class PVModelResponse(BaseModel):
     table: str
     ids: Set[str]
-    security: [int]
-    conformity: [int]
-    tradition: [int]
-    benevolence: [int]
-    universalism: [int]
-    self_direction: [int]
-    stimulation: [int]
-    hedonism: [int]
-    achievement: [int]
-    power: [int]
+    security: List[int]
+    conformity: List[int]
+    tradition: List[int]
+    benevolence: List[int]
+    universalism: List[int]
+    self_direction: List[int]
+    stimulation: List[int]
+    hedonism: List[int]
+    achievement: List[int]
+    power: List[int]
 
 
 @app.get("/")
