@@ -19,12 +19,12 @@ with open(os.environ['PV_MODEL_PATH'], 'rb') as infile:
 
 class TweetIDItem(BaseModel):
     table: str
-    ids: Set[str]
+    id: Set[str]
 
 
 class PVModelResponse(BaseModel):
     table: str
-    ids: Set[str]
+    id: Set[str]
     security: List[int]
     conformity: List[int]
     tradition: List[int]
