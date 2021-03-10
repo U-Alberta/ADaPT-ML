@@ -72,6 +72,7 @@ services:
       - "9000:80"
     volumes:
     - ${MO_DATA_PATH}/mlruns:/mlruns
+    - CRATE_DB_IP=${CRATE_DB_IP}
     networks:
       - modelling_network
 
