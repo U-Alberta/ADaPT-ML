@@ -1,7 +1,7 @@
 version: '3.3'
 
 services:
-  ls_web:
+  ls_pv_web:
     restart: on-failure
     image: heartexlabs/label-studio:latest
     container_name: label-studio-web
@@ -9,17 +9,16 @@ services:
       - "8080:8080"
     networks:
       - ls_network
+    environment:
+      - INIT_COMMAND=--init --force
     volumes:
-      - ${LS_PATH}:/label-studio/session_projects
+      - ${LS_PATH}/pv_project:/label-studio/pv_project
       - ./config/pv_config.xml:/pv_config.xml
       - ${LS_PATH}/pv_tasks:/pv_tasks
-    command: label-studio start-multi-session \
-      --root-dir ./session_projects \
-      --force \
+    command: label-studio start pv_project \
       --label-config /pv_config.xml \
       --input-path /pv_tasks \
       --input-format json-dir \
-      --initial-project-description personal_values
   ls:
     restart: on-failure
     build:
