@@ -6,13 +6,14 @@ from datetime import datetime
 import os
 import logging
 
-date_str = str(datetime.now()).replace(' ', '_')
+date_str = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+filename = date_str+'.json'
 
 parser = argparse.ArgumentParser(description='Sample a number of tweets from a table to annotate.')
 parser.add_argument('table', type=str, help='Table name that stores the tweets.')
 parser.add_argument('n', type=int, help='Number of tweets to sample.')
 parser.add_argument('task', type=str, help='What task is this sample for? {pv}')
-parser.add_argument('--filename', default=date_str, type=str, help='What would you like the task file to be called?')
+parser.add_argument('--filename', default=filename, type=str, help='What would you like the task file to be called?')
 
 parsed_args = parser.parse_args()
 
