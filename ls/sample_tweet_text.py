@@ -36,7 +36,7 @@ def main():
 
     for row in df.iterrows():
         task = {
-            "tweet_text": row[1]['tweet'],
+            "tweet": row[1]['tweet'],
             "ref_id": row[1]['id'],
             "meta_info": {
                 "table": row[1]['table']

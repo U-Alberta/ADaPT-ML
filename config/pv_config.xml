@@ -1,6 +1,6 @@
 <View>
     <Header value="Choose Personal Value:"/>
-    <Text name="tweet_text" value="$tweetText"/>
+    <Text name="tweet_text" value="$tweet"/>
     <Choices name="personal_value" toName="tweet_text" choice="multiple" showInLine="false">
       <Choice value="security"/>
       <Choice value="conformity"/>
