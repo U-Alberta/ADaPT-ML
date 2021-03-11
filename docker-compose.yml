@@ -1,0 +1,43 @@
+version: '3.3'
+
+services:
+  ls_web:
+    restart: on-failure
+    image: heartexlabs/label-studio:latest
+    container_name: label-studio-web
+    ports:
+      - "8080:8080"
+    networks:
+      - ls_network
+    volumes:
+      - ${LS_PATH}:/label-studio/session_projects
+      - ./config/pv_config.xml:/pv_config.xml
+      - ${LS_PATH}/pv_tasks:/pv_tasks
+    command: label-studio start-multi-session \
+      --root-dir ./session_projects \
+      --force \
+      --label-config /pv_config.xml \
+      --input-path /pv_tasks \
+      --input-format json-dir \
+      --initial-project-description personal_values
+  ls:
+    restart: on-failure
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ls-image
+    container_name: label-studio-dev
+    networks:
+      - ls_network
+    volumes:
+      - ./ls:/code/ls
+      - ${LS_PATH}/pv_tasks:/pv_tasks
+      - ${LS_PATH}/dev_log.txt:/dev_log.txt
+    environment:
+      - CRATE_DB_IP=${CRATE_DB_IP}
+    stdin_open: true
+    tty: true
+
+networks:
+  ls_network:
+    driver: bridge
