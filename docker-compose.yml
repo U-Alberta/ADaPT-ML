@@ -25,8 +25,7 @@ services:
       - ls_network
     volumes:
       - ./ls:/code/ls
-      - ${LS_PATH}/pv_tasks:/pv_tasks
-      - ${LS_PATH}/dev_log.txt:/dev_log.txt
+      - ${LS_PATH}:/label_studio
     environment:
       - CRATE_DB_IP=${CRATE_DB_IP}
     stdin_open: true
