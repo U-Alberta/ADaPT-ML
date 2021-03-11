@@ -13,7 +13,7 @@ services:
       - ${LS_PATH}/pv_project:/label-studio/pv_project
       - ./config/pv_config.xml:/pv_config.xml
       - ${LS_PATH}/pv_tasks:/pv_tasks
-    command: label-studio start pv_project --init --force --label-config /pv_config.xml --input-path /pv_tasks --input-format json-dir
+    command: label-studio start pv_project --init --force --label-config=/pv_config.xml --input-path=/pv_tasks --input-format=json-dir
   ls:
     restart: on-failure
     build:

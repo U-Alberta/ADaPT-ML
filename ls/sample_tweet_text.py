@@ -35,10 +35,10 @@ def main():
 
     for row in df.iterrows():
         task = {
-            "tweet_text": row['tweet'],
-            "ref_id": row['id'],
+            "tweet_text": row[1]['tweet'],
+            "ref_id": row[1]['id'],
             "meta_info": {
-                "table": row['table']
+                "table": row[1]['table']
             }
         }
         task_list.append(task)
