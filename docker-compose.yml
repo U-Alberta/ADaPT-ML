@@ -9,8 +9,8 @@ services:
       - "8080:8080"
     networks:
       - ls_network
-    environment:
-      - INIT_COMMAND=--init --force
+#    environment:
+#      - INIT_COMMAND=--init --force
     volumes:
       - ${LS_PATH}/pv_project:/label-studio/pv_project
       - ./config/pv_config.xml:/pv_config.xml
