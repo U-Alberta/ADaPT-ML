@@ -5,8 +5,7 @@ WORKDIR /code
 COPY requirements.txt .
 COPY setup.py .
 COPY setup.cfg .
-RUN pip install -r requirements.txt
-
 COPY ./ls ./ls
+RUN pip install -r requirements.txt
 
 CMD [ "/bin/bash" ]
