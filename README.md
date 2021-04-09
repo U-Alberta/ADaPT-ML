@@ -46,34 +46,4 @@ docker exec dp-mlflow 'wait-for-it dp-mlflow-db:3306 -s -- mlflow run --no-conda
 
 Go to http://129.128.215.241:5000 to view the experiments
 
-## Labeling data with Label Studio
 
-```shell script
-docker run \
--p 8080:8080 \
--v $LS_PATH:/label-studio/session_projects \
--v $LS_PATH/pv_config.xml:/pv_config.xml \
--v $LS_PATH/pv_tasks.json:/pv_tasks.json \
---name label-studio \
-heartexlabs/label-studio:latest \
-label-studio start-multi-session \
---root-dir ./session_projects \
---force \
---label-config /pv_config.xml \
---input-path /pv_tasks.json \
---initial-project-description personal_values
-```
-
-This will import the JSON-formatted list of data points in each file in the input path. The files should look like this:
-```json
-[
-  {
-    "tweet_text": "Opossum is great",
-    "ref_id": "<tweet_id>",
-    "meta_info": {
-      "timestamp": "2020-03-09 18:15:28.212882",
-      "location": "North Pole"
-    }
-  }
-]
-```

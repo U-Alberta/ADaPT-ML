@@ -3,13 +3,14 @@ References:
     https://www.snorkel.org/use-cases/01-spam-tutorial#a-keyword-lfs
     https://snorkel.readthedocs.io/en/v0.9.5/packages/_autosummary/labeling/snorkel.labeling.LabelingFunction.html
 """
-import os
 import logging
+import os
 import pickle
+
+import requests
 from snorkel.labeling import LabelingFunction, LFAnalysis
 
 from label.lfs import ValueLabel, ABSTAIN
-import requests
 
 PV_DICTIONARY_URL = os.environ['PERSONAL_VALUES_DICTIONARY']
 
@@ -20,7 +21,8 @@ def load_lfs():
     try:
         with open(PV_LFS_PATH, 'rb') as infile:
             lfs = pickle.load(infile)
-        # assert len([lf.name for lf in lfs if lf.name.startswith('keyword')]) == 1068
+        keyword_lfs = [lf for lf in lfs if lf.name.startswith('keyword')]
+        assert len(keyword_lfs) == 947
         logging.info("Using existing LFs.")
     except (FileNotFoundError, AssertionError, EOFError):
         # remake all of the lfs to get updated ones
@@ -41,7 +43,7 @@ def load_lfs():
     
 def load_keyword_dictionary():
     """
-    There are 1068 terms in the personal values (PV) dictionary.
+    There are 1068 terms in the personal values (PV) dictionary. 947 lemmas.
         SE: 85
         CO: 129
         TR: 109
@@ -73,8 +75,8 @@ def lemma_keyword_lookup(x, lemma, label):
     :param label: the label for the given PV
     :return:
     """
-    return label.value if (label.name in x.tweet_pv_words_count
-                           and lemma in x.tweet_pv_words_count[label.name]['words']) else ABSTAIN
+    return label.value if (label.name in x.text_pv_freq
+                           and lemma in x.text_pv_freq[label.name]) else ABSTAIN
 
 
 def make_keyword_lf(name, lemma, label):

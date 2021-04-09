@@ -1,22 +1,18 @@
 import logging
-import multiprocessing
-import requests
-import json
 
 import numpy as np
 import pandas as pd
+from kneed import KneeLocator
 from pandas.core.common import flatten
-from snorkel.labeling import filter_unlabeled_dataframe
 from snorkel.labeling import PandasLFApplier
-# from snorkel.labeling.apply.dask import PandasParallelLFApplier
-
+from snorkel.labeling import filter_unlabeled_dataframe
 # from snorkel.labeling.model import MajorityLabelVoter
 from snorkel.labeling.model import LabelModel
 from snorkel.utils import probs_to_preds
-from kneed import KneeLocator
 
-from label import (TRAIN_DF, LABEL_MATRIX_FILENAME, LABEL_MODEL_FILENAME, TRAINING_DATA_FILENAME,
-                   TRAINING_DATA_HTML_FILENAME, TRAIN_PARAMS)
+from label import (LABEL_MODEL_FILENAME, TRAIN_PARAMS, SQL_QUERY, CRATE_DB_IP)
+
+# from snorkel.labeling.apply.dask import PandasParallelLFApplier
 
 INIT_PARAMS = {
     'verbose': True,
@@ -42,50 +38,55 @@ LM_OPTIMIZER_SETTINGS = {
 }
 
 
-def load_lf_info(endpoints):
-    try:
-        ids = TRAIN_DF.id.tolist()
-        data_df = pd.DataFrame({'id': ids})
-        for endpoint in endpoints:
-            lf_info = requests.get(endpoints[endpoint]['url']).json()
-            all_ids, all_data = zip(*lf_info)
-            if endpoints[endpoint]['dtype'] == 'json':
-                all_data = [json.loads(d) for d in all_data]
-            data_df = pd.merge(data_df, pd.DataFrame({'id': all_ids, endpoint: all_data}), on='id')
+def load_lf_info(id_df, features):
+    data_df = pd.DataFrame()
+    for table in id_df.table.unique():
+        table_df = id_df.loc[(id_df.table == table)]
+        lf_features_df = pd.read_sql(SQL_QUERY.format(column=', '.join(['id'] + features),
+                                                      table=table,
+                                                      ids=str(tuple(table_df.id.tolist()))),
+                                     CRATE_DB_IP,
+                                     chunksize=100)
+        data_df.append(lf_features_df, ignore_index=True)
 
-        train_df = pd.merge(TRAIN_DF, data_df, on='id')
-
-    except Exception as e:
-        # TODO: we can't do anything about this error so we should just quit probably
-        logging.error(e.args)
-
+    lf_info_df = pd.merge(id_df, data_df, on='id')
+    assert id_df.shape[0] == lf_info_df.shape[0]
     logging.info("LF info loaded. Here's a peek:")
-    logging.info(train_df.head())
-    return train_df
+    logging.info(lf_info_df.head())
+    return lf_info_df
 
 
-def create_label_matrix(train_df, lfs):
+def create_label_matrix(df, lfs):
     applier = PandasLFApplier(lfs=lfs)
     # applier = PandasParallelLFApplier(lfs=lfs)
     # n_parallel = int(multiprocessing.cpu_count() / 2)
     # train_L = applier.apply(train_df, n_parallel=n_parallel, fault_tolerant=True)
-    train_L, metadata = applier.apply(train_df, return_meta=True)
-    if metadata.faults:
-        logging.warning("Some LFs failed:", metadata.faults)
-    np.save(LABEL_MATRIX_FILENAME, train_L)
-    return train_L
+    try:
+        label_matrix, metadata = applier.apply(df, return_meta=True)
+        if metadata.faults:
+            logging.warning("Some LFs failed:", metadata.faults)
+    except:
+        label_matrix = None
+    return label_matrix
 
 
-def train_label_model(L_train: np.ndarray, labels) -> LabelModel:
+def save_label_matrix(label_matrix, filename):
+    np.save(filename, label_matrix)
+
+
+def train_label_model(L_train: np.ndarray, y_dev, labels) -> LabelModel:
     label_model = LabelModel(cardinality=len(labels), **INIT_PARAMS)
     TRAIN_PARAMS.update(LM_OPTIMIZER_SETTINGS[TRAIN_PARAMS['optimizer']])
-    label_model.fit(L_train, **TRAIN_PARAMS)
+    label_model.fit(L_train, class_balance=calc_class_balance(y_dev, labels), **TRAIN_PARAMS)
     label_model.save(LABEL_MODEL_FILENAME)
     return label_model
 
 
-def apply_label_preds(L_train: np.ndarray, label_model: LabelModel, labels, task) -> pd.DataFrame:
-    filtered_df, probs_array = filter_df(L_train, label_model)
+def apply_label_preds(df, label_matrix: np.ndarray, label_model: LabelModel, labels, task) -> pd.DataFrame:
+    try:
+        filtered_df, probs_array = filter_df(df, label_matrix, label_model)
+    except:
+        return None
     probs_list = probs_array.tolist()
     preds_list = probs_to_preds(probs_array).tolist()
     if task == 'multiclass':
@@ -116,16 +117,21 @@ def apply_label_preds(L_train: np.ndarray, label_model: LabelModel, labels, task
 def add_labels(df, labels, label_probs):
     df.insert(len(df.columns), 'label', labels)
     df.insert(len(df.columns), 'label_probs', label_probs)
-    df.to_pickle(TRAINING_DATA_FILENAME)
-    df.head().to_html(TRAINING_DATA_HTML_FILENAME)
+    logging.info("Labels inserted. Here's a peek:")
+    logging.info(df.head())
     return df
 
 
-def filter_df(L_train: np.ndarray, label_model: LabelModel):
+def filter_df(unfiltered_df: pd.DataFrame, label_matrix: np.ndarray, label_model: LabelModel):
     logging.info("Filtering out abstain data points ...")
-    filtered_df, probs = filter_unlabeled_dataframe(TRAIN_DF, label_model.predict_proba(L_train), L_train)
-    logging.info("data points filtered out: {0}".format(TRAIN_DF.shape[0] - filtered_df.shape[0]))
-    logging.info("data points remaining: {0}".format(filtered_df.shape[0]))
+    try:
+        filtered_df, probs = filter_unlabeled_dataframe(unfiltered_df, label_model.predict_proba(label_matrix),
+                                                    label_matrix)
+        logging.info("data points filtered out: {0}".format(unfiltered_df.shape[0] - filtered_df.shape[0]))
+        logging.info("data points remaining: {0}".format(filtered_df.shape[0]))
+    except:
+        filtered_df = None
+        probs = None
     return filtered_df, probs
 
 
@@ -138,17 +144,18 @@ def validate_training_data(filtered_df, labels):
         logging.warning("Not all classes are represented in this training data.")
 
 
-def train_params_dict(label_model: LabelModel) -> dict:
+def calc_class_balance(y_dev, labels):
     try:
-        train_params = {
-            'n_epochs': label_model.train_config.n_epochs,
-            'optimizer': label_model.train_config.optimizer,
-            'lr_scheduler': label_model.train_config.lr_scheduler,
-            'lr': label_model.train_config.lr,
-            'l2': label_model.train_config.l2,
-            'prec_init': label_model.train_config.prec_init
-        }
-        return train_params
-    except AttributeError:
-        logging.error("Label Model hasn't been trained yet...?")
+        y_len = len(y_dev)
+        flat_y_dev = np.array(y_dev).flatten().tolist()
+        counts = map(lambda l: flat_y_dev.count(l), [label.name for label in labels])
+        balance = list(map(lambda count: count / y_len, counts))
+    except:
+        balance = None
+    logging.info("BALANCE: {}".format(balance))
+    return balance
 
+
+def save_df(df, pkl_filename, html_filename):
+    df.to_pickle(pkl_filename)
+    df.head().to_html(html_filename)

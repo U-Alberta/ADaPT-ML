@@ -45,6 +45,7 @@ services:
       - ${DP_DATA_PATH}/unlabeled_data:/unlabeled_data
       - ${LF_RESOURCES_PATH}:/lf_resources
       - ${DP_DATA_PATH}/tmp_artifacts:/tmp_artifacts
+      - ${LS_PATH}:/label_studio
       - ./label:/code/label
       - ./MLproject:/code/MLproject
       - ./conda.yaml:/code/conda.yaml

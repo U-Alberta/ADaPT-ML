@@ -1,61 +1,65 @@
 import logging
 import os
+
 import mlflow
-from mlflow.models.signature import infer_signature
-import json
-from glob import glob
-import requests
 
-from label.lfs.pv import pv_lfs
+from label import TRAIN_DF, parsed_args, model, evaluate, tracking
 from label.lfs.pv import ValueLabel
-
-from label import parsed_args, model, evaluate, tracking
+from label.lfs.pv import pv_lfs
 
 REGISTERED_MODEL_NAME = 'PersonalValuesLabelModel'
-ENDPOINTS = {
-    'tweet_pv_words_count': {
-        'url': os.environ['PV_WORD_COUNT'],
-        'dtype': 'json'}
-}
+LF_FEATURES = ('text_pv_freq',)
+PV_DEV_COMPLETIONS_DIRECTORY = os.path.join('/label_studio', 'pv_project', 'completions', '*')
 
 
 def main():
     with mlflow.start_run():
         # get the needed information for the pv lfs
         logging.info("Getting information for lfs ...")
-        train_df = model.load_lf_info(ENDPOINTS)
+        train_df = model.load_lf_info(TRAIN_DF, LF_FEATURES)
+
+        if parsed_args.dev_data:
+            logging.info("Getting development data if available ...")
+            dev_df = model.load_lf_info(evaluate.get_dev_df(PV_DEV_COMPLETIONS_DIRECTORY), LF_FEATURES)
+            dev_true = dev_df.gold_label.tolist()
+        else:
+            logging.info("Skipping development data ...")
+            dev_df = None
+            dev_true = None
 
         # create the label matrix
         logging.info("Creating label matrix ...")
         train_L = model.create_label_matrix(train_df, pv_lfs)
+        dev_L = model.create_label_matrix(dev_df, pv_lfs)
 
         # train the label model
         logging.info("Training label model ...")
-        label_model = model.train_label_model(train_L, ValueLabel)
+        label_model = model.train_label_model(train_L, dev_true, ValueLabel)
 
         # evaluate the label model
         logging.info("Predicting {} ...".format(parsed_args.task))
-        labeled_train_df = model.apply_label_preds(train_L, label_model, ValueLabel, parsed_args.task)
+        labeled_train_df = model.apply_label_preds(train_df, train_L, label_model, ValueLabel, parsed_args.task)
+        labeled_dev_df = model.apply_label_preds(dev_df, dev_L, label_model, ValueLabel, parsed_args.task)
+
+        train_pred = labeled_train_df.label.tolist()
+        try:
+            dev_pred = labeled_dev_df.label.tolist()
+        except:
+            dev_pred = None
 
         # validate the training data
-        # print("Validating training data ...")
-        # model.validate_training_data(labeled_train_df, ValueLabel)
+        print("Validating training data ...")
+        model.validate_training_data(labeled_train_df, ValueLabel)
+
         logging.info("Evaluating ...")
-        evaluate.lf_summary(train_L, pv_lfs, label_model)
-        # if parsed_args.dev_data:
-        #     # TODO: figure out how do get the label studio project uuid and switch then export the completions
-        #     # requests.get('http://129.128.215.241:8080/api/project-switch/?project_uuid=32d6ccea-2b41-479c-8272-a4ebfdd1d5aa')
-        #     dev_df = evaluate.get_dev_df()
-        #     y_dev = dev_df.gold_label.tolist()
-        #     if parsed_args.task == 'multiclass':
-        #         metrics = evaluate.multiclass_summary(train_L, y_dev, label_model, labeled_train_df.label.tolist())
-        #     elif parsed_args.task == 'multilabel':
-        #         metrics = evaluate.multilabel_summary(labeled_train_df, label_model)
-        metrics = None
-        logging.info("Saving ...")
+        evaluate.lf_summary(train_L, dev_L, pv_lfs, label_model, dev_true)
+        if parsed_args.task == 'multiclass':
+            metrics = evaluate.multiclass_summary(dev_L, dev_true, dev_pred, label_model)
+        elif parsed_args.task == 'multilabel':
+            metrics = evaluate.multilabel_summary(dev_true, dev_pred)
+        logging.info("Logging artifacts and saving ...")
         input_example = train_L[:5, :]
-        tracking.log(model.train_params_dict(label_model),
-                     metrics,
+        tracking.log(metrics,
                      input_example,
                      REGISTERED_MODEL_NAME,
                      label_model)

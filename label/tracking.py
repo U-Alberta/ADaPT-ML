@@ -1,19 +1,22 @@
-import os
-import mlflow
 import logging
-from label import (LOGGING_FILENAME, TRAIN_DF_FILENAME, LABEL_MATRIX_FILENAME, TRAINING_DATA_FILENAME,
-                   TRAINING_DATA_HTML_FILENAME, LF_SUMMARY_FILENAME, CONFUSION_MATRIX_FILENAME)
+import os
+from glob import glob
+
+import mlflow
 import mlflow.pytorch
 
+from label import TMP_ARTIFACTS
 
-def log(train_params, metrics, input_example, model_name, label_model):
+
+def log(metrics, input_example, model_name, label_model):
+    filenames = glob(os.path.join(TMP_ARTIFACTS, '*'))
 
     # Log the data points, label matrix, and labeled training data as artifacts
-    mlflow.log_params(train_params)
+    mlflow.log_params(train_params_dict(label_model))
     try:
         mlflow.log_metrics(metrics)
     except:
-        logging.warning("metrics not available.")
+        logging.warning("Metrics not available.")
 
     # LabelModel subclasses torch.nn.Module
     mlflow.pytorch.log_model(
@@ -22,22 +25,24 @@ def log(train_params, metrics, input_example, model_name, label_model):
         registered_model_name=model_name,
         input_example=input_example)
 
+    for filename in filenames:
+        try:
+            mlflow.log_artifact(filename)
+            os.remove(filename)
+        except:
+            print("An artifact could not be logged: {}".format(filename))
+
+
+def train_params_dict(label_model) -> dict:
     try:
-        mlflow.log_artifact(LOGGING_FILENAME)
-        mlflow.log_artifact(TRAIN_DF_FILENAME)
-        mlflow.log_artifact(LABEL_MATRIX_FILENAME)
-        mlflow.log_artifact(TRAINING_DATA_FILENAME)
-        mlflow.log_artifact(TRAINING_DATA_HTML_FILENAME)
-        mlflow.log_artifact(LF_SUMMARY_FILENAME)
-        mlflow.log_artifact(CONFUSION_MATRIX_FILENAME)
-
-        os.remove(LOGGING_FILENAME)
-        os.remove(TRAIN_DF_FILENAME)
-        os.remove(LABEL_MATRIX_FILENAME)
-        os.remove(TRAINING_DATA_FILENAME)
-        os.remove(TRAINING_DATA_HTML_FILENAME)
-        os.remove(LF_SUMMARY_FILENAME)
-        os.remove(CONFUSION_MATRIX_FILENAME)
-
-    except:
-        logging.warning("an artifact could not be logged")
+        train_params = {
+            'n_epochs': label_model.train_config.n_epochs,
+            'optimizer': label_model.train_config.optimizer,
+            'lr_scheduler': label_model.train_config.lr_scheduler,
+            'lr': label_model.train_config.lr,
+            'l2': label_model.train_config.l2,
+            'prec_init': label_model.train_config.prec_init
+        }
+        return train_params
+    except AttributeError:
+        logging.error("Label Model hasn't been trained yet...?")
