@@ -48,7 +48,7 @@ def load_lf_info(id_df, features):
                                      CRATE_DB_IP,
                                      chunksize=100)
         for data in lf_features_df:
-            data_df.append(data, ignore_index=True)
+            data_df = data_df.append(data, ignore_index=True)
 
     lf_info_df = pd.merge(id_df, data_df, on='id')
     assert id_df.shape[0] == lf_info_df.shape[0]
