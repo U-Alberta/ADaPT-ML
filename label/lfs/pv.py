@@ -14,7 +14,7 @@ from label.lfs import ValueLabel, ABSTAIN
 
 PV_DICTIONARY_URL = os.environ['PERSONAL_VALUES_DICTIONARY']
 
-PV_LFS_PATH = os.path.join('/lf_resources', 'lfs.pkl')
+PV_LFS_PATH = os.path.join('/lf_resources', 'pv_lfs.pkl')
 
 
 def load_lfs():
