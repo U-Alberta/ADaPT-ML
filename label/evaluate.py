@@ -84,11 +84,14 @@ def get_dev_df(completions_dir):
             completion = json.load(infile)
 
         df = pd.json_normalize(completion)
-        gold_label = df.at[0, 'completions'][0]['result'][0]['value']['choices']
-        if "NONE" not in gold_label:
-            df = df.rename(columns={'id': 'file_id', 'data.ref_id': 'id', 'data.meta_info.table': 'table'})
-            df['gold_label'] = [gold_label]
-            dev_df = dev_df.append(df, ignore_index=True)
+        try:
+            gold_label = df.at[0, 'completions'][0]['result'][0]['value']['choices']
+            if "NONE" not in gold_label:
+                df = df.rename(columns={'id': 'file_id', 'data.ref_id': 'id', 'data.meta_info.table': 'table'})
+                df['gold_label'] = [gold_label]
+                dev_df = dev_df.append(df, ignore_index=True)
+        except IndexError:
+            logging.warning("One of the completions has no result?: {}".format(df.at[0, 'completions']))
 
     dev_df.to_pickle(DEV_DF_FILENAME)
     dev_df.to_html(DEV_DF_HTML_FILENAME)
