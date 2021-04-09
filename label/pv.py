@@ -9,7 +9,7 @@ from label.lfs.pv import pv_lfs
 
 REGISTERED_MODEL_NAME = 'PersonalValuesLabelModel'
 LF_FEATURES = ('text_pv_freq',)
-PV_DEV_COMPLETIONS_DIRECTORY = os.path.join('/label_studio', 'pv_project', 'completions', '*')
+PV_DEV_COMPLETIONS_DIRECTORY = os.path.join('/labeled_data', 'pv_completions', '*')
 
 
 def main():

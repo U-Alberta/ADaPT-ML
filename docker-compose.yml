@@ -43,9 +43,9 @@ services:
     volumes:
       - ${DP_DATA_PATH}/mlruns:/code/mlruns
       - ${DP_DATA_PATH}/unlabeled_data:/unlabeled_data
-      - ${LF_RESOURCES_PATH}:/lf_resources
       - ${DP_DATA_PATH}/tmp_artifacts:/tmp_artifacts
-      - ${LS_PATH}:/label_studio
+      - ${DP_DATA_PATH}/labeled_data:/labeled_data
+      - ${LF_RESOURCES_PATH}:/lf_resources
       - ./label:/code/label
       - ./MLproject:/code/MLproject
       - ./conda.yaml:/code/conda.yaml
