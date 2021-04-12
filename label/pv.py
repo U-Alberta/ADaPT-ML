@@ -1,6 +1,6 @@
 import logging
 import os
-
+import json
 import mlflow
 
 from label import TRAIN_DF, parsed_args, model, evaluate, tracking
@@ -8,7 +8,7 @@ from label.lfs.pv import ValueLabel
 from label.lfs.pv import pv_lfs
 
 REGISTERED_MODEL_NAME = 'PersonalValuesLabelModel'
-LF_FEATURES = {'text_pv_freq': dict}
+LF_FEATURES = {'text_pv_freq': json.loads}
 PV_DEV_COMPLETIONS_DIRECTORY = os.path.join('/labeled_data', 'pv_completions', '*')
 
 

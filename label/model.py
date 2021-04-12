@@ -52,7 +52,9 @@ def load_lf_info(id_df, features):
 
     lf_info_df = pd.merge(id_df, data_df, on='id')
     assert id_df.shape[0] == lf_info_df.shape[0]
-    lf_info_df = lf_info_df.astype(features)
+    # convert to the right data types
+    for column in features:
+        lf_info_df[column] = lf_info_df[column].apply(lambda d: features[column](d))
     logging.info("LF info loaded. Here's a peek:")
     logging.info(lf_info_df.head())
     return lf_info_df
