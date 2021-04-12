@@ -42,7 +42,7 @@ def load_lf_info(id_df, features):
     data_df = pd.DataFrame()
     for table in id_df.table.unique():
         table_df = id_df.loc[(id_df.table == table)]
-        lf_features_df = pd.read_sql(SQL_QUERY.format(column=', '.join(['id'] + features),
+        lf_features_df = pd.read_sql(SQL_QUERY.format(column=', '.join(['id'] + list(features)),
                                                       table=table,
                                                       ids=str(tuple(table_df.id.tolist()))),
                                      CRATE_DB_IP,
@@ -52,6 +52,7 @@ def load_lf_info(id_df, features):
 
     lf_info_df = pd.merge(id_df, data_df, on='id')
     assert id_df.shape[0] == lf_info_df.shape[0]
+    lf_info_df = lf_info_df.astype(features)
     logging.info("LF info loaded. Here's a peek:")
     logging.info(lf_info_df.head())
     return lf_info_df

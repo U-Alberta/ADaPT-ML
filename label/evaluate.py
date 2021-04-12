@@ -91,7 +91,7 @@ def get_dev_df(completions_dir):
                 df['gold_label'] = [gold_label]
                 dev_df = dev_df.append(df, ignore_index=True)
         except IndexError:
-            logging.warning("One of the completions has no result?: {}".format(df.at[0, 'completions']))
+            logging.warning("This completion has no result?: {}".format(df.at[0, 'completions']))
 
     dev_df.to_pickle(DEV_DF_FILENAME)
     dev_df.to_html(DEV_DF_HTML_FILENAME)
