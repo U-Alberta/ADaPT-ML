@@ -154,6 +154,7 @@ def calc_class_balance(y_dev, labels):
         flat_y_dev = np.array(y_dev).flatten().tolist()
         counts = map(lambda l: flat_y_dev.count(l), [label.name for label in labels])
         balance = list(map(lambda count: count / y_len, counts))
+        assert 0 not in balance
     except:
         balance = None
     logging.info("BALANCE: {}".format(balance))

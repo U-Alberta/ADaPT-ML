@@ -3,7 +3,7 @@ import os
 import json
 import mlflow
 
-from label import TRAIN_DF, parsed_args, model, evaluate, tracking
+from label import TRAIN_DF, DEV_DF_FILENAME, DEV_DF_HTML_FILENAME, parsed_args, model, evaluate, tracking
 from label.lfs.pv import ValueLabel
 from label.lfs.pv import pv_lfs
 
@@ -21,6 +21,7 @@ def main():
         if parsed_args.dev_data:
             logging.info("Getting development data if available ...")
             dev_df = model.load_lf_info(evaluate.get_dev_df(PV_DEV_COMPLETIONS_DIRECTORY), LF_FEATURES)
+            model.save_df(dev_df, DEV_DF_FILENAME, DEV_DF_HTML_FILENAME)
             dev_true = dev_df.gold_label.tolist()
         else:
             logging.info("Skipping development data ...")
