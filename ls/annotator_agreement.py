@@ -63,7 +63,7 @@ def main():
     dfs = pd.DataFrame()
     for d in project_directories:
         completions_directory = os.path.join(d, 'completions', '*')
-        df = get_dev_df(completions_directory).drop(['completions', 'file_id', 'table', 'data.tweet'])
+        df = get_dev_df(completions_directory).drop(columns=['completions', 'file_id', 'table', 'data.tweet'])
         dfs = dfs.join(df, on='id', how='outer', rsuffix='_{}'.format(d[-1]))
     print("Annotations loaded. Here's a preview:")
     print(dfs)
