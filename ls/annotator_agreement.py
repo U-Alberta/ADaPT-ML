@@ -48,12 +48,12 @@ def calc_krippendorff_alpha(dfs):
         [val for sublist in label for val in sublist] for label in gold_label_cols_df.itertuples(index=False)]
                             ]
     vectorizer = CountVectorizer()
-    label_count_matrix = vectorizer.fit_transform(gold_labels_combined)
+    label_count_matrix = vectorizer.fit_transform(gold_labels_combined).toarray()
     print("This is the vocabulary:")
     print(vectorizer.vocabulary)
 
     print("This is the label count matrix:")
-    print(label_count_matrix.toarray())
+    print(label_count_matrix)
     nominal_metric = krippendorff.alpha(value_counts=label_count_matrix, level_of_measurement='nominal')
     return nominal_metric
 
