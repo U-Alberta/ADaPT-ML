@@ -60,12 +60,11 @@ def main():
     project_directories = glob(os.path.join(LABEL_STUDIO_DIRECTORY, '{}_project_*'.format(parsed_args.task)))
     assert project_directories
 
-    dfs = pd.DataFrame(columns=['id'])
+    dfs = pd.DataFrame()
     for d in project_directories:
         completions_directory = os.path.join(d, 'completions', '*')
-        df = get_dev_df(completions_directory)
-        dfs.join(df, on='id', how='outer', rsuffix=d[-1])
-
+        df = get_dev_df(completions_directory).drop(['completions', 'file_id', 'table', 'data.tweet'])
+        dfs = dfs.join(df, on='id', how='outer', rsuffix='_{}'.format(d[-1]))
     print("Annotations loaded. Here's a preview:")
     print(dfs)
     nominal_alpha = calc_krippendorff_alpha(dfs)
