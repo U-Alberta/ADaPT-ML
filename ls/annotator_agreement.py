@@ -73,13 +73,13 @@ def main():
     print(dfs)
     nominal_alpha = calc_krippendorff_alpha(dfs)
     logging.info("Nominal Alpha: {}".format(nominal_alpha))
-    print("Nominal Alpha: {}".format(nominal_alpha))
+    print("\n\nNominal Alpha: {}".format(nominal_alpha))
     if nominal_alpha >= RELIABLE:
-        print("Feel free to use these annotations as a benchmark.")
+        print("Feel free to use these annotations as a benchmark.\n\n")
     elif nominal_alpha < UNRELIABLE:
-        print("Discard these annotations and start again.")
+        print("Discard these annotations and start again.\n\n")
     else:
-        print("Use these annotations to make tentative conclusions only.")
+        print("Use these annotations to make tentative conclusions only.\n\n")
 
 
 if __name__ == '__main__':
