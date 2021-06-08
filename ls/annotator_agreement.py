@@ -68,7 +68,7 @@ def main():
         suffix = '_{}'.format(d[-1])
         df = df.add_suffix(suffix).rename(columns={'id{}'.format(suffix): 'id'})
         df_list.append(df)
-    dfs = reduce(lambda left, right: pd.merge(left, right, on=['id'], how='outer'), df_list)
+    dfs = reduce(lambda left, right: pd.merge(left, right, on=['id'], how='outer'), df_list).dropna()
     print("Annotations loaded. Here's a preview:")
     print(dfs)
     nominal_alpha = calc_krippendorff_alpha(dfs)
