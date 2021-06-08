@@ -47,6 +47,8 @@ def calc_krippendorff_alpha(dfs):
     gold_labels_combined = [' '.join(labels) for labels in [
         [val for sublist in label for val in sublist] for label in gold_label_cols_df.itertuples(index=False)]
                             ]
+    print("Gold label docs:")
+    print(gold_labels_combined)
     vectorizer = CountVectorizer()
     label_count_matrix = vectorizer.fit_transform(gold_labels_combined).toarray()
     print("This is the vocabulary:")
