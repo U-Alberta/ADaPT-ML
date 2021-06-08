@@ -50,7 +50,7 @@ def calc_krippendorff_alpha(dfs):
     vectorizer = CountVectorizer()
     label_count_matrix = vectorizer.fit_transform(gold_labels_combined)
     print("This is the label count matrix:")
-    print(label_count_matrix)
+    print(label_count_matrix.toarray())
     nominal_metric = krippendorff.alpha(value_counts=label_count_matrix, level_of_measurement='nominal')
     return nominal_metric
 
