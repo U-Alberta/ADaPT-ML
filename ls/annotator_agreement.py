@@ -19,6 +19,7 @@ from ls import LABEL_STUDIO_DIRECTORY
 from sklearn.feature_extraction.text import CountVectorizer
 import numpy as np
 import krippendorff
+from functools import reduce
 
 
 def get_dev_df(completions_dir):
@@ -60,11 +61,14 @@ def main():
     project_directories = glob(os.path.join(LABEL_STUDIO_DIRECTORY, '{}_project_*'.format(parsed_args.task)))
     assert project_directories
 
-    dfs = pd.DataFrame()
+    df_list = []
     for d in project_directories:
         completions_directory = os.path.join(d, 'completions', '*')
         df = get_dev_df(completions_directory).drop(columns=['completions', 'file_id', 'table', 'data.tweet'])
-        dfs = dfs.join(df, on='id', how='outer', rsuffix='_{}'.format(d[-1]))
+        suffix = '_{}'.format(d[-1])
+        df = df.add_suffix(suffix).rename(columns={'id{}'.format(suffix): 'id'})
+        df_list.append(df)
+    dfs = reduce(lambda left, right: pd.merge(left, right, on=['id'], how='outer'), df_list)
     print("Annotations loaded. Here's a preview:")
     print(dfs)
     nominal_alpha = calc_krippendorff_alpha(dfs)
