@@ -1,17 +1,13 @@
 # CECN Label Studio
 ## Labeling data with Label Studio
 
-This will import the JSON-formatted list of data points in each file in the input path. The files should look like this:
-```json
-[
-  {
-    "tweet_text": "Opossum is great",
-    "ref_id": "<tweet_id>",
-    "meta_info": {
-      "timestamp": "2020-03-09 18:15:28.212882",
-      "location": "North Pole"
-    }
-  }
-]
+I have made a backup of all annotations so don't worry if you accidentally remake the containers, just try not to
+touch docker-compose up or anything that will restart the containers, because it will wipe out the annotations.
+
+To run annotator agreement analysis:
+```shell
+docker attach label-studio-dev
+python ls/annotator_agreement.py pv
 ```
-set up and run projects in Label Studio
+it will print the head of the annotations common between all annotators, the shape of the dataframe (how many data points
+were in common in the rows), the nominal alpha, and how to interpret it.
