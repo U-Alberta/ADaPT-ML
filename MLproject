@@ -1,0 +1,21 @@
+name: data-programming
+
+conda_env: conda.yaml
+
+entry_points:
+    pv:
+        parameters:
+            train_data: path
+            task: {type: string, default: multilabel}
+            dev_data: {type: int, default: 0}
+            n_epochs: {type: int, default: 1000}
+            optimizer: {type: string, default: sgd}
+            prec_init: {type: float, default: 0.7}
+        command: "python ./label/pv.py
+        --task {task}
+        --dev_data {dev_data}
+        --n_epochs {n_epochs}
+        --optimizer {optimizer}
+        --prec_init {prec_init}
+        {train_data}
+        "

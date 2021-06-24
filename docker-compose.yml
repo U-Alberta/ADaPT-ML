@@ -1,0 +1,66 @@
+version: '3.3'
+
+services:
+  dp_db:
+    restart: on-failure
+    image: mysql/mysql-server:8.0
+    container_name: dp-mlflow-db
+    expose:
+      - "3306"
+    networks:
+      - dp_network
+    environment:
+      - MYSQL_DATABASE=${DP_MYSQL_DATABASE}
+      - MYSQL_USER=${DP_MYSQL_USER}
+      - MYSQL_PASSWORD=${DP_MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${DP_MYSQL_ROOT_PASSWORD}
+    volumes:
+      - ${DP_DATA_PATH}/dbdata:/var/lib/mysql
+  dp_web:
+    restart: on-failure
+    build:
+      context: .
+      dockerfile: Dockerfile-server
+    image: dp-server-image
+    container_name: dp-mlflow-server
+    ports:
+      - "5000:5000"
+    networks:
+      - dp_network
+    environment:
+      - MLFLOW_TRACKING_URI=${DP_MLFLOW_TRACKING_URI}
+    command: wait-for-it dp-mlflow-db:3306 -s -- mlflow server --backend-store-uri ${DP_MLFLOW_TRACKING_URI} --default-artifact-root ./mlruns --host 0.0.0.0
+    volumes:
+      - ${DP_DATA_PATH}/mlruns:/mlflow/mlruns
+    depends_on:
+      - dp_db
+  dp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: data-programming-image
+    container_name: dp-mlflow
+    volumes:
+      - ${DP_DATA_PATH}/mlruns:/code/mlruns
+      - ${DP_DATA_PATH}/unlabeled_data:/unlabeled_data
+      - ${DP_DATA_PATH}/tmp_artifacts:/tmp_artifacts
+      - ${DP_DATA_PATH}/labeled_data:/labeled_data
+      - ${LF_RESOURCES_PATH}:/lf_resources
+      - ./label:/code/label
+      - ./MLproject:/code/MLproject
+      - ./conda.yaml:/code/conda.yaml
+    networks:
+      - dp_network
+    environment:
+      - MLFLOW_TRACKING_URI=${DP_MLFLOW_TRACKING_URI}
+      - CRATE_DB_IP=${CRATE_DB_IP}
+      - PV_WORD_COUNT=${PV_WORD_COUNT}
+      - PERSONAL_VALUES_DICTIONARY=${PERSONAL_VALUES_DICTIONARY}
+    stdin_open: true
+    tty: true
+    depends_on:
+      - dp_db
+
+networks:
+  dp_network:
+    driver: bridge
