@@ -1,0 +1,9 @@
+scikit-learn
+krippendorff
+pandas
+pymysql
+SQLAlchemy>=1.0.0
+geojson
+crate
+pyyaml
+-e .
