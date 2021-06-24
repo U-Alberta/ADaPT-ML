@@ -1,0 +1,26 @@
+name: modelling_env
+channels:
+  - defaults
+  - conda-forge
+  - pytorch
+dependencies:
+  - python>=3.6
+  - networkx>=2.2,<2.4
+  - numpy>=1.16.0,<2.0.0
+  - jupyter==1.0.0
+  - torchvision
+  - tensorflow>=2.2.0
+  - pip>19.0
+  - matplotlib
+  - scikit-learn
+  - pip:
+    - pyyaml
+    - mlflow
+    - pymysql
+    - SQLAlchemy>=1.0.0
+    - geojson
+    - crate
+    - "-e ."
+#    - tensorflow-data-validation == 0.22.2
+#    - tensorflow-transform == 0.22.0
+#    - tensorflow-model-analysis == 0.22.2

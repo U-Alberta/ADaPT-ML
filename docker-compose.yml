@@ -1,0 +1,83 @@
+version: '3.3'
+
+services:
+
+  modelling_db:
+    restart: on-failure
+    image: mysql/mysql-server:8.0
+    container_name: modelling-mlflow-db
+    expose:
+      - "3306"
+    networks:
+      - modelling_network
+    environment:
+      - MYSQL_DATABASE=${MO_MYSQL_DATABASE}
+      - MYSQL_USER=${MO_MYSQL_USER}
+      - MYSQL_PASSWORD=${MO_MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MO_MYSQL_ROOT_PASSWORD}
+    volumes:
+      - ${MO_DATA_PATH}/dbdata:/var/lib/mysql
+
+  modelling_web:
+    restart: on-failure
+    build:
+      context: .
+      dockerfile: Dockerfile-server
+    image: modelling-server-image
+    container_name: modelling-mlflow-server
+    ports:
+      - "5001:5000"
+    networks:
+      - modelling_network
+    environment:
+      - MLFLOW_TRACKING_URI=${MO_MLFLOW_TRACKING_URI}
+    command: wait-for-it modelling-mlflow-db:3306 -s -- mlflow server --backend-store-uri ${MO_MLFLOW_TRACKING_URI} --default-artifact-root ./mlruns --host 0.0.0.0
+    volumes:
+      - ${MO_DATA_PATH}/mlruns:/mlflow/mlruns
+    depends_on:
+      - modelling_db
+
+  modelling:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: modelling-image
+    container_name: modelling-mlflow
+    volumes:
+      - ${MO_DATA_PATH}/mlruns:/code/mlruns
+      - ${MO_DATA_PATH}/train_data:/train_data
+      - ${MO_DATA_PATH}/test_data:/test_data
+      - ${MO_DATA_PATH}/tmp_artifacts:/tmp_artifacts
+      - ./modelling:/code/modelling
+      - ./MLproject:/code/MLproject
+      - ./conda.yaml:/code/conda.yaml
+      - /usr/local/share/nltk_data:/usr/local/share/nltk_data
+    networks:
+      - modelling_network
+    environment:
+      - MLFLOW_TRACKING_URI=${MO_MLFLOW_TRACKING_URI}
+      - CRATE_DB_IP=${CRATE_DB_IP}
+    stdin_open: true
+    tty: true
+    depends_on:
+      - modelling_db
+
+  modelling_deploy:
+    build:
+      context: .
+      dockerfile: Dockerfile-deploy
+    image: modelling-deploy-image
+    container_name: modelling-mlflow-deploy
+    ports:
+      - "9000:80"
+    volumes:
+      - ${MO_DATA_PATH}/mlruns:/mlruns
+    environment:
+      - CRATE_DB_IP=${CRATE_DB_IP}
+      - PV_MODEL_PATH=/mlruns/1/66f85b78775344d1afb8db53bb0eab6c/artifacts/mlp/python_model.pkl
+    networks:
+      - modelling_network
+
+networks:
+  modelling_network:
+    driver: bridge

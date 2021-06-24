@@ -1,0 +1,65 @@
+name: modelling
+
+conda_env: conda.yaml
+
+entry_points:
+    mlogit:
+        parameters:
+            train_data: path
+            test_data: path
+            features: {type: string, default: tfidf}
+            solver: {type: string, default: lbfgs}
+            tol: {type: float, default: 1e-4}
+            C: {type: float, default: 1.0}
+            max_iter: {type: int, default: 100}
+            multi_class: {type: string, default: auto}
+            verbose: {type: int, default: 10000}
+            n_jobs: {type: int, default: -1}
+        command: "python ./modelling/mlogit.py
+         --solver {solver}
+         --tol {tol}
+         --C {C}
+         --max_iter {max_iter}
+         --multi_class {multi_class}
+         --verbose {verbose}
+         --n_jobs {n_jobs}
+         {train_data}
+         {test_data}
+         {features}"
+    mlp:
+        parameters:
+            train_data: path
+            test_data: path
+            features: {type: string, default: tfidf}
+            activation: {type: string, default: relu}
+            solver: {type: str, default: adam}
+            alpha: {type: float, default: 0.0001}
+            learning_rate: {type: str, default: constant}
+            learning_rate_init: {type: float, default: 0.001}
+            power_t: {type: float, default: 0.5}
+            max_iter: {type: int, default: 200}
+            tol: {type: float, default: 1e-4}
+            momentum: {type: float, default: 0.9}
+            beta_1: {type: float, default: 0.9}
+            beta_2: {type: float, default: 0.999}
+            epsilon: {type: float, default: 1e-8}
+            n_iter_no_change: {type: int, default: 10}
+            max_fun: {type: int, default: 15000}
+        command: "python ./modelling/mlp.py
+         --activation {activation}
+         --solver {solver}
+         --alpha {alpha}
+         --learning_rate {learning_rate}
+         --learning_rate_init {learning_rate_init}
+         --power_t {power_t}
+         --max_iter {max_iter}
+         --tol {tol}
+         --momentum {momentum}
+         --beta_1 {beta_1}
+         --beta_2 {beta_2}
+         --epsilon {epsilon}
+         --n_iter_no_change {n_iter_no_change}
+         --max_fun {max_fun}
+         {train_data}
+         {test_data}
+         {features}"
