@@ -42,6 +42,6 @@ COPY ./modelling ./modelling
 RUN conda env create -f conda.yaml
 RUN echo "conda activate modelling_env" >> ~/.bashrc
 
-COPY ./model.py .
+COPY model_objs.py .
 
 CMD [ "/bin/bash" ]

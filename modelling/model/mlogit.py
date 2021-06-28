@@ -10,9 +10,9 @@ import mlflow.sklearn
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import plot_confusion_matrix, f1_score
 
-from modelling import CONFUSION_MATRIX_FILENAME
-from modelling.data import load, get_train_features, binarize_labels, predict_test, log_artifacts
-from model import LookupClassifier, save_model
+from model import CONFUSION_MATRIX_FILENAME
+from model.data import load, get_train_features, binarize_labels, predict_test, log_artifacts
+from model_objs import LookupClassifier, save_model
 
 parser = argparse.ArgumentParser(description='Train a multinomial logistic regression classifier.')
 parser.add_argument('train_path', type=str, help='File path or URL to the training data')

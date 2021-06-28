@@ -4,9 +4,9 @@ import sys
 import logging
 import mlflow
 from sklearn.preprocessing import MultiLabelBinarizer
-from modelling import (X_TRAIN_FILENAME, TRAIN_DF_HTML_FILENAME, TEST_PRED_DF_FILENAME,
+from model import (X_TRAIN_FILENAME, TRAIN_DF_HTML_FILENAME, TEST_PRED_DF_FILENAME,
                        TEST_PRED_DF_HTML_FILENAME, CONFUSION_MATRIX_FILENAME, LOGGING_FILENAME)
-from model import SQL_QUERY, CRATE_DB_IP
+from model_objs import SQL_QUERY, CRATE_DB_IP
 
 
 def load(train_path, test_path):
