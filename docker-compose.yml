@@ -1,0 +1,175 @@
+version: '3.3'
+
+services:
+  ls_web:
+    restart: on-failure
+    image: heartexlabs/label-studio:latest
+    container_name: label-studio-web
+    ports:
+      - 8080:8080
+    networks:
+      - ls_network
+    volumes:
+      - ${LS_DATA_PATH}:/label-studio/data
+      - ./label-studio/label_config:/label_config
+    environment:
+      - LABEL_STUDIO_LOCAL_FILES_SERVING_ENABLED=true
+      - LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT=/label-studio/files
+    command: label-studio init pv_project --label-config=/label_config/pv_config.xml \
+              && label-studio init frame_project --label-config=/label_config/frame_config.xml \
+              && label-studio start
+  ls:
+    restart: on-failure
+    build:
+      context: ./label-studio
+      dockerfile: Dockerfile
+    image: label-studio-image
+    container_name: label-studio-dev
+    networks:
+      - ls_network
+    volumes:
+      - ./label-studio/ls:/code/ls
+      - ${LS_DATA_PATH}:/label_studio
+    environment:
+      - CRATE_DB_IP=${CRATE_DB_IP}
+    stdin_open: true
+    tty: true
+  dp_db:
+    restart: on-failure
+    image: mysql/mysql-server:8.0
+    container_name: dp-mlflow-db
+    expose:
+      - 3306
+    networks:
+      - dp_network
+    volumes:
+      - ${DP_DATA_PATH}/dbdata:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=${DP_MYSQL_DATABASE}
+      - MYSQL_USER=${DP_MYSQL_USER}
+      - MYSQL_PASSWORD=${DP_MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${DP_MYSQL_ROOT_PASSWORD}
+  dp_web:
+    restart: on-failure
+    build:
+      context: data-programming
+      dockerfile: Dockerfile-server
+    image: dp-server-image
+    container_name: dp-mlflow-server
+    ports:
+      - 5000:5000
+    networks:
+      - dp_network
+    depends_on:
+      - dp_db
+    volumes:
+      - ${DP_DATA_PATH}/mlruns:/mlflow/mlruns
+    environment:
+      - MLFLOW_TRACKING_URI=${DP_MLFLOW_TRACKING_URI}
+    command: wait-for-it dp-mlflow-db:3306 -s -- mlflow server --backend-store-uri ${DP_MLFLOW_TRACKING_URI} --default-artifact-root ./mlruns --host 0.0.0.0
+  dp:
+    build:
+      context: ./data-programming
+      dockerfile: Dockerfile
+    image: data-programming-image
+    container_name: dp-mlflow
+    networks:
+      - dp_network
+    depends_on:
+      - dp_db
+    volumes:
+      - ${DP_DATA_PATH}/mlruns:/code/mlruns
+      - ${DP_DATA_PATH}/unlabeled_data:/unlabeled_data
+      - ${DP_DATA_PATH}/tmp_artifacts:/tmp_artifacts
+      - ${DP_DATA_PATH}/labeled_data:/labeled_data
+      - ${LF_RESOURCES_PATH}:/lf_resources
+      - ./data-programming/label:/code/label
+      - ./data-programming/MLproject:/code/MLproject
+      - ./data-programming/conda.yaml:/code/conda.yaml
+    environment:
+      - MLFLOW_TRACKING_URI=${DP_MLFLOW_TRACKING_URI}
+      - CRATE_DB_IP=${CRATE_DB_IP}
+      - PV_WORD_COUNT=${PV_WORD_COUNT}
+      - PERSONAL_VALUES_DICTIONARY=${PERSONAL_VALUES_DICTIONARY}
+    stdin_open: true
+    tty: true
+  m_db:
+    restart: on-failure
+    image: mysql/mysql-server:8.0
+    container_name: modelling-mlflow-db
+    expose:
+      - 3306
+    networks:
+      - modelling_network
+    volumes:
+      - ${MODELLING_DATA_PATH}/dbdata:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=${MODELLING_MYSQL_DATABASE}
+      - MYSQL_USER=${MODELLING_MYSQL_USER}
+      - MYSQL_PASSWORD=${MODELLING_MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MODELLING_MYSQL_ROOT_PASSWORD}
+  m_web:
+    restart: on-failure
+    build:
+      context: ./modelling
+      dockerfile: Dockerfile-server
+    image: modelling-server-image
+    container_name: modelling-mlflow-server
+    ports:
+      - 5001:5000
+    networks:
+      - m_network
+    depends_on:
+      - m_db
+    volumes:
+      - ${MODELLING_DATA_PATH}/mlruns:/mlflow/mlruns
+    environment:
+      - MLFLOW_TRACKING_URI=${MODELLING_MLFLOW_TRACKING_URI}
+    command: wait-for-it modelling-mlflow-db:3306 -s -- mlflow server --backend-store-uri ${MODELLING_MLFLOW_TRACKING_URI} --default-artifact-root ./mlruns --host 0.0.0.0
+  m:
+    build:
+      context: ./modelling
+      dockerfile: Dockerfile
+    image: modelling-image
+    container_name: modelling-mlflow
+    networks:
+      - m_network
+    depends_on:
+      - m_db
+    volumes:
+      - ${MODELLING_DATA_PATH}/mlruns:/code/mlruns
+      - ${MODELLING_DATA_PATH}/train_data:/train_data
+      - ${MODELLING_DATA_PATH}/test_data:/test_data
+      - ${MODELLING_DATA_PATH}/tmp_artifacts:/tmp_artifacts
+      - ./modelling/model:/code/model
+      - ./MLproject:/code/MLproject
+      - ./conda.yaml:/code/conda.yaml
+      - /usr/local/share/nltk_data:/usr/local/share/nltk_data
+    environment:
+      - MLFLOW_TRACKING_URI=${MODELLING_MLFLOW_TRACKING_URI}
+      - CRATE_DB_IP=${CRATE_DB_IP}
+    stdin_open: true
+    tty: true
+  m_deploy:
+    build:
+      context: ./modelling
+      dockerfile: Dockerfile-deploy
+    image: modelling-deploy-image
+    container_name: modelling-mlflow-deploy
+    ports:
+      - 80:80
+    networks:
+      - m_network
+    volumes:
+      - ${MODELLING_DATA_PATH}/mlruns:/mlruns
+    environment:
+      - CRATE_DB_IP=${CRATE_DB_IP}
+      - PV_MODEL_PATH=${PV_MODEL_PATH}
+
+networks:
+  ls_network:
+    driver: bridge
+  dp_network:
+    driver: bridge
+  m_network:
+    driver: bridge
