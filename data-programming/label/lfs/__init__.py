@@ -24,3 +24,8 @@ class ValueLabel(Enum):
     AC = 8
     power = 9
     PO = 9
+
+
+class FrameLabel(Enum):
+    settled_science = 0
+    SS = 0
