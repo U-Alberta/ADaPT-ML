@@ -1,4 +1,6 @@
 """
+Create a file like this one and write your LFs. As you update LFs or find new resources for new LFs, the load_lfs
+function will make sure that you are staying up-to-date.
 References:
     https://www.snorkel.org/use-cases/01-spam-tutorial#a-keyword-lfs
     https://snorkel.readthedocs.io/en/v0.9.5/packages/_autosummary/labeling/snorkel.labeling.LabelingFunction.html
@@ -10,19 +12,20 @@ import pickle
 import requests
 from snorkel.labeling import LabelingFunction, LFAnalysis
 
-from label.lfs import ValueLabel, ABSTAIN
+from label.lfs import Example, ABSTAIN
 
-PV_DICTIONARY_URL = os.environ['PERSONAL_VALUES_DICTIONARY']
-
-PV_LFS_PATH = os.path.join('/lf_resources', 'pv_lfs.pkl')
+EXAMPLE_LFS_PATH = os.path.join('/lf_resources', 'example_lfs.pkl')
 
 
 def load_lfs():
+    """
+    This function runs a few checks to see if the saved LFs are up-to-date, i.e. they match all of the functions
+    included in this module.
+    """
     try:
-        with open(PV_LFS_PATH, 'rb') as infile:
+        with open(EXAMPLE_LFS_PATH, 'rb') as infile:
             lfs = pickle.load(infile)
-        keyword_lfs = [lf for lf in lfs if lf.name.startswith('keyword')]
-        assert len(keyword_lfs) == 947
+        assert sorted() == 15
         logging.info("Using existing LFs.")
     except (FileNotFoundError, AssertionError, EOFError):
         # remake all of the lfs to get updated ones
