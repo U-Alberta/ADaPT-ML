@@ -31,7 +31,7 @@ services:
       - ./label-studio/ls:/code/ls
       - ${LS_DATA_PATH}:/label_studio
     environment:
-      - CRATE_DB_IP=${CRATE_DB_IP}
+      - DATABASE_IP=${DATABASE_IP}
     stdin_open: true
     tty: true
   dp_db:
@@ -88,7 +88,7 @@ services:
       - ./data-programming/conda.yaml:/code/conda.yaml
     environment:
       - MLFLOW_TRACKING_URI=${DP_MLFLOW_TRACKING_URI}
-      - CRATE_DB_IP=${CRATE_DB_IP}
+      - DATABASE_IP=${DATABASE_IP}
       - PV_WORD_COUNT=${PV_WORD_COUNT}
       - PERSONAL_VALUES_DICTIONARY=${PERSONAL_VALUES_DICTIONARY}
     stdin_open: true
@@ -147,7 +147,7 @@ services:
       - /usr/local/share/nltk_data:/usr/local/share/nltk_data
     environment:
       - MLFLOW_TRACKING_URI=${MODELLING_MLFLOW_TRACKING_URI}
-      - CRATE_DB_IP=${CRATE_DB_IP}
+      - DATABASE_IP=${DATABASE_IP}
     stdin_open: true
     tty: true
   m_deploy:
@@ -163,7 +163,7 @@ services:
     volumes:
       - ${MODELLING_DATA_PATH}/mlruns:/mlruns
     environment:
-      - CRATE_DB_IP=${CRATE_DB_IP}
+      - DATABASE_IP=${DATABASE_IP}
       - PV_MODEL_PATH=${PV_MODEL_PATH}
 
 networks:
