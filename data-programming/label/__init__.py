@@ -7,16 +7,13 @@ import pandas as pd
 
 parser = argparse.ArgumentParser(description='Perform data programming.')
 parser.add_argument('train_data', help='File path or URL to the unlabeled training data')
-parser.add_argument('--task', default='multilabel', type=str, help='classification task (multiclass or multilabel)')
+parser.add_argument('--task', default='multilabel', type=str, choices=('multiclass', 'multilabel'), help='classification setting (multiclass or multilabel)')
 parser.add_argument('--dev_data', default=0, help='Use labeled development data for training and evaluation')
 parser.add_argument('--n_epochs', default=1000, type=int, help='the number of epochs to train the Label Model (where '
                                                                'each epoch is a single optimization step)')
-parser.add_argument('--optimizer', default='sgd', help='which optimizer to use for the Label Model')
+parser.add_argument('--optimizer', default='sgd', choices=('sgd', 'adam', 'adamax'), help='which optimizer to use for the Label Model')
 parser.add_argument('--prec_init', default=0.7, type=float, help='LF precision initializations / priors')
 parsed_args = parser.parse_args()
-
-# Validate command line args
-assert parsed_args.task in ('multiclass', 'multilabel'), "Invalid argument for task: {}".format(parsed_args.task)
 
 TMP_ARTIFACTS = '/tmp_artifacts'
 
@@ -49,7 +46,7 @@ TRAIN_PARAMS = {
     'optimizer': parsed_args.optimizer,
     'prec_init': parsed_args.prec_init
 }
-CRATE_DB_IP = os.environ['CRATE_DB_IP']
+DATABASE_IP = os.environ['DATABASE_IP']
 SQL_QUERY = """
     SELECT {column} FROM {table} WHERE id IN {ids};
     """

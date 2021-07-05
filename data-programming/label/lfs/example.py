@@ -7,104 +7,64 @@ References:
 """
 import logging
 import os
-import pickle
+from snorkel.labeling import LabelingFunction
 
-import requests
-from snorkel.labeling import LabelingFunction, LFAnalysis
-
-from label.lfs import Example, ABSTAIN
+from label.lfs import ExampleLabels, ABSTAIN
 
 EXAMPLE_LFS_PATH = os.path.join('/lf_resources', 'example_lfs.pkl')
+KEYWORD_DICT = {
+    'cat': [
+        'whisker', 'meow', 'litterbox', 'purr', 'hiss', 'lion', 'tiger', 'tabby',
+        'leopard', 'panther', 'cheetah', 'cougar', 'kitten', 'cat'
+    ],
+    'dog': [
+        'bark', 'pant', 'fetch', 'puppy', 'dog', 'beagle', 'collie', 'labrador',
+        'schnauser', 'pitbull', 'bulldog', 'poodle', 'howl', 'husky'
+    ],
+    'bird': [
+        'bird', 'chirp', 'squawk', 'wing', 'beak', 'feather', 'eagle', 'parrot',
+        'vulture', 'toucan', 'talon', 'birdbath', 'penguin', 'chick'
+    ]
+}
 
 
-def load_lfs():
+def get_lfs():
     """
-    This function runs a few checks to see if the saved LFs are up-to-date, i.e. they match all of the functions
-    included in this module.
+    This function creates a list of all lfs in this module
     """
-    try:
-        with open(EXAMPLE_LFS_PATH, 'rb') as infile:
-            lfs = pickle.load(infile)
-        assert sorted() == 15
-        logging.info("Using existing LFs.")
-    except (FileNotFoundError, AssertionError, EOFError):
-        # remake all of the lfs to get updated ones
-        logging.info("Remaking keyword LFs ...")
-        personal_values_dict = load_keyword_dictionary()
-        keyword_lfs = []
-        for label in ValueLabel:
-            keyword_lfs = keyword_lfs + [make_keyword_lf('keyword_{0}_{1}'.format(label.name, lemma),
-                                                         lemma,
-                                                         label)
-                                         for lemma in personal_values_dict[label.name]]
-        lfs = keyword_lfs
-        with open(PV_LFS_PATH, 'wb') as outfile:
-            pickle.dump(lfs, outfile)
-        logging.info("New LFs saved.")
+    lfs = []
+    keyword_lfs = []
+    for label in ExampleLabels:
+        keyword_lfs = keyword_lfs + [make_keyword_lf('keyword_{0}_{1}'.format(label.name, lemma),
+                                                     lemma,
+                                                     label)
+                                     for lemma in KEYWORD_DICT[label.name]]
+        lfs = lfs + keyword_lfs
     return lfs
-
-    
-def load_keyword_dictionary():
-    """
-    There are 1068 terms in the personal values (PV) dictionary. 947 lemmas.
-        SE: 85
-        CO: 129
-        TR: 109
-        BE: 95
-        UN: 103
-        SD: 140
-        ST: 120
-        HE: 97
-        AC: 88
-        PO: 102
-    This function connects to the database where the dictionary is stored, fetches the words for each PV, creates a
-    SpaCy doc for them, and returns a dict in the form of {V1: [doc, ...], V2: [doc, ...] ...}
-    :return:    dict
-    """
-    # TODO: update this so it gets the lemmas in the personal values dictionary
-    try:
-        personal_values_dict = requests.get(PV_DICTIONARY_URL).json()
-        assert sorted(personal_values_dict) == sorted([label.name for label in ValueLabel])
-        return personal_values_dict
-    except Exception as e:
-        logging.error(e.args)
 
 
 def lemma_keyword_lookup(x, lemma, label):
     """
-    This function looks for all of the word lemmas for a given PV in the given data point x.
+    This function looks for all of the word lemmas for a given label in the given data point x.
     :param x: data point
-    :param keyword_docs: docs for the given PV
-    :param label: the label for the given PV
+    :param keyword_docs: docs for the given label
+    :param label: the label for the given label
     :return:
     """
-    return label.value if (label.name in x.text_pv_freq
-                           and lemma in x.text_pv_freq[label.name]) else ABSTAIN
+    return label.value if lemma in x.text_lemm else ABSTAIN
 
 
 def make_keyword_lf(name, lemma, label):
     """
     This function makes all of the keyword lfs by calling the lemma_keyword_lookup helper and attaches the SpaCy
     preprocessor.
-    :param name: the prefix 'keywords_' followed by the PV abbreviation
-    :param keyword_doc: the SpaCy docs for the given PV
-    :param label: the integer value for the given PV
-    :return: a keyword-based LabelingFunction for a given PV
+    :param name: the prefix 'keywords_' followed by the label abbreviation
+    :param keyword_doc: the SpaCy docs for the given label
+    :param label: the integer value for the given label
+    :return: a keyword-based LabelingFunction for a given label
     """
     return LabelingFunction(
         name=name,
         f=lemma_keyword_lookup,
         resources=dict(lemma=lemma, label=label)
     )
-
-
-def evaluate_keyword_lfs(L_train):
-    """
-    Computes the correlation, conflict, coverage, polarity, etc. for the LFs based on the PV dictionary
-    :param L_train: label matrix for the train set
-    :return:
-    """
-    return LFAnalysis(L_train, lfs=pv_lfs).lf_summary()
-
-
-pv_lfs = load_lfs()
