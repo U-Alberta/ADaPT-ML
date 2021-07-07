@@ -1,6 +1,72 @@
-version: '3.3'
+version: '3.8'
 
 services:
+  cratedb01:
+    image: crate:latest
+    ports:
+      - 4201:4200
+    volumes:
+      - ${DB_DATA_PATH}/01:/data
+    command: [ "crate",
+               "-Ccluster.name=crate-docker-cluster",
+               "-Cnode.name=cratedb01",
+               "-Cnode.data=true",
+               "-Cnetwork.host=_site_",
+               "-Cdiscovery.seed_hosts=cratedb02,cratedb03",
+               "-Ccluster.initial_master_nodes=cratedb01,cratedb02,cratedb03",
+               "-Cgateway.expected_nodes=3",
+               "-Cgateway.recover_after_nodes=2" ]
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    environment:
+      - CRATE_HEAP_SIZE=2g
+
+  cratedb02:
+    image: crate:latest
+    ports:
+      - 4202:4200
+    volumes:
+      - ${DB_DATA_PATH}/02:/data
+    command: [ "crate",
+               "-Ccluster.name=crate-docker-cluster",
+               "-Cnode.name=cratedb02",
+               "-Cnode.data=true",
+               "-Cnetwork.host=_site_",
+               "-Cdiscovery.seed_hosts=cratedb01,cratedb03",
+               "-Ccluster.initial_master_nodes=cratedb01,cratedb02,cratedb03",
+               "-Cgateway.expected_nodes=3",
+               "-Cgateway.recover_after_nodes=2" ]
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    environment:
+      - CRATE_HEAP_SIZE=2g
+
+  cratedb03:
+    image: crate:latest
+    ports:
+      - 4203:4200
+    volumes:
+      - ${DB_DATA_PATH}/03:/data
+    command: [ "crate",
+               "-Ccluster.name=crate-docker-cluster",
+               "-Cnode.name=cratedb03",
+               "-Cnode.data=true",
+               "-Cnetwork.host=_site_",
+               "-Cdiscovery.seed_hosts=cratedb01,cratedb02",
+               "-Ccluster.initial_master_nodes=cratedb01,cratedb02,cratedb03",
+               "-Cgateway.expected_nodes=3",
+               "-Cgateway.recover_after_nodes=2" ]
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    environment:
+      - CRATE_HEAP_SIZE=2g
+
   ls_web:
     restart: on-failure
     image: heartexlabs/label-studio:latest
@@ -15,9 +81,12 @@ services:
     environment:
       - LABEL_STUDIO_LOCAL_FILES_SERVING_ENABLED=true
       - LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT=/label-studio/files
-    command: label-studio init pv_project --label-config=/label_config/pv_config.xml \
-              && label-studio init frame_project --label-config=/label_config/frame_config.xml \
-              && label-studio start
+    command: [ "label-studio init",
+               "eg_project",
+               "--label-config=/label_config/eg_config.xml",
+               "&&",
+               "label-studio start" ]
+
   ls:
     restart: on-failure
     build:
@@ -34,6 +103,7 @@ services:
       - DATABASE_IP=${DATABASE_IP}
     stdin_open: true
     tty: true
+
   dp_db:
     restart: on-failure
     image: mysql/mysql-server:8.0
@@ -49,6 +119,7 @@ services:
       - MYSQL_USER=${DP_MYSQL_USER}
       - MYSQL_PASSWORD=${DP_MYSQL_PASSWORD}
       - MYSQL_ROOT_PASSWORD=${DP_MYSQL_ROOT_PASSWORD}
+
   dp_web:
     restart: on-failure
     build:
@@ -66,7 +137,12 @@ services:
       - ${DP_DATA_PATH}/mlruns:/mlflow/mlruns
     environment:
       - MLFLOW_TRACKING_URI=${DP_MLFLOW_TRACKING_URI}
-    command: wait-for-it dp-mlflow-db:3306 -s -- mlflow server --backend-store-uri ${DP_MLFLOW_TRACKING_URI} --default-artifact-root ./mlruns --host 0.0.0.0
+    command: [ "wait-for-it dp-mlflow-db:3306 -s --",
+               "mlflow server",
+               "--backend-store-uri=$DP_MLFLOW_TRACKING_URI",
+               "--default-artifact-root=./mlruns",
+               "--host=0.0.0.0"]
+
   dp:
     build:
       context: ./data-programming
@@ -93,6 +169,7 @@ services:
       - PERSONAL_VALUES_DICTIONARY=${PERSONAL_VALUES_DICTIONARY}
     stdin_open: true
     tty: true
+
   m_db:
     restart: on-failure
     image: mysql/mysql-server:8.0
@@ -108,6 +185,7 @@ services:
       - MYSQL_USER=${MODELLING_MYSQL_USER}
       - MYSQL_PASSWORD=${MODELLING_MYSQL_PASSWORD}
       - MYSQL_ROOT_PASSWORD=${MODELLING_MYSQL_ROOT_PASSWORD}
+
   m_web:
     restart: on-failure
     build:
@@ -125,7 +203,12 @@ services:
       - ${MODELLING_DATA_PATH}/mlruns:/mlflow/mlruns
     environment:
       - MLFLOW_TRACKING_URI=${MODELLING_MLFLOW_TRACKING_URI}
-    command: wait-for-it modelling-mlflow-db:3306 -s -- mlflow server --backend-store-uri ${MODELLING_MLFLOW_TRACKING_URI} --default-artifact-root ./mlruns --host 0.0.0.0
+    command: [ "wait-for-it modelling-mlflow-db:3306 -s --",
+               "mlflow server",
+               "--backend-store-uri=$MODELLING_MLFLOW_TRACKING_URI",
+               "--default-artifact-root=./mlruns",
+               "--host=0.0.0.0" ]
+
   m:
     build:
       context: ./modelling
@@ -150,6 +233,7 @@ services:
       - DATABASE_IP=${DATABASE_IP}
     stdin_open: true
     tty: true
+
   m_deploy:
     build:
       context: ./modelling

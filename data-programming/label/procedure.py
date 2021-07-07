@@ -12,7 +12,7 @@ from snorkel.utils import probs_to_preds
 
 from label import (LABEL_MODEL_FILENAME, TRAIN_PARAMS, SQL_QUERY, CRATE_DB_IP)
 
-# from snorkel.labeling.apply.dask import PandasParallelLFApplier
+from snorkel.labeling.apply.dask import PandasParallelLFApplier
 
 INIT_PARAMS = {
     'verbose': True,
@@ -39,6 +39,13 @@ LM_OPTIMIZER_SETTINGS = {
 
 
 def load_lf_info(id_df, features):
+    """
+    This function takes a DataFrame containing two columns, table and id, of all of the data points that have been
+    selected through some means to become the labelled training data. It looks up the features needed for the LFs and
+    adds this to the DataFrame.
+    :poram id_df: pd.DataFrame with columns table and id
+
+    """
     data_df = pd.DataFrame()
     for table in id_df.table.unique():
         table_df = id_df.loc[(id_df.table == table)]
@@ -61,10 +68,9 @@ def load_lf_info(id_df, features):
 
 
 def create_label_matrix(df, lfs):
-    applier = PandasLFApplier(lfs=lfs)
-    # applier = PandasParallelLFApplier(lfs=lfs)
-    # n_parallel = int(multiprocessing.cpu_count() / 2)
-    # train_L = applier.apply(train_df, n_parallel=n_parallel, fault_tolerant=True)
+    applier = PandasParallelLFApplier(lfs=lfs)
+    n_parallel = int(multiprocessing.cpu_count() / 2)
+    train_L = applier.apply(train_df, n_parallel=n_parallel, fault_tolerant=True)
     try:
         label_matrix, metadata = applier.apply(df, return_meta=True)
         if metadata.faults:

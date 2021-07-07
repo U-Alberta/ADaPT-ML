@@ -23,7 +23,17 @@ MULTICLASS_METRICS = ['accuracy', 'coverage', 'f1_micro', 'f1_macro']
 
 
 def lf_summary(train_L, dev_L, lfs, label_model, dev_true):
+    """
+    This function uses the train and dev label matrices, along with the LFs used to create them and the LF weights
+    from the Label Model to calculate the coverage, conflict, empirical accuracy, and other metrics.
+    :param train_L: NumPy matrix of ints corresponding to the votes from the LFs for the train data points
+    :param dev_L: NumPy matrix of ints corresponding to the votes from the LFs for the dev data points
+    :param lfs: [LabelingFunction] for the classification task curently in progress
+    :param label_model: LabelModel that has been trained on train_L
+    :param dev_true: [[label.name]] for the label class for the task in progress from Label Studio
+    """
     try:
+        # Try to get the empirical accuracy using the development set
         dev_summary = LFAnalysis(L=dev_L, lfs=lfs).lf_summary(Y=dev_true, est_weights=label_model.get_weights())
         dev_summary.to_html(LF_SUMMARY_DEV_FILENAME)
     except:
@@ -33,6 +43,15 @@ def lf_summary(train_L, dev_L, lfs, label_model, dev_true):
 
 
 def multiclass_summary(dev_L, dev_true, dev_pred, label_model) -> dict:
+    """
+    The multiclass summary is comprised of the confusion matrix for the label model's predicted labels against the
+    gold labels, the accuracy, coverage, f1 micro, and f1 macro of the predictions on the development set.
+    :param dev_L: NumPy matrix of ints corresponding to the votes from the LFs for the dev data points
+    :param dev_true: [[label.name]] for the label class for the task in progress from Label Studio
+    :param dev_pred: [[label.name]] for the label class for the task in progress from the label model
+    :param label_model: LabelModel that has been trained on train_L
+    :return: either None if no dev labels are available, or a dict for the metrics from the label model
+    """
     try:
         # flatten arrays for evaluation
         dev_true = np.array(dev_true).flatten()
@@ -55,6 +74,13 @@ def multiclass_summary(dev_L, dev_true, dev_pred, label_model) -> dict:
 
 
 def multilabel_summary(dev_true, dev_pred) -> dict:
+    """
+    For the multilabel summary, the confusion matrix is used to calculate performance metrics for the label model since
+    the label model does not natively support a multilabel setting.
+    :param dev_true: [[label.name]] for the label class for the task in progress from Label Studio
+    :param dev_pred: [[label.name]] for the label class for the task in progress from the label model
+    :return: either None if no dev labels are available, or a dict for the metrics from the label model
+    """
     mlb = MultiLabelBinarizer()
     try:
         dev_true = mlb.fit_transform(dev_true)
@@ -76,7 +102,10 @@ def multilabel_summary(dev_true, dev_pred) -> dict:
     return lm_metrics
 
 
-def get_dev_df(completions_dir):
+def get_dev_df(completions_dir) -> pd.DataFrame:
+    """
+
+    """
     completion_files = glob(completions_dir)
     dev_df = pd.DataFrame()
     for filename in completion_files:
