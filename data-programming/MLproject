@@ -3,15 +3,15 @@ name: data-programming
 conda_env: conda.yaml
 
 entry_points:
-    pv:
+    example:
         parameters:
             train_data: path
-            task: {type: string, default: multilabel}
+            task: {type: string, default: multiclass}
             dev_data: {type: int, default: 0}
             n_epochs: {type: int, default: 1000}
             optimizer: {type: string, default: sgd}
             prec_init: {type: float, default: 0.7}
-        command: "python ./label/pv.py
+        command: "python ./label/example.py
         --task {task}
         --dev_data {dev_data}
         --n_epochs {n_epochs}

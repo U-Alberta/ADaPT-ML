@@ -1,3 +1,6 @@
+"""
+This module performs all MLFlow tracking tasks.
+"""
 import logging
 import os
 from glob import glob
@@ -25,6 +28,7 @@ def log(metrics, input_example, model_name, label_model):
         registered_model_name=model_name,
         input_example=input_example)
 
+    # log all of the artifacts kept in the temporary folder into the proper run folder and remove them once logged
     for filename in filenames:
         try:
             mlflow.log_artifact(filename)

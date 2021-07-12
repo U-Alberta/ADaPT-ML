@@ -86,10 +86,7 @@ def create_label_matrix(df, lfs):
     """
     applier = PandasParallelLFApplier(lfs=lfs)
     n_parallel = int(multiprocessing.cpu_count() / 2)
-    try:
-        label_matrix = applier.apply(df, n_parallel=n_parallel, fault_tolerant=False)
-    except:
-        label_matrix = None
+    label_matrix = applier.apply(df, n_parallel=n_parallel, fault_tolerant=False)
     return label_matrix
 
 
@@ -110,7 +107,14 @@ def train_label_model(L_train: np.ndarray, y_dev: [[str]], labels) -> LabelModel
     label_model = LabelModel(cardinality=len(labels), **INIT_PARAMS)
     # to change the optimizer parameters, refer to LM_OPTIMIZER_SETTINGS at the top of this module
     TRAIN_PARAMS.update(LM_OPTIMIZER_SETTINGS[TRAIN_PARAMS['optimizer']])
-    label_model.fit(L_train, class_balance=calc_class_balance(y_dev, labels), **TRAIN_PARAMS)
+    try:
+        balance = calc_class_balance(y_dev, labels)
+        logging.info("TRUE CLASS BALANCE: {}".format(balance))
+        balance = list(balance.values())
+    except:
+        balance = None
+        logging.info("TRUE CLASS BALANCE: {}".format(balance))
+    label_model.fit(L_train, class_balance=balance, **TRAIN_PARAMS)
     label_model.save(LABEL_MODEL_FILENAME)
     return label_model
 
@@ -129,11 +133,9 @@ def apply_label_preds(df, label_matrix: np.ndarray, label_model: LabelModel, lab
     :param task: one of multilabel or multiclass
     :return: a pd.DataFrame containing the columns id, table, label, label_probs
     """
-    try:
-        # filter out abstain datapoints
-        filtered_df, probs_array = filter_df(df, label_matrix, label_model)
-    except:
-        return None
+    # filter out abstain datapoints
+    filtered_df, probs_array = filter_df(df, label_matrix, label_model)
+
     # get the list of labels predicted to be true and probabilities corresponding to each possible label
     probs_list = probs_array.tolist()
     preds_list = probs_to_preds(probs_array).tolist()
@@ -146,14 +148,24 @@ def apply_label_preds(df, label_matrix: np.ndarray, label_model: LabelModel, lab
         label_values = [label.value for label in labels]
         pred_labels = []
         for probs in probs_list:
-            # get a list of tuples with the label's int value followed by its probability, then sort from lowest to
-            # highest probability
             chosen = find_knee(labels, label_values, probs)
             pred_labels.append(chosen)
     return add_labels(filtered_df, pred_labels, probs_list)
 
 
-def find_knee(labels, label_values, probs)
+def find_knee(labels, label_values, probs) -> [str]:
+    """
+    This function is used in a multilabel setting to use the label model's probabilities to find which labels should
+    be included in the prediction. It locates probabilities above the knee and adds them to the list.
+    Reference: https://towardsdatascience.com/using-snorkel-for-multi-label-annotation-cc2aa217986a
+
+    :param labels: the Label class for the current classification task that stores the name and int value
+    :label values: a list of the labels' int values in order that they appear with their probabilities
+    :probs: a list of probabilities for the labels from the label model that sum to 1
+    :return: a list of labels with probabilities above the knee, or the most probable label if no knee is detected
+    """
+    # get a list of tuples with the label's int value followed by its probability, then sort from lowest to
+    # highest probability
     pairs = list(zip(label_values, probs))
     pairs.sort(key=lambda t: t[1])
     # find the point of sharpest increase in probability
@@ -173,9 +185,13 @@ def find_knee(labels, label_values, probs)
     return chosen
 
 
-def add_labels(df, labels, label_probs):
+def add_labels(df: pd.DataFrame, labels: [[str]], label_probs: [[float]]) -> pd.DataFrame:
     """
-    This function adds the list of labels and
+    This function adds the list of labels and label probabilities to the dataframe
+    :param df: pd.DataFrame that is unlabeled
+    :param labels: The [[Label.name]] for the label model's predictions for these datapoints
+    :param label_probs: The probabilities associated with all labels, not just the chosen ones
+    :return: pd.DataFrame that has columns id, table, label, label_probs
     """
     df.insert(len(df.columns), 'label', labels)
     df.insert(len(df.columns), 'label_probs', label_probs)
@@ -184,41 +200,57 @@ def add_labels(df, labels, label_probs):
     return df
 
 
-def filter_df(unfiltered_df: pd.DataFrame, label_matrix: np.ndarray, label_model: LabelModel):
+def filter_df(df: pd.DataFrame, label_matrix: np.ndarray, label_model: LabelModel) -> (pd.DataFrame, [[float]]):
+    """
+    This function uses the label model's predictions to filter out data points that cannot be classified.
+    :param df: a pd.DataFrame containing data points to be filtered
+    :param label_matrix: The numpy.ndarray of LF votes for each data point
+    :param label_model: The Label Model that has been trained on the train label matrix
+    :return: The filtered df and corresponding probabilities
+    """
     logging.info("Filtering out abstain data points ...")
-    try:
-        filtered_df, probs = filter_unlabeled_dataframe(unfiltered_df, label_model.predict_proba(label_matrix),
+    filtered_df, probs = filter_unlabeled_dataframe(df, label_model.predict_proba(label_matrix),
                                                     label_matrix)
-        logging.info("data points filtered out: {0}".format(unfiltered_df.shape[0] - filtered_df.shape[0]))
-        logging.info("data points remaining: {0}".format(filtered_df.shape[0]))
-    except:
-        filtered_df = None
-        probs = None
+    logging.info("data points filtered out: {0}".format(df.shape[0] - filtered_df.shape[0]))
+    logging.info("data points remaining: {0}".format(filtered_df.shape[0]))
     return filtered_df, probs
 
 
-def validate_training_data(filtered_df, labels):
+def validate_training_data(df: pd.DataFrame, labels):
+    """
+    - Do a check of the class representation for the training data
+    :param df: The labeled train pd.DataFrame
+    :param labels: the Label class for this current classification task storing the name and int value for each class
+    """
     logging.info("Validating the training data ...")
-    # Make sure each class is represented in the data
-    try:
-        assert (not set(flatten(filtered_df['label'].tolist())).difference(set([label.name for label in labels])))
-    except AssertionError:
-        logging.warning("Not all classes are represented in this training data.")
+    # Check class balance
+    balance = calc_class_balance(df.label.tolist(), labels)
+    logging.info("TRAINING DATA CLASS BALANCE: {}".format(balance))
 
 
-def calc_class_balance(y_dev, labels):
-    try:
-        y_len = len(y_dev)
-        flat_y_dev = np.array(y_dev).flatten().tolist()
-        counts = map(lambda l: flat_y_dev.count(l), [label.name for label in labels])
-        balance = list(map(lambda count: count / y_len, counts))
-        assert 0 not in balance
-    except:
-        balance = None
-    logging.info("BALANCE: {}".format(balance))
-    return balance
+def calc_class_balance(y: [[str]], labels) -> dict:
+    """
+    Calculates class balance for multilabel and multiclass annotations by flattening the multidimensional array of
+    labels into one array, counting the number of times each label appears, and dividing that count by the total number
+    of data points to get each label's proportion of the entire dataset. We take the proportion out of data points, not
+    the total number of labels, because we assume that in a multilabel setting, each label per data point can fully
+    describe that data point without depending on the other label to complete it.
+            Example:
+                y = [['cat'],['dog','bird'],['cat','dog']]
+                label_names = ['cat','dog','bird']
+                y_len = 3
+                counts = [2, 2, 1]
+                balance = {'cat':0.66, 'dog':0.66, 'bird':0.33}
+    :param y: The annotations
+    """
+    y_len = len(y)
+    flat_y_dev = np.array(y).flatten().tolist()
+    label_names = [label.name for label in labels]
+    counts = map(lambda l: flat_y_dev.count(l), label_names)
+    balance = list(map(lambda count: count / y_len, counts))
+    return dict(zip(label_names, balance))
 
 
-def save_df(df, pkl_filename, html_filename):
+def save_df(df: pd.DataFrame, pkl_filename: str, html_filename: str):
     df.to_pickle(pkl_filename)
     df.head().to_html(html_filename)

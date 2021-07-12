@@ -2,6 +2,7 @@ import logging
 import os
 import json
 import mlflow
+import sys
 
 from label import TRAIN_DF, DEV_DF_FILENAME, DEV_DF_HTML_FILENAME, parsed_args, model, evaluate, tracking
 from label.lfs.pv import ValueLabel
@@ -30,19 +31,31 @@ def main():
 
         # create the label matrix
         logging.info("Creating label matrix ...")
-        train_L = model.create_label_matrix(train_df, pv_lfs)
-        dev_L = model.create_label_matrix(dev_df, pv_lfs)
+        try:
+            train_L = model.create_label_matrix(train_df, pv_lfs)
+        except Exception as e:
+            msg = "Unable to create train label matrix:\n{}\nStopping.".format(e.args)
+            logging.error(msg)
+            sys.exit(msg)
+        try:
+            dev_L = model.create_label_matrix(dev_df, pv_lfs)
+        except Exception as e:
+            msg = "Unable to create dev label matrix:\n{}\nProceeding without class balance.".format(e.args)
+            logging.warning(msg)
 
         # train the label model
         logging.info("Training label model ...")
-        label_model = model.train_label_model(train_L, dev_true, ValueLabel)
+        try:
+            label_model = model.train_label_model(train_L, dev_true, ValueLabel)
+        except Exception as e:
+            msg = "Unable to train label model:\n{}\nStopping.".format(e.args)
+            logging.error(msg)
+            sys.exit(msg)
 
-        # evaluate the label model
+        # use the label model to label the data
         logging.info("Predicting {} ...".format(parsed_args.task))
         labeled_train_df = model.apply_label_preds(train_df, train_L, label_model, ValueLabel, parsed_args.task)
         labeled_dev_df = model.apply_label_preds(dev_df, dev_L, label_model, ValueLabel, parsed_args.task)
-
-        train_pred = labeled_train_df.label.tolist()
         try:
             dev_pred = labeled_dev_df.label.tolist()
         except:
@@ -52,6 +65,7 @@ def main():
         print("Validating training data ...")
         model.validate_training_data(labeled_train_df, ValueLabel)
 
+        # evaluate the labeling functions and label model predictions
         logging.info("Evaluating ...")
         evaluate.lf_summary(train_L, dev_L, pv_lfs, label_model, dev_true)
         if parsed_args.task == 'multiclass':
