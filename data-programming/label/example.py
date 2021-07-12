@@ -1,16 +1,15 @@
 import logging
 import os
-import json
-import mlflow
 import sys
 
+import mlflow
 from label import TRAIN_DF, DEV_DF_FILENAME, DEV_DF_HTML_FILENAME, parsed_args, model, evaluate, tracking
-from label.lfs.pv import ValueLabel
-from label.lfs.pv import pv_lfs
+from label.lfs import ExampleLabels
+from label.lfs.example import get_lfs
 
-REGISTERED_MODEL_NAME = 'PersonalValuesLabelModel'
-LF_FEATURES = {'text_pv_freq': json.loads}
-PV_DEV_COMPLETIONS_DIRECTORY = os.path.join('/labeled_data', 'pv_completions', '*')
+REGISTERED_MODEL_NAME = 'ExampleLabelModel'
+LF_FEATURES = {'text_lemma': None}
+EXAMPLE_DEV_COMPLETIONS_DIRECTORY = os.path.join('/labeled_data', 'eg_completions', '*')
 
 
 def main():
@@ -21,7 +20,7 @@ def main():
 
         if parsed_args.dev_data:
             logging.info("Getting development data if available ...")
-            dev_df = model.load_lf_info(evaluate.get_dev_df(PV_DEV_COMPLETIONS_DIRECTORY), LF_FEATURES)
+            dev_df = model.load_lf_info(evaluate.get_dev_df(EXAMPLE_DEV_COMPLETIONS_DIRECTORY), LF_FEATURES)
             model.save_df(dev_df, DEV_DF_FILENAME, DEV_DF_HTML_FILENAME)
             dev_true = dev_df.gold_label.tolist()
         else:
@@ -30,15 +29,16 @@ def main():
             dev_true = None
 
         # create the label matrix
+        lfs = get_lfs()
         logging.info("Creating label matrix ...")
         try:
-            train_L = model.create_label_matrix(train_df, pv_lfs)
+            train_L = model.create_label_matrix(train_df, lfs)
         except Exception as e:
             msg = "Unable to create train label matrix:\n{}\nStopping.".format(e.args)
             logging.error(msg)
             sys.exit(msg)
         try:
-            dev_L = model.create_label_matrix(dev_df, pv_lfs)
+            dev_L = model.create_label_matrix(dev_df, lfs)
         except Exception as e:
             msg = "Unable to create dev label matrix:\n{}\nProceeding without class balance.".format(e.args)
             logging.warning(msg)
@@ -46,7 +46,7 @@ def main():
         # train the label model
         logging.info("Training label model ...")
         try:
-            label_model = model.train_label_model(train_L, dev_true, ValueLabel)
+            label_model = model.train_label_model(train_L, dev_true, ExampleLabels)
         except Exception as e:
             msg = "Unable to train label model:\n{}\nStopping.".format(e.args)
             logging.error(msg)
@@ -54,8 +54,8 @@ def main():
 
         # use the label model to label the data
         logging.info("Predicting {} ...".format(parsed_args.task))
-        labeled_train_df = model.apply_label_preds(train_df, train_L, label_model, ValueLabel, parsed_args.task)
-        labeled_dev_df = model.apply_label_preds(dev_df, dev_L, label_model, ValueLabel, parsed_args.task)
+        labeled_train_df = model.apply_label_preds(train_df, train_L, label_model, ExampleLabels, parsed_args.task)
+        labeled_dev_df = model.apply_label_preds(dev_df, dev_L, label_model, ExampleLabels, parsed_args.task)
         try:
             dev_pred = labeled_dev_df.label.tolist()
         except:
@@ -63,11 +63,11 @@ def main():
 
         # validate the training data
         print("Validating training data ...")
-        model.validate_training_data(labeled_train_df, ValueLabel)
+        model.validate_training_data(labeled_train_df, ExampleLabels)
 
         # evaluate the labeling functions and label model predictions
         logging.info("Evaluating ...")
-        evaluate.lf_summary(train_L, dev_L, pv_lfs, label_model, dev_true)
+        evaluate.lf_summary(train_L, dev_L, lfs, label_model, dev_true)
         if parsed_args.task == 'multiclass':
             metrics = evaluate.multiclass_summary(dev_L, dev_true, dev_pred, label_model)
         elif parsed_args.task == 'multilabel':
