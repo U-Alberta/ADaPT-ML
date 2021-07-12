@@ -5,21 +5,20 @@ drawing false conclusions from unreliable data, social scientists commonly rely 
 consider data with 0.800 > α ≥ 0.667 only to draw tentative conclusions, and discard data whose agreement measures α
 < 0.667. """
 
-RELIABLE = 0.8
-UNRELIABLE = 0.667
-
-
-from glob import glob
 import argparse
 import json
-import os
-import pandas as pd
 import logging
+import os
+from functools import reduce
+from glob import glob
+
+import krippendorff
+import pandas as pd
 from ls import LABEL_STUDIO_DIRECTORY
 from sklearn.feature_extraction.text import CountVectorizer
-import numpy as np
-import krippendorff
-from functools import reduce
+
+RELIABLE = 0.8
+UNRELIABLE = 0.667
 
 
 def get_dev_df(completions_dir):
@@ -42,7 +41,14 @@ def get_dev_df(completions_dir):
     return dev_df
 
 
-def calc_krippendorff_alpha(dfs):
+def calc_krippendorff_alpha(dfs: pd.DataFrame) -> float:
+    """
+    This function calculates krippendorff's alpha to measure annotator agreement for both multiclass and multilabel
+    settings with two or more annotators.
+    :param dfs: pd.Dataframe with columns id and gold_label_# for all data points that have been labeled by all
+    annotators
+    :return: the nominal alpha
+    """
     gold_label_cols_df = dfs[[col for col in dfs.columns if 'gold_label' in col]]
     gold_labels_combined = [' '.join(labels) for labels in [
         [val for sublist in label for val in sublist] for label in gold_label_cols_df.itertuples(index=False)]

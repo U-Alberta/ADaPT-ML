@@ -1,0 +1,10 @@
+<View>
+    <Header value="Choose Topic:"/>
+    <Text name="tweet_text" value="$tweet"/>
+    <Choices name="topic" toName="tweet_text" choice="multiple" showInLine="false">
+      <Choice value="cat"/>
+      <Choice value="dog"/>
+      <Choice value="bird"/>
+      <Choice value="NONE"/>
+    </Choices>
+</View>

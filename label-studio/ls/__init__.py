@@ -1,22 +1,15 @@
 import os
 import logging
 
-CRATE_DB_IP = os.environ['CRATE_DB_IP']
+DATABASE_IP = os.environ['DATABASE_IP']
 LABEL_STUDIO_DIRECTORY = '/label_studio'
-PV_TASKS_DIRECTORY = os.path.join(LABEL_STUDIO_DIRECTORY, 'pv_tasks')
+PV_TASKS_DIRECTORY = os.path.join(LABEL_STUDIO_DIRECTORY, 'example_tasks')
 LOGGING_FILENAME = os.path.join(LABEL_STUDIO_DIRECTORY, 'dev_log.txt')
 
-PV_VOCAB = [
-    "security",
-    "conformity",
-    "tradition",
-    "benevolence",
-    "universalism",
-    "self_direction",
-    "stimulation",
-    "hedonism",
-    "achievement",
-    "power"
+EXAMPLE_VOCAB = [
+    "cat",
+    "dog",
+    "bird",
 ]
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO, filename=LOGGING_FILENAME, filemode='w')

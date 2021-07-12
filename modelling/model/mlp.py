@@ -17,12 +17,15 @@ from model_objs import LookupClassifier, save_model
 parser = argparse.ArgumentParser(description='Train a multi-layer perceptron classifier.')
 parser.add_argument('train_path', type=str, help='File path or URL to the training data')
 parser.add_argument('test_path', type=str, help='File path or URL to the test data')
-parser.add_argument('features', default='tweet_use', nargs='+', type=str, help='column name(s) of the features to use.')
+parser.add_argument('features', nargs='+', type=str, help='column name(s) of the features to use.')
 
-parser.add_argument('--activation', default='relu', type=str, help='Activation function for the hidden layer.')
-parser.add_argument('--solver', default='adam', type=str, help='The solver for weight optimization.')
+parser.add_argument('--activation', choices=('identity', 'logistic', 'tanh', 'relu'), default='relu', type=str,
+                    help='Activation function for the hidden layer.')
+parser.add_argument('--solver', choices=('adam', 'lbfgs', 'sgd'), default='adam', type=str,
+                    help='The solver for weight optimization.')
 parser.add_argument('--alpha', default=0.0001, type=float, help='L2 penalty (regularization term) parameter.')
-parser.add_argument('--learning_rate', default='constant', type=str, help='Learning rate schedule for weight updates.')
+parser.add_argument('--learning_rate', choices=('constant', 'invscaling', 'adaptive'), default='constant', type=str,
+                    help='Learning rate schedule for weight updates.')
 parser.add_argument('--learning_rate_init', default=0.001, type=float,
                     help='The initial learning rate used. It controls the step-size in updating the weights.')
 parser.add_argument('--power_t', default=0.5, type=float, help='The exponent for inverse scaling rate.')
@@ -73,8 +76,6 @@ TRAIN_PARAMS.update(
 
 REGISTERED_MODEL_NAME = '{}_MLP'.format('_'.join(parsed_args.features))
 ARTIFACT_PATH = 'mlp'
-
-# mlflow.sklearn.autolog()
 
 
 def evaluate_multiclass(pipe, x_test, y_true, y_pred):

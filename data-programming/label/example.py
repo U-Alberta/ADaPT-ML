@@ -8,7 +8,7 @@ from label.lfs import ExampleLabels
 from label.lfs.example import get_lfs
 
 REGISTERED_MODEL_NAME = 'ExampleLabelModel'
-LF_FEATURES = {'text_lemma': None}
+LF_FEATURES = {'text_clean_lemma': None}
 EXAMPLE_DEV_COMPLETIONS_DIRECTORY = os.path.join('/labeled_data', 'eg_completions', '*')
 
 

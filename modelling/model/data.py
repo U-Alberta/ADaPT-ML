@@ -9,7 +9,13 @@ from model import (X_TRAIN_FILENAME, TRAIN_DF_HTML_FILENAME, TEST_PRED_DF_FILENA
 from model_objs import SQL_QUERY, CRATE_DB_IP
 
 
-def load(train_path, test_path):
+def load(train_path: str, test_path: str) -> (pd.DataFrame, pd.DataFrame):
+    """
+    Loads the training and testing pd.DataFrames from disk, and saves a preview of the training data
+    :param train_path: path to the training data given as an argument on startup
+    :param test_path: path to the test data given as an argument on startup
+    :return: two DataFrames containing the testing data with columns id, table, label, label_probs
+    """
     logging.info("Getting train and test data ...")
     try:
         with open(train_path, 'rb') as infile:
@@ -17,13 +23,20 @@ def load(train_path, test_path):
             train_df.head().to_html(TRAIN_DF_HTML_FILENAME)
         with open(test_path, 'rb') as infile:
             test_df = pd.read_pickle(infile)
-    except IOError:
-        sys.exit("Could not read data")
+    except IOError as e:
+        sys.exit("Could not read data: {}".format(e.args))
 
     return train_df, test_df
 
 
-def binarize_labels(y_train, y_test, return_inverse=False):
+def binarize_labels(y_train: [[str]], y_test: [[str]], return_inverse=False):
+    """
+    This function takes the list of label names and turns it into a one-hot encoding for each data point, then returns
+    the binarizer and transformed labels for training and testing
+    :param y_train: list of labels such as [['cat'],['dog','bird']]
+    :param y_test: list of labels such as [['cat'],['dog','bird']]
+    :param return_inverse: optional parameter to return the
+    """
     mlb = MultiLabelBinarizer()
     y_train = mlb.fit_transform(y_train)
     y_test = mlb.transform(y_test)

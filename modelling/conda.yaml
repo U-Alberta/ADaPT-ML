@@ -21,6 +21,4 @@ dependencies:
     - geojson
     - crate
     - "-e ."
-#    - tensorflow-data-validation == 0.22.2
-#    - tensorflow-transform == 0.22.0
-#    - tensorflow-model-analysis == 0.22.2
+
