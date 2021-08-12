@@ -21,4 +21,5 @@ dependencies:
     - geojson
     - crate
     - matplotlib
+    - cryptography
     - "-e ."
