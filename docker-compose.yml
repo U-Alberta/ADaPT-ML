@@ -1,65 +1,14 @@
 version: '3.8'
 
 services:
-  cratedb01:
+  cratedb:
     image: crate:latest
+    container_name: crate-db
     ports:
-      - 4201:4200
+      - 4200:4200
     volumes:
-      - ${DB_DATA_PATH}/01:/data
-    command: [ "crate",
-               "-Ccluster.name=crate-docker-cluster",
-               "-Cnode.name=cratedb01",
-               "-Cnode.data=true",
-               "-Cnetwork.host=_site_",
-               "-Cdiscovery.seed_hosts=cratedb02,cratedb03",
-               "-Ccluster.initial_master_nodes=cratedb01,cratedb02,cratedb03",
-               "-Cgateway.expected_nodes=3",
-               "-Cgateway.recover_after_nodes=2" ]
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: on-failure
-    environment:
-      - CRATE_HEAP_SIZE=2g
-
-  cratedb02:
-    image: crate:latest
-    ports:
-      - 4202:4200
-    volumes:
-      - ${DB_DATA_PATH}/02:/data
-    command: [ "crate",
-               "-Ccluster.name=crate-docker-cluster",
-               "-Cnode.name=cratedb02",
-               "-Cnode.data=true",
-               "-Cnetwork.host=_site_",
-               "-Cdiscovery.seed_hosts=cratedb01,cratedb03",
-               "-Ccluster.initial_master_nodes=cratedb01,cratedb02,cratedb03",
-               "-Cgateway.expected_nodes=3",
-               "-Cgateway.recover_after_nodes=2" ]
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: on-failure
-    environment:
-      - CRATE_HEAP_SIZE=2g
-
-  cratedb03:
-    image: crate:latest
-    ports:
-      - 4203:4200
-    volumes:
-      - ${DB_DATA_PATH}/03:/data
-    command: [ "crate",
-               "-Ccluster.name=crate-docker-cluster",
-               "-Cnode.name=cratedb03",
-               "-Cnode.data=true",
-               "-Cnetwork.host=_site_",
-               "-Cdiscovery.seed_hosts=cratedb01,cratedb02",
-               "-Ccluster.initial_master_nodes=cratedb01,cratedb02,cratedb03",
-               "-Cgateway.expected_nodes=3",
-               "-Cgateway.recover_after_nodes=2" ]
+      - ${DB_DATA_PATH}:/data
+    command: [ "crate", "-Cnetwork.host=_site_" ]
     deploy:
       replicas: 1
       restart_policy:
@@ -77,15 +26,11 @@ services:
       - ls_network
     volumes:
       - ${LS_DATA_PATH}:/label-studio/data
-      - ./label-studio/label_config:/label_config
+      - ./label-studio/config:/config
     environment:
       - LABEL_STUDIO_LOCAL_FILES_SERVING_ENABLED=true
       - LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT=/label-studio/files
-    command: [ "label-studio init",
-               "eg_project",
-               "--label-config=/label_config/eg_config.xml",
-               "&&",
-               "label-studio start" ]
+    command: [ "label-studio", "start" ]
 
   ls:
     restart: on-failure
@@ -98,7 +43,7 @@ services:
       - ls_network
     volumes:
       - ./label-studio/ls:/code/ls
-      - ${LS_DATA_PATH}:/label_studio
+      - ${LS_DATA_PATH}:/label-studio/data
     environment:
       - DATABASE_IP=${DATABASE_IP}
     stdin_open: true
@@ -106,7 +51,7 @@ services:
 
   dp_db:
     restart: on-failure
-    image: mysql/mysql-server:8.0
+    image: mysql/mysql-server:8.0.26
     container_name: dp-mlflow-db
     expose:
       - 3306
@@ -119,6 +64,7 @@ services:
       - MYSQL_USER=${DP_MYSQL_USER}
       - MYSQL_PASSWORD=${DP_MYSQL_PASSWORD}
       - MYSQL_ROOT_PASSWORD=${DP_MYSQL_ROOT_PASSWORD}
+#      - MYSQL_ROOT_HOST=172.*.*.*
 
   dp_web:
     restart: on-failure
@@ -137,8 +83,8 @@ services:
       - ${DP_DATA_PATH}/mlruns:/mlflow/mlruns
     environment:
       - MLFLOW_TRACKING_URI=${DP_MLFLOW_TRACKING_URI}
-    command: [ "wait-for-it dp-mlflow-db:3306 -s --",
-               "mlflow server",
+    command: [ "mlflow",
+               "server",
                "--backend-store-uri=$DP_MLFLOW_TRACKING_URI",
                "--default-artifact-root=./mlruns",
                "--host=0.0.0.0"]
@@ -158,26 +104,23 @@ services:
       - ${DP_DATA_PATH}/unlabeled_data:/unlabeled_data
       - ${DP_DATA_PATH}/tmp_artifacts:/tmp_artifacts
       - ${DP_DATA_PATH}/labeled_data:/labeled_data
-      - ${LF_RESOURCES_PATH}:/lf_resources
       - ./data-programming/label:/code/label
       - ./data-programming/MLproject:/code/MLproject
       - ./data-programming/conda.yaml:/code/conda.yaml
     environment:
       - MLFLOW_TRACKING_URI=${DP_MLFLOW_TRACKING_URI}
       - DATABASE_IP=${DATABASE_IP}
-      - PV_WORD_COUNT=${PV_WORD_COUNT}
-      - PERSONAL_VALUES_DICTIONARY=${PERSONAL_VALUES_DICTIONARY}
     stdin_open: true
     tty: true
 
   m_db:
     restart: on-failure
-    image: mysql/mysql-server:8.0
+    image: mysql/mysql-server:8.0.26
     container_name: modelling-mlflow-db
     expose:
       - 3306
     networks:
-      - modelling_network
+      - m_network
     volumes:
       - ${MODELLING_DATA_PATH}/dbdata:/var/lib/mysql
     environment:
@@ -185,6 +128,7 @@ services:
       - MYSQL_USER=${MODELLING_MYSQL_USER}
       - MYSQL_PASSWORD=${MODELLING_MYSQL_PASSWORD}
       - MYSQL_ROOT_PASSWORD=${MODELLING_MYSQL_ROOT_PASSWORD}
+#      - MYSQL_ROOT_HOST=172.*.*.*
 
   m_web:
     restart: on-failure
@@ -203,8 +147,8 @@ services:
       - ${MODELLING_DATA_PATH}/mlruns:/mlflow/mlruns
     environment:
       - MLFLOW_TRACKING_URI=${MODELLING_MLFLOW_TRACKING_URI}
-    command: [ "wait-for-it modelling-mlflow-db:3306 -s --",
-               "mlflow server",
+    command: [ "mlflow",
+               "server",
                "--backend-store-uri=$MODELLING_MLFLOW_TRACKING_URI",
                "--default-artifact-root=./mlruns",
                "--host=0.0.0.0" ]
@@ -225,9 +169,8 @@ services:
       - ${MODELLING_DATA_PATH}/test_data:/test_data
       - ${MODELLING_DATA_PATH}/tmp_artifacts:/tmp_artifacts
       - ./modelling/model:/code/model
-      - ./MLproject:/code/MLproject
-      - ./conda.yaml:/code/conda.yaml
-      - /usr/local/share/nltk_data:/usr/local/share/nltk_data
+      - ./modelling/MLproject:/code/MLproject
+      - ./modelling/conda.yaml:/code/conda.yaml
     environment:
       - MLFLOW_TRACKING_URI=${MODELLING_MLFLOW_TRACKING_URI}
       - DATABASE_IP=${DATABASE_IP}
@@ -248,7 +191,7 @@ services:
       - ${MODELLING_DATA_PATH}/mlruns:/mlruns
     environment:
       - DATABASE_IP=${DATABASE_IP}
-      - PV_MODEL_PATH=${PV_MODEL_PATH}
+      - EXAMPLE_MODEL_PATH=${EXAMPLE_MODEL_PATH}
 
 networks:
   ls_network:
@@ -257,3 +200,7 @@ networks:
     driver: bridge
   m_network:
     driver: bridge
+
+#>
+#      sh -c "label-studio init example_project --label-config=/config/example_config.xml
+#      && label-studio start"

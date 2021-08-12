@@ -68,7 +68,8 @@ def load_lf_info(id_df, features) -> pd.DataFrame:
 
     # convert to the right data types
     for column in features:
-        lf_info_df[column] = lf_info_df[column].apply(lambda d: features[column](d))
+        if features[column] is not None:
+            lf_info_df[column] = lf_info_df[column].apply(lambda d: features[column](d))
     logging.info("LF info loaded. Here's a peek:")
     logging.info(lf_info_df.head())
     return lf_info_df

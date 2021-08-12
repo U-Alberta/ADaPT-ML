@@ -34,7 +34,7 @@ KEYWORD_DICT = {
         'leopard', 'panther', 'cheetah', 'cougar', 'kitten', 'cat'
     ],
     'dog': [
-        'bark', 'pant', 'fetch', 'puppy', 'dog', 'beagle', 'collie', 'labrador',
+        'bark', 'pant', 'woof', 'puppy', 'dog', 'beagle', 'collie', 'labrador',
         'schnauser', 'pitbull', 'bulldog', 'poodle', 'howl', 'husky'
     ],
     'bird': [
