@@ -201,6 +201,7 @@ networks:
   m_network:
     driver: bridge
 
+# test
 #>
 #      sh -c "label-studio init example_project --label-config=/config/example_config.xml
 #      && label-studio start"
