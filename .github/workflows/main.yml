@@ -1,0 +1,40 @@
+# This is a workflow containing an automated test suite covering the core functionality of the software.
+
+name: ADaPT-ML CI
+
+on: [push]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+    env:
+      DATA_PATH=/test_data
+      DB_DATA_PATH=./crate
+      LS_DATA_PATH=/test_data/ls
+      DP_DATA_PATH=/test_data/dp
+      MODELLING_DATA_PATH=/test_data/m
+      DATABASE_IP=crate://crate-db:4200
+
+      DP_MYSQL_DATABASE=mlruns.db
+      DP_MYSQL_USER=testusr
+      DP_MYSQL_PASSWORD=testpassword
+      DP_MYSQL_ROOT_PASSWORD=strongtestpassword
+      DP_HOST_NAME=dp-mlflow-db
+      DP_MLFLOW_TRACKING_URI=mysql+pymysql://testusr:testpassword@dp-mlflow-db:3306/mlruns.db
+
+      MODELLING_MYSQL_DATABASE=mlruns.db
+      MODELLING_MYSQL_USER=testusr
+      MODELLING_MYSQL_PASSWORD=testpassword
+      MODELLING_MYSQL_ROOT_PASSWORD=strongtestpassword
+      MODELLING_HOST_NAME=modelling-mlflow-db
+      MODELLING_MLFLOW_TRACKING_URI=mysql+pymysql://testusr:testpassword@modelling-mlflow-db:3306/mlruns.db
+      EXAMPLE_MODEL_PATH=
+
+    steps:
+    - uses: actions/ADaPT-ML@v1-beta
+    - name: Build the docker-compose stack
+      run: docker-compose -f docker-compose.yml up -d
+    - name: Check running containers
+      run: docker ps -a
