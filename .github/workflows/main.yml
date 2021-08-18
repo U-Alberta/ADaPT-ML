@@ -10,27 +10,27 @@ jobs:
 
     runs-on: ubuntu-latest
     env:
-      DATA_PATH=/test_data
-      DB_DATA_PATH=./crate
-      LS_DATA_PATH=/test_data/ls
-      DP_DATA_PATH=/test_data/dp
-      MODELLING_DATA_PATH=/test_data/m
-      DATABASE_IP=crate://crate-db:4200
+      DATA_PATH: /test_data
+      DB_DATA_PATH: ./crate
+      LS_DATA_PATH: /test_data/ls
+      DP_DATA_PATH: /test_data/dp
+      MODELLING_DATA_PATH: /test_data/m
+      DATABASE_IP: crate://crate-db:4200
 
-      DP_MYSQL_DATABASE=mlruns.db
-      DP_MYSQL_USER=testusr
-      DP_MYSQL_PASSWORD=testpassword
-      DP_MYSQL_ROOT_PASSWORD=strongtestpassword
-      DP_HOST_NAME=dp-mlflow-db
-      DP_MLFLOW_TRACKING_URI=mysql+pymysql://testusr:testpassword@dp-mlflow-db:3306/mlruns.db
+      DP_MYSQL_DATABASE: mlruns.db
+      DP_MYSQL_USER: testusr
+      DP_MYSQL_PASSWORD: testpassword
+      DP_MYSQL_ROOT_PASSWORD: strongtestpassword
+      DP_HOST_NAME: dp-mlflow-db
+      DP_MLFLOW_TRACKING_URI: mysql+pymysql://testusr:testpassword@dp-mlflow-db:3306/mlruns.db
 
-      MODELLING_MYSQL_DATABASE=mlruns.db
-      MODELLING_MYSQL_USER=testusr
-      MODELLING_MYSQL_PASSWORD=testpassword
-      MODELLING_MYSQL_ROOT_PASSWORD=strongtestpassword
-      MODELLING_HOST_NAME=modelling-mlflow-db
-      MODELLING_MLFLOW_TRACKING_URI=mysql+pymysql://testusr:testpassword@modelling-mlflow-db:3306/mlruns.db
-      EXAMPLE_MODEL_PATH=
+      MODELLING_MYSQL_DATABASE: mlruns.db
+      MODELLING_MYSQL_USER: testusr
+      MODELLING_MYSQL_PASSWORD: testpassword
+      MODELLING_MYSQL_ROOT_PASSWORD: strongtestpassword
+      MODELLING_HOST_NAME: modelling-mlflow-db
+      MODELLING_MLFLOW_TRACKING_URI: mysql+pymysql://testusr:testpassword@modelling-mlflow-db:3306/mlruns.db
+      EXAMPLE_MODEL_PATH: /example_model
 
     steps:
     - uses: actions/ADaPT-ML@v1-beta
