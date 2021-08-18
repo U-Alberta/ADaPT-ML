@@ -28,7 +28,7 @@ LOOKUP_CLASSIFIER_CONDA_ENV = {
     'name': 'lookup_classifier_env'
 }
 
-CRATE_DB_IP = os.environ['CRATE_DB_IP']
+DATABASE_IP = os.environ['DATABASE_IP']
 SQL_QUERY = """
     SELECT {column} FROM {table} WHERE id IN {ids};
     """
@@ -43,7 +43,7 @@ class LookupClassifier(mlflow.pyfunc.PythonModel):
         self.features = features
         self.conda_env = LOOKUP_CLASSIFIER_CONDA_ENV
         self.query = SQL_QUERY
-        self.db = CRATE_DB_IP
+        self.db = DATABASE_IP
         self.used_inverse_labels = used_inverse_labels
 
     def get_features(self, id_df):

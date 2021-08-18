@@ -103,6 +103,9 @@ venv.bak/
 # Pycharm project settings
 .idea
 
+# Jupyter
+*.ipynb
+
 # Rope project settings
 .ropeproject
 
@@ -117,3 +120,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# temp
+example_test.py
+example_data
