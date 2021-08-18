@@ -12,9 +12,6 @@ class ExampleLabels(Enum):
     This is an example of 3 different categories that the data can be classified into -- the topic of cats, dogs,
     and / or birds
     """
-    cats = 0
-    C = 0
-    dogs = 1
-    D = 1
-    birds = 2
-    B = 2
+    cat = 0
+    dog = 1
+    bird = 2

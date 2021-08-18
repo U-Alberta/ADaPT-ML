@@ -6,6 +6,8 @@ services:
     container_name: crate-db
     ports:
       - 4200:4200
+    networks:
+      - dp_network
     volumes:
       - ${DB_DATA_PATH}:/data
     command: [ "crate", "-Cnetwork.host=_site_" ]

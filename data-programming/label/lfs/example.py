@@ -57,7 +57,7 @@ def get_lfs() -> [LabelingFunction]:
                                                      lemma,
                                                      label)
                                      for lemma in KEYWORD_DICT[label.name]]
-        lfs = lfs + keyword_lfs
+    lfs = lfs + keyword_lfs
     logging.info("LFs have been gathered.")
     return lfs
 
@@ -70,7 +70,7 @@ def lemma_keyword_lookup(x, lemma, label) -> int:
     :param label: the attribute of the ExampleLabels for the given label, holding its name and value
     :return: the integer value of the ExampleLabel if the lemma is found, or -1 (abstain) if not
     """
-    return label.value if lemma in x.text_lemm else ABSTAIN
+    return label.value if lemma in x.txt_clean_lemma else ABSTAIN
 
 
 def make_keyword_lf(name, lemma, label) -> LabelingFunction:
