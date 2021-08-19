@@ -44,5 +44,5 @@ jobs:
       run: docker ps -a
 
     # Testing out the data programming functionality
-    - name: DP test 1: multiclass
+    - name: DP test 1 -- multiclass
       run: docker exec dp-mlflow 'wait-for-it dp-mlflow-db:3306 -s -- mlflow run --no-conda -e example --experiment-name test -P train_data=./example_data/multiclass_df.pkl -P dev_data=0 -P task=multiclass .'
