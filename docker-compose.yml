@@ -36,10 +36,7 @@ services:
 
   ls:
     restart: on-failure
-    build:
-      context: ./label-studio
-      dockerfile: Dockerfile
-    image: label-studio-image
+    image: nullberry/adapt-ml-ls:latest
     container_name: label-studio-dev
     networks:
       - ls_network
@@ -69,10 +66,7 @@ services:
 
   dp_web:
     restart: on-failure
-    build:
-      context: data-programming
-      dockerfile: Dockerfile-server
-    image: dp-server-image
+    image: nullberry/adapt-ml-dp-web:latest
     container_name: dp-mlflow-server
     ports:
       - 5000:5000
@@ -130,10 +124,7 @@ services:
 
   m_web:
     restart: on-failure
-    build:
-      context: ./modelling
-      dockerfile: Dockerfile-server
-    image: modelling-server-image
+    image: nullberry/adapt-ml-m-web:latest
     container_name: modelling-mlflow-server
     ports:
       - 5001:5000
@@ -152,10 +143,7 @@ services:
                "--host=0.0.0.0" ]
 
   m:
-    build:
-      context: ./modelling
-      dockerfile: Dockerfile
-    image: modelling-image
+    image: nullberry/adapt-ml-m:latest
     container_name: modelling-mlflow
     networks:
       - m_network
@@ -176,10 +164,7 @@ services:
     tty: true
 
   m_deploy:
-    build:
-      context: ./modelling
-      dockerfile: Dockerfile-deploy
-    image: modelling-deploy-image
+    image: nullberry/adapt-ml-m-deploy:latest
     container_name: modelling-mlflow-deploy
     ports:
       - 80:80
