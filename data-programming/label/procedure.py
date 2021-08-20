@@ -11,7 +11,7 @@ from snorkel.labeling import filter_unlabeled_dataframe
 from snorkel.labeling.model import LabelModel
 from snorkel.utils import probs_to_preds
 
-from label import (LABEL_MODEL_FILENAME, TRAIN_PARAMS, SQL_QUERY, DATABASE_IP)
+from label import TRAIN_PARAMS, SQL_QUERY, DATABASE_IP
 
 from snorkel.labeling.apply.dask import PandasParallelLFApplier
 
@@ -75,7 +75,7 @@ def load_lf_info(id_df, features) -> pd.DataFrame:
     return lf_info_df
 
 
-def create_label_matrix(df, lfs):
+def create_label_matrix(df, lfs) -> np.ndarray:
     """
     This function applies the LFs over the datapoints in the given DataFrame to create an n X m numpy matrix where each
     row is for a datapoint and each column is the integer vote from each LF if its check is successful or -1 if it
@@ -89,10 +89,6 @@ def create_label_matrix(df, lfs):
     n_parallel = int(multiprocessing.cpu_count() / 2)
     label_matrix = applier.apply(df, n_parallel=n_parallel, fault_tolerant=False)
     return label_matrix
-
-
-def save_label_matrix(label_matrix, filename):
-    np.save(filename, label_matrix)
 
 
 def train_label_model(L_train: np.ndarray, y_dev: [[str]], labels) -> LabelModel:
@@ -116,7 +112,6 @@ def train_label_model(L_train: np.ndarray, y_dev: [[str]], labels) -> LabelModel
         balance = None
         logging.info("TRUE CLASS BALANCE: {}".format(balance))
     label_model.fit(L_train, class_balance=balance, **TRAIN_PARAMS)
-    label_model.save(LABEL_MODEL_FILENAME)
     return label_model
 
 
@@ -255,3 +250,7 @@ def calc_class_balance(y: [[str]], labels) -> dict:
 def save_df(df: pd.DataFrame, pkl_filename: str, html_filename: str):
     df.to_pickle(pkl_filename)
     df.head().to_html(html_filename)
+
+
+def save_label_matrix(label_matrix: np.ndarray, filename: str):
+    np.save(filename, label_matrix)
