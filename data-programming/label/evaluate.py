@@ -16,8 +16,7 @@ from sklearn.metrics import confusion_matrix, multilabel_confusion_matrix, f1_sc
 from sklearn.preprocessing import MultiLabelBinarizer
 from snorkel.labeling import LFAnalysis
 
-from label import CONFUSION_MATRIX_FILENAME, LF_SUMMARY_DEV_FILENAME, LF_SUMMARY_TRAIN_FILENAME, DEV_DF_FILENAME, \
-    DEV_DF_HTML_FILENAME
+from label import CONFUSION_MATRIX_FILENAME, LF_SUMMARY_DEV_FILENAME, LF_SUMMARY_TRAIN_FILENAME
 
 MULTICLASS_METRICS = ['accuracy', 'coverage', 'f1_micro', 'f1_macro']
 
@@ -122,6 +121,4 @@ def get_dev_df(completions_dir) -> pd.DataFrame:
         except IndexError:
             logging.warning("This completion has no result?: {}".format(df.at[0, 'completions']))
 
-    dev_df.to_pickle(DEV_DF_FILENAME)
-    dev_df.to_html(DEV_DF_HTML_FILENAME)
     return dev_df

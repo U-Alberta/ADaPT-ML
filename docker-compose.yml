@@ -66,7 +66,6 @@ services:
       - MYSQL_USER=${DP_MYSQL_USER}
       - MYSQL_PASSWORD=${DP_MYSQL_PASSWORD}
       - MYSQL_ROOT_PASSWORD=${DP_MYSQL_ROOT_PASSWORD}
-#      - MYSQL_ROOT_HOST=172.*.*.*
 
   dp_web:
     restart: on-failure
@@ -92,10 +91,7 @@ services:
                "--host=0.0.0.0"]
 
   dp:
-    build:
-      context: ./data-programming
-      dockerfile: Dockerfile
-    image: data-programming-image
+    image: nullberry/adapt-ml-dp:latest
     container_name: dp-mlflow
     networks:
       - dp_network
@@ -131,7 +127,6 @@ services:
       - MYSQL_USER=${MODELLING_MYSQL_USER}
       - MYSQL_PASSWORD=${MODELLING_MYSQL_PASSWORD}
       - MYSQL_ROOT_PASSWORD=${MODELLING_MYSQL_ROOT_PASSWORD}
-#      - MYSQL_ROOT_HOST=172.*.*.*
 
   m_web:
     restart: on-failure
