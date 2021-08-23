@@ -46,6 +46,8 @@ jobs:
       run: |
         docker exec dp-mlflow ls /example_data
         docker exec dp-mlflow echo $CONDA_DEFAULT_ENV
+        docker exec echo $DP_MLFLOW_TRACKING_URI
+        docker exec pwd
         docker logs dp-mlflow
         
     # Testing out the data programming functionality
