@@ -39,9 +39,11 @@ jobs:
     - name: Build the docker-compose stack
       run: docker-compose -f docker-compose.yml up -d
     - name: Give databases a chance to start up
-      run: sleep 20
+      run: sleep 30
     - name: Check running containers
       run: docker ps -a
+    - name: Check file locations
+      run: docker exec dp-mlflow 'ls /example_data && ls'
 
     # Testing out the data programming functionality
     - name: DP test 1 -- multiclass
