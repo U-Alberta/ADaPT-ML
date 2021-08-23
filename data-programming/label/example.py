@@ -33,7 +33,7 @@ def main():
         lfs = get_lfs()
         logging.info("Creating label matrix ...")
         try:
-            train_L = procedure.create_label_matrix(train_df, lfs)
+            train_L = procedure.create_label_matrix(train_df, lfs, parallel=False)
             procedure.save_label_matrix(train_L, TRAIN_MATRIX_FILENAME)
         except Exception as e:
             msg = "Unable to create train label matrix:\n{}\nStopping.".format(e.args)

@@ -75,7 +75,7 @@ def load_lf_info(id_df, features) -> pd.DataFrame:
     return lf_info_df
 
 
-def create_label_matrix(df, lfs) -> np.ndarray:
+def create_label_matrix(df, lfs, parallel=False) -> np.ndarray:
     """
     This function applies the LFs over the datapoints in the given DataFrame to create an n X m numpy matrix where each
     row is for a datapoint and each column is the integer vote from each LF if its check is successful or -1 if it
@@ -83,11 +83,16 @@ def create_label_matrix(df, lfs) -> np.ndarray:
     :param df: pd.DataFrame containing columns with extracted features from the datapoint necessary for the current
     classification task's LFs
     :param lfs: The current classification task's [LabelingFunction]
+    :param parallel: Choose whether to apply the labeling functions in sequence or in parallel
     :return: numpy.ndarray of integers representing votes from the LFs
     """
-    applier = PandasParallelLFApplier(lfs=lfs)
-    n_parallel = int(multiprocessing.cpu_count() / 2)
-    label_matrix = applier.apply(df, n_parallel=n_parallel, fault_tolerant=False)
+    if parallel:
+        applier = PandasParallelLFApplier(lfs=lfs)
+        n_parallel = int(multiprocessing.cpu_count() / 2)
+        label_matrix = applier.apply(df, n_parallel=n_parallel, fault_tolerant=False)
+    else:
+        applier = PandasLFApplier(lfs=lfs)
+        label_matrix = applier.apply(df)
     return label_matrix
 
 
