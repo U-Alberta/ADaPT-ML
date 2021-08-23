@@ -19,7 +19,7 @@ A flexible framework for creating data-driven models of phenomena for which ther
 
 # Statement of need
 
-`ADaPT-ML` is a Python package that ties together the `Label Studio` package [@LabelStudio],
+`ADaPT-ML` is a response to  that ties together the `Label Studio` package [@LabelStudio],
 `Snorkel` [@Snorkel], and a variety of supervised learning algorithms
 to take the development work out of creating novel models from novel ideas, supporting
 the progress of interdisciplinary work in testing theories of social communication on
