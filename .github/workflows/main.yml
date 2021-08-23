@@ -38,7 +38,7 @@ jobs:
     # Building and setting up the containers
     - name: Check Docker
       run: |
-        docker run --name ubuntu_bash --rm -i -t ubuntu bash
+        docker run --name ubuntu_bash --rm ubuntu bash
         docker exec -d ubuntu_bash touch /tmp/execWorks
     - name: Build the docker-compose stack
       run: docker-compose -f docker-compose.yml up -d
