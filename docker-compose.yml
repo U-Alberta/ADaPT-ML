@@ -19,6 +19,9 @@ services:
       - CRATE_HEAP_SIZE=2g
 
   ls_web:
+    profiles:
+      - label
+      - dev
     restart: on-failure
     image: heartexlabs/label-studio:latest
     container_name: label-studio-web
@@ -35,6 +38,9 @@ services:
     command: [ "label-studio", "start" ]
 
   ls:
+    profiles:
+      - label
+      - dev
     restart: on-failure
     image: nullberry/adapt-ml-ls:latest
     container_name: label-studio-dev
@@ -49,6 +55,9 @@ services:
     tty: true
 
   dp_db:
+    profiles:
+      - data_programming
+      - dev
     restart: on-failure
     image: mysql/mysql-server:8.0.26
     container_name: dp-mlflow-db
@@ -65,6 +74,8 @@ services:
       - MYSQL_ROOT_PASSWORD=${DP_MYSQL_ROOT_PASSWORD}
 
   dp_web:
+    profiles:
+      - dev
     restart: on-failure
     image: nullberry/adapt-ml-dp-web:latest
     container_name: dp-mlflow-server
@@ -85,6 +96,9 @@ services:
                "--host=0.0.0.0"]
 
   dp:
+    profiles:
+      - data_programming
+      - dev
     image: nullberry/adapt-ml-dp:latest
     container_name: dp-mlflow
     networks:
@@ -107,6 +121,9 @@ services:
     tty: true
 
   m_db:
+    profiles:
+      - modelling
+      - dev
     restart: on-failure
     image: mysql/mysql-server:8.0.26
     container_name: modelling-mlflow-db
@@ -123,6 +140,8 @@ services:
       - MYSQL_ROOT_PASSWORD=${MODELLING_MYSQL_ROOT_PASSWORD}
 
   m_web:
+    profiles:
+      - dev
     restart: on-failure
     image: nullberry/adapt-ml-m-web:latest
     container_name: modelling-mlflow-server
@@ -143,6 +162,9 @@ services:
                "--host=0.0.0.0" ]
 
   m:
+    profiles:
+      - modelling
+      - dev
     image: nullberry/adapt-ml-m:latest
     container_name: modelling-mlflow
     networks:
@@ -164,6 +186,9 @@ services:
     tty: true
 
   m_deploy:
+    profiles:
+      - deploy
+      - dev
     image: nullberry/adapt-ml-m-deploy:latest
     container_name: modelling-mlflow-deploy
     ports:

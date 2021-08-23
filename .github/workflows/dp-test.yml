@@ -1,6 +1,6 @@
 # This is a workflow containing an automated test suite covering the core functionality of the software.
 
-name: ADaPT-ML CI
+name: ADaPT-ML Data Programming CI
 
 on: [push]
 
@@ -14,7 +14,6 @@ jobs:
       DB_DATA_PATH: ./crate
       LS_DATA_PATH: /test_data/ls
       DP_DATA_PATH: /test_data/dp
-      MODELLING_DATA_PATH: /test_data/m
       DATABASE_IP: crate://crate-db:4200
 
       DP_MYSQL_DATABASE: mlruns.db
@@ -24,26 +23,18 @@ jobs:
       DP_HOST_NAME: dp-mlflow-db
       DP_MLFLOW_TRACKING_URI: mysql+pymysql://testusr:testpassword@dp-mlflow-db:3306/mlruns.db
 
-      MODELLING_MYSQL_DATABASE: mlruns.db
-      MODELLING_MYSQL_USER: testusr
-      MODELLING_MYSQL_PASSWORD: testpassword
-      MODELLING_MYSQL_ROOT_PASSWORD: strongtestpassword
-      MODELLING_HOST_NAME: modelling-mlflow-db
-      MODELLING_MLFLOW_TRACKING_URI: mysql+pymysql://testusr:testpassword@modelling-mlflow-db:3306/mlruns.db
-      EXAMPLE_MODEL_PATH: /example_model
-
     steps:
     - uses: actions/checkout@v2
     
     # Building and setting up the containers
     - name: Build the docker-compose stack
-      run: docker-compose -f docker-compose.yml up -d
-    - name: Give databases a chance to start up
+      run: docker-compose -f docker-compose.yml --profile data_programming up -d
+    - name: Give database a chance to start up
       run: sleep 30
     - name: Check running containers
       run: docker ps -a
         
     # Testing out the data programming functionality
-    - name: DP test 1 -- multiclass
+    - name: Test 1 -- multiclass
       run: docker exec dp-mlflow sh -c ". ~/.bashrc && wait-for-it dp-mlflow-db:3306 -s -- mlflow run --no-conda -e example --experiment-name test -P train_data=/example_data/multiclass_df.pkl -P dev_data=0 -P task=multiclass ."
 
