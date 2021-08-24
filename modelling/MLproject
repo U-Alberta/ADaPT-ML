@@ -15,7 +15,7 @@ entry_points:
             multi_class: {type: string, default: auto}
             verbose: {type: int, default: 10000}
             n_jobs: {type: int, default: -1}
-        command: "python ./modelling/mlogit.py
+        command: "python ./model/mlogit.py
          --solver {solver}
          --tol {tol}
          --C {C}
@@ -45,7 +45,7 @@ entry_points:
             epsilon: {type: float, default: 1e-8}
             n_iter_no_change: {type: int, default: 10}
             max_fun: {type: int, default: 15000}
-        command: "python ./modelling/mlp.py
+        command: "python ./model/mlp.py
          --activation {activation}
          --solver {solver}
          --alpha {alpha}
