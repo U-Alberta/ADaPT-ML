@@ -1,0 +1,39 @@
+# This is a workflow containing an automated test suite covering the core functionality of the software.
+
+name: ADaPT-ML Modelling CI
+
+on: [push]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+    env:
+      DATA_PATH: /test_data
+      DB_DATA_PATH: ./crate
+      MODELLING_DATA_PATH: /test_data/m
+      DATABASE_IP: crate://crate-db:4200
+
+      MODELLING_MYSQL_DATABASE: mlruns.db
+      MODELLING_MYSQL_USER: testusr
+      MODELLING_MYSQL_PASSWORD: testpassword
+      MODELLING_MYSQL_ROOT_PASSWORD: strongtestpassword
+      MODELLING_HOST_NAME: modelling-mlflow-db
+      MODELLING_MLFLOW_TRACKING_URI: mysql+pymysql://testusr:testpassword@modelling-mlflow-db:3306/mlruns.db
+
+    steps:
+    - uses: actions/checkout@v2
+
+    # Building and setting up the containers
+    - name: Build the docker-compose stack
+      run: docker-compose -f docker-compose.yml --profile modelling up -d
+    - name: Give database a chance to start up
+      run: sleep 30
+    - name: Check running containers
+      run: docker ps -a
+
+    # Testing out the data programming functionality
+    - name: Test 1 -- mlp for multiclass
+      run: docker exec modelling-mlflow sh -c ". ~/.bashrc && wait-for-it modelling-mlflow-db:3306 -s -- mlflow run --no-conda -e mlp --experiment-name test -P train_data=/example_data/multiclass_training_data.pkl -P test_data=/example_data/multiclass_training_data.pkl -P features=txt_use ."
+
