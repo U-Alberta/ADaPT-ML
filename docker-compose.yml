@@ -179,6 +179,7 @@ services:
       - ./modelling/model:/code/model
       - ./modelling/MLproject:/code/MLproject
       - ./modelling/conda.yaml:/code/conda.yaml
+      - ./example_data:/example_data
     environment:
       - MLFLOW_TRACKING_URI=${MODELLING_MLFLOW_TRACKING_URI}
       - DATABASE_IP=${DATABASE_IP}
