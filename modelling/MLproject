@@ -3,29 +3,6 @@ name: modelling
 conda_env: conda.yaml
 
 entry_points:
-    mlogit:
-        parameters:
-            train_data: path
-            test_data: path
-            features: {type: string, default: tfidf}
-            solver: {type: string, default: lbfgs}
-            tol: {type: float, default: 1e-4}
-            C: {type: float, default: 1.0}
-            max_iter: {type: int, default: 100}
-            multi_class: {type: string, default: auto}
-            verbose: {type: int, default: 10000}
-            n_jobs: {type: int, default: -1}
-        command: "python ./model/mlogit.py
-         --solver {solver}
-         --tol {tol}
-         --C {C}
-         --max_iter {max_iter}
-         --multi_class {multi_class}
-         --verbose {verbose}
-         --n_jobs {n_jobs}
-         {train_data}
-         {test_data}
-         {features}"
     mlp:
         parameters:
             train_data: path

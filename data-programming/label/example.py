@@ -79,8 +79,8 @@ def main():
             metrics = evaluate.multiclass_summary(dev_L, dev_true, dev_pred, label_model)
         elif parsed_args.task == 'multilabel':
             metrics = evaluate.multilabel_summary(dev_true, dev_pred)
-        logging.info("Logging artifacts and saving ...")
 
+        logging.info("Logging artifacts and saving ...")
         input_example = train_L[:5, :]
         tracking.log(metrics,
                      input_example,

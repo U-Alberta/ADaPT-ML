@@ -1,6 +1,14 @@
 """
 Initialize the classes that store the mapping between class labels and the number they will
 represent in the label matrix.
+
+For binary classification tasks, indicate which label is the positive class and which label is the negative class --
+this will make the labels compatible with the modelling evaluation functions.
+
+E.g.
+        class BinaryLabels(Enum):
+            ham_neg = 0
+            spam_pos = 1
 """
 from enum import Enum
 
@@ -15,3 +23,5 @@ class ExampleLabels(Enum):
     cat = 0
     dog = 1
     bird = 2
+
+

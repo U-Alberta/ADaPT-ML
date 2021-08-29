@@ -7,12 +7,15 @@ import logging
 
 import matplotlib.pyplot as plt
 import mlflow
-from sklearn.metrics import plot_confusion_matrix, f1_score
+import numpy as np
+import sklearn.metrics as eval
 from sklearn.neural_network import MLPClassifier
 
-from model import CONFUSION_MATRIX_FILENAME
-from model.data import load, get_train_features, binarize_labels, predict_test, log_artifacts
-from model_objs import LookupClassifier, save_model
+from model import (X_TRAIN_FILENAME, TRAIN_DF_FILENAME, TRAIN_DF_HTML_FILENAME, TEST_PRED_DF_FILENAME,
+                   TEST_PRED_DF_HTML_FILENAME, CONFUSION_MATRIX_FILENAME, LOGGING_FILENAME)
+import model.data as data
+import model.tracking as tracking
+from model_objs import LookupClassifier
 
 parser = argparse.ArgumentParser(description='Train a multi-layer perceptron classifier.')
 parser.add_argument('train_path', type=str, help='File path or URL to the training data')
@@ -78,30 +81,63 @@ REGISTERED_MODEL_NAME = '{}_MLP'.format('_'.join(parsed_args.features))
 ARTIFACT_PATH = 'mlp'
 
 
-def evaluate_multiclass(pipe, x_test, y_true, y_pred):
-    f1 = {'F1 micro': float(f1_score(y_true, y_pred, average='micro')),
-          'F1 macro': float(f1_score(y_true, y_pred, average='macro')),
-          'F1 weighted': float(f1_score(y_true, y_pred, average='weighted'))}
-    # plot_roc_curve(pipe, x_test, y_true)
-    # plt.savefig(ROC_CURVE_FILENAME)
-    # plt.close()
-    plot_confusion_matrix(pipe, x_test, y_true)
+def evaluate_multiclass(y_true: np.ndarray,
+                        y_pred: np.ndarray,
+                        y_prob: np.ndarray,
+                        ravel_y_true: [str],
+                        ravel_y_pred: [str],
+                        x_test: np.ndarray,
+                        mlp_model: LookupClassifier) -> dict:
+    metrics_dict = common_metrics(y_true, y_pred, y_prob)
+    metrics_dict.update(binary_metrics())
+    metrics_dict.update({
+        'F1 micro': float(eval.f1_score(y_true, y_pred, average='micro')),
+        'F1 macro': float(eval.f1_score(y_true, y_pred, average='macro')),
+        'F1 weighted': float(eval.f1_score(y_true, y_pred, average='weighted')),
+        'balanced accuracy score': eval.balanced_accuracy_score(ravel_y_true, ravel_y_pred),
+
+    })
+    eval.plot_confusion_matrix(mlp_model.classifier, x_test, ravel_y_true, labels=mlp_model.classes)
     plt.savefig(CONFUSION_MATRIX_FILENAME)
     plt.close()
-    return f1
+    return metrics_dict
 
 
-def evaluate_multilabel():
-    pass
+def evaluate_multilabel(y_true: np.ndarray, y_pred: np.ndarray, y_prob: np.ndarray) -> dict:
+    metrics_dict = common_metrics(y_true, y_pred, y_prob)
+    metrics_dict.update({
+        'discounted cumulative gain': eval.dcg_score(y_true, y_prob)
+    })
 
+
+def common_metrics(y_true: np.ndarray, y_pred: np.ndarray, y_prob: np.ndarray) -> dict:
+    """
+    functions that can be used for multiclass or multilabel.
+    """
+    metrics_dict = {'accuracy': eval.accuracy_score(y_true, y_pred),
+                    'macro average precision score': eval.average_precision_score(y_true, y_prob)}
+    return metrics_dict
+
+
+def binary_metrics(y_true: np.ndarray, y_pred: np.ndarray, y_prob: np.ndarray, ravel_y_true: [str], ravel_y_pred: [str]) -> dict:
+    flat_max_probs = [max(probs) for probs in y_prob]
+    metrics_dict = {
+
+    }
 
 def main():
     with mlflow.start_run():
         logging.info("Loading training and testing sets, and feature sets")
-        train_df, test_df = load(parsed_args.train_path, parsed_args.test_path)
-        x_train = get_train_features(train_df, parsed_args.features)
-        mlb, y_train, y_test = binarize_labels(y_train=train_df.label.tolist(),
+        train_df, test_df = data.load(parsed_args.train_path, parsed_args.test_path)
+        data.save_df(train_df, TRAIN_DF_FILENAME, TRAIN_DF_HTML_FILENAME)
+
+        x_train = data.get_train_features(train_df, parsed_args.features)
+        data.save_training_features(x_train, X_TRAIN_FILENAME)
+
+        logging.info("Encoding labels and determining multiclass or multilabel ...")
+        mlb, y_train, y_test = data.binarize_labels(y_train=train_df.label.tolist(),
                                                y_test=test_df.label.tolist())
+        train_is_multiclass, test_is_multiclass = data.check_if_multiclass(y_train, y_test)
 
         logging.info("Training mlp ...")
         mlp = MLPClassifier(**TRAIN_PARAMS)
@@ -109,17 +145,41 @@ def main():
         mlp_model = LookupClassifier(mlb, mlp, parsed_args.features)
 
         logging.info("Predicting test ...")
-        test_pred_df = predict_test(mlp_model, test_df)
+        test_pred_df = mlp_model.predict(test_df)
+        y_pred = test_pred_df[mlp_model.classes].to_numpy()
+        y_prob = test_pred_df[mlp_model.prob_labels].to_numpy()
 
-        logging.info("Saving model ...")
-        save_model(x_train, test_pred_df, mlp_model, ARTIFACT_PATH, REGISTERED_MODEL_NAME)
+        logging.info("Evaluating model ...")
+        try:
+            if train_is_multiclass and test_is_multiclass:
+                logging.info("Train and test are multiclass. Using multiclass evaluation ...")
+                ravel_y_test = data.ravel_inverse_binarized_labels(mlb, y_test)
+                ravel_y_pred = data.ravel_inverse_binarized_labels(mlb, y_pred)
+                x_test = mlp_model.get_features(test_pred_df)
+                metrics = evaluate_multiclass(y_test, y_pred, y_prob, ravel_y_test, ravel_y_pred)
+            elif not train_is_multiclass and not test_is_multiclass:
+                logging.info("Train and test are multilabel. Using multilabel evaluation ...")
+                metrics = evaluate_multilabel(y_test, y_pred, y_prob)
+            else:
+                logging.warning("""Train and test do not have matching classification types. 
+                This could have consequences in evaluation. Trying multilabel evaluation ...""")
+                try:
+                    metrics = evaluate_multilabel(y_test, y_pred, y_prob)
+                except Exception as e:
+                    msg = "Unable to perform multilabel evaluation:\n{}\nTrying multiclass ...".format(e.args)
+                    logging.error(msg)
+                    try:
+                        metrics = evaluate_multiclass(y_test, y_pred, y_prob)
+                    except Exception as e:
+                        msg = "Unable to perform multiclass evaluation:\n{}\nStopping.".format(e.args)
+                        logging.error(msg)
+                        metrics = None
+        except Exception as e:
+            msg = "Unable to perform evaluation:\n{}".format(e.args)
+            logging.error(msg)
+            metrics = None
 
-        # logging.info("Evaluating model ...")
-
-        # metrics = evaluate_multiclass(mlp_model, x_test, y_test, [list(row) for row in y_pred_df.iterrows()])
-        # mlflow.log_metrics(metrics)
-
-        logging.info("Logging artifacts ...")
+        logging.info("Logging artifacts and saving model ...")
         log_artifacts(parsed_args.train_path, parsed_args.test_path)
 
 
