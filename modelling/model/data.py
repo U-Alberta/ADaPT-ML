@@ -17,7 +17,6 @@ def load(train_path: str, test_path: str) -> (pd.DataFrame, pd.DataFrame):
     try:
         with open(train_path, 'rb') as infile:
             train_df = pd.read_pickle(infile)
-            train_df.head().to_html(TRAIN_DF_HTML_FILENAME)
         with open(test_path, 'rb') as infile:
             test_df = pd.read_pickle(infile)
     except IOError as e:

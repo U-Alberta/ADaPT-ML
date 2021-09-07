@@ -40,6 +40,7 @@ class LookupClassifier(mlflow.pyfunc.PythonModel):
         self.mlb = mlb
         self.classifier = classifier
         self.classes = mlb.classes_
+        self.num_classes = len(self.classes)
         self.features = features
         self.conda_env = LOOKUP_CLASSIFIER_CONDA_ENV
         self.query = SQL_QUERY

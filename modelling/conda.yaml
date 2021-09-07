@@ -16,6 +16,7 @@ dependencies:
   - pip:
     - pyyaml
     - mlflow
+    - seaborn
     - pymysql
     - SQLAlchemy>=1.0.0
     - geojson

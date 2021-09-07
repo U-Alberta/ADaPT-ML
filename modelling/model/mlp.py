@@ -2,12 +2,14 @@
 multi-layer perceptron classifier
 https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html
 """
+from math import floor, ceil
 import argparse
 import logging
-
+import seaborn as sns
 import matplotlib.pyplot as plt
 import mlflow
 import numpy as np
+import pandas as pd
 import sklearn.metrics as eval
 from sklearn.neural_network import MLPClassifier
 
@@ -33,16 +35,21 @@ parser.add_argument('--learning_rate_init', default=0.001, type=float,
                     help='The initial learning rate used. It controls the step-size in updating the weights.')
 parser.add_argument('--power_t', default=0.5, type=float, help='The exponent for inverse scaling rate.')
 parser.add_argument('--max_iter', default=200, type=int, help='Maximum number of iterations.')
-parser.add_argument('--tol', default=1e-4, type=float, help='Tolerance for the optimization.')
+parser.add_argument('--tol', default=0.0001, type=float, help='Tolerance for the optimization.')
 parser.add_argument('--momentum', default=0.9, type=float, help='Momentum for gradient descent update.')
 parser.add_argument('--beta_1', default=0.9, type=float,
                     help='Exponential decay rate for estimates of first moment vector in adam.')
 parser.add_argument('--beta_2', default=0.999, type=float,
                     help='Exponential decay rate for estimates of second moment vector in adam.')
-parser.add_argument('--epsilon', default=1e-8, type=float, help='Value for numerical stability in adam.')
+parser.add_argument('--epsilon', default=0.00000001, type=float, help='Value for numerical stability in adam.')
 parser.add_argument('--n_iter_no_change', default=10, type=int,
                     help='Maximum number of epochs to not meet tol improvement.')
 parser.add_argument('--max_fun', default=15000, type=int, help='Maximum number of loss function calls.')
+parser.add_argument('--random_state', default=0, type=int, help='Determines random number generation for weights and '
+                                                                'bias initialization, train-test split if early '
+                                                                'stopping is used, and batch sampling when '
+                                                                'solver=’sgd’ or ‘adam’. Pass an int for reproducible '
+                                                                'results across multiple function calls.')
 
 parsed_args = parser.parse_args()
 
@@ -52,7 +59,8 @@ TRAIN_PARAMS = {
     'alpha': parsed_args.alpha,
     'max_iter': parsed_args.max_iter,
     'tol': parsed_args.tol,
-    'verbose': True
+    'verbose': True,
+    'random_state': parsed_args.random_state if parsed_args.random_state else None
 }
 TRAIN_PARAMS.update(
     {
@@ -81,6 +89,38 @@ REGISTERED_MODEL_NAME = '{}_MLP'.format('_'.join(parsed_args.features))
 ARTIFACT_PATH = 'mlp'
 
 
+def common_metrics(y_true: np.ndarray, y_pred: np.ndarray, y_prob: np.ndarray, labels: [str]) -> dict:
+    """
+    functions that can be used for multiclass or multilabel.
+    """
+    print(y_true)
+    print(y_pred)
+    metrics_dict = {
+        'accuracy': eval.accuracy_score(y_true, y_pred),
+        'macro average precision score': eval.average_precision_score(y_true, y_prob),
+        'F1 micro': float(eval.f1_score(y_true, y_pred, average='micro')),
+        'F1 macro': float(eval.f1_score(y_true, y_pred, average='macro')),
+        'F1 weighted': float(eval.f1_score(y_true, y_pred, average='weighted')),
+        'hamming loss micro': eval.hamming_loss(y_true, y_pred),
+        'hamming loss macro': eval.hamming_loss(y_true, y_pred),
+        'hamming loss weighted': eval.hamming_loss(y_true, y_pred),
+        'jaccard score micro': eval.jaccard_score(y_true, y_pred, average='micro'),
+        'jaccard score macro': eval.jaccard_score(y_true, y_pred, average='macro'),
+        'jaccard score weighted': eval.jaccard_score(y_true, y_pred, average='weighted')
+    }
+    return metrics_dict
+
+
+def binary_metrics(ravel_y_true: [str], ravel_y_pred: [str], y_prob_pos: np.ndarray, pos_label: str) -> dict:
+    metrics_dict = {
+        'DET curve': eval.det_curve(ravel_y_true, y_prob_pos, pos_label=pos_label),
+        'F1 binary': eval.f1_score(ravel_y_true, ravel_y_pred, pos_label=pos_label),
+        'hamming loss binary': eval.hamming_loss(ravel_y_true, ravel_y_pred, pos_label=pos_label),
+        'jaccard score binary': eval.jaccard_score(ravel_y_true, ravel_y_pred, pos_label=pos_label)
+    }
+    return metrics_dict
+
+
 def evaluate_multiclass(y_true: np.ndarray,
                         y_pred: np.ndarray,
                         y_prob: np.ndarray,
@@ -88,42 +128,64 @@ def evaluate_multiclass(y_true: np.ndarray,
                         ravel_y_pred: [str],
                         x_test: np.ndarray,
                         mlp_model: LookupClassifier) -> dict:
-    metrics_dict = common_metrics(y_true, y_pred, y_prob)
-    metrics_dict.update(binary_metrics())
+    metrics_dict = common_metrics(y_true, y_pred, y_prob, mlp_model.classes)
     metrics_dict.update({
-        'F1 micro': float(eval.f1_score(y_true, y_pred, average='micro')),
-        'F1 macro': float(eval.f1_score(y_true, y_pred, average='macro')),
-        'F1 weighted': float(eval.f1_score(y_true, y_pred, average='weighted')),
         'balanced accuracy score': eval.balanced_accuracy_score(ravel_y_true, ravel_y_pred),
-
+        'MCC': eval.matthews_corrcoef(ravel_y_true, ravel_y_pred)
     })
-    eval.plot_confusion_matrix(mlp_model.classifier, x_test, ravel_y_true, labels=mlp_model.classes)
-    plt.savefig(CONFUSION_MATRIX_FILENAME)
-    plt.close()
+    cm = eval.confusion_matrix(ravel_y_true, ravel_y_pred, labels=mlp_model.classes)
+
+    # eval.plot_confusion_matrix(mlp_model.classifier, x_test, y_true, labels=mlp_model.classes)
+    # plt.savefig(CONFUSION_MATRIX_FILENAME)
+    # plt.close()
     return metrics_dict
 
 
-def evaluate_multilabel(y_true: np.ndarray, y_pred: np.ndarray, y_prob: np.ndarray) -> dict:
-    metrics_dict = common_metrics(y_true, y_pred, y_prob)
+def evaluate_multilabel(y_true: np.ndarray,
+                        y_pred: np.ndarray,
+                        y_prob: np.ndarray,
+                        mlp_model: LookupClassifier) -> dict:
+    metrics_dict = common_metrics(y_true, y_pred, y_prob, mlp_model)
     metrics_dict.update({
-        'discounted cumulative gain': eval.dcg_score(y_true, y_prob)
+        'discounted cumulative gain': eval.dcg_score(y_true, y_prob),
+        'log loss': eval.log_loss(y_true, y_prob, labels=mlp_model.classes)
     })
 
+    # make multilabel confusion matrix with TPs in 1,1 and TN in 0,0
+    try:
+        cm = eval.multilabel_confusion_matrix(y_true, y_pred, labels=mlp_model.classes)
+        fig, ax = plt.subplots(floor(mlp_model.num_classes / 2), ceil(mlp_model.num_classes / 2), figsize=(12, 7))
 
-def common_metrics(y_true: np.ndarray, y_pred: np.ndarray, y_prob: np.ndarray) -> dict:
-    """
-    functions that can be used for multiclass or multilabel.
-    """
-    metrics_dict = {'accuracy': eval.accuracy_score(y_true, y_pred),
-                    'macro average precision score': eval.average_precision_score(y_true, y_prob)}
+        for axes, cfs_matrix, label in zip(ax.flatten(), cm, mlp_model.classes):
+            plot_multilabel_confusion_matrix(cfs_matrix, axes, label, ["N", "Y"])
+
+        fig.tight_layout()
+        plt.savefig(CONFUSION_MATRIX_FILENAME)
+        plt.close()
+    except Exception as e:
+        logging.error("Could not create multilabel confusion matrix:\n{}\n".format(e.args))
+
     return metrics_dict
 
 
-def binary_metrics(y_true: np.ndarray, y_pred: np.ndarray, y_prob: np.ndarray, ravel_y_true: [str], ravel_y_pred: [str]) -> dict:
-    flat_max_probs = [max(probs) for probs in y_prob]
-    metrics_dict = {
+def plot_multilabel_confusion_matrix(confusion_matrix, axes, class_label, class_names, fontsize=14):
+    """
+    Adapted from https://stackoverflow.com/questions/62722416/plot-confusion-matrix-for-multilabel-classifcation-python
+    """
+    df_cm = pd.DataFrame(
+        confusion_matrix, index=class_names, columns=class_names,
+    )
 
-    }
+    try:
+        heatmap = sns.heatmap(df_cm, annot=True, fmt="d", cbar=False, ax=axes)
+    except ValueError:
+        raise ValueError("Confusion matrix values must be integers.")
+    heatmap.yaxis.set_ticklabels(heatmap.yaxis.get_ticklabels(), rotation=0, ha='right', fontsize=fontsize)
+    heatmap.xaxis.set_ticklabels(heatmap.xaxis.get_ticklabels(), rotation=45, ha='right', fontsize=fontsize)
+    axes.set_ylabel('True label')
+    axes.set_xlabel('Predicted label')
+    axes.set_title(class_label)
+
 
 def main():
     with mlflow.start_run():
@@ -136,51 +198,57 @@ def main():
 
         logging.info("Encoding labels and determining multiclass or multilabel ...")
         mlb, y_train, y_test = data.binarize_labels(y_train=train_df.label.tolist(),
-                                               y_test=test_df.label.tolist())
+                                                    y_test=test_df.label.tolist())
         train_is_multiclass, test_is_multiclass = data.check_if_multiclass(y_train, y_test)
 
         logging.info("Training mlp ...")
         mlp = MLPClassifier(**TRAIN_PARAMS)
         mlp.fit(x_train, y_train)
         mlp_model = LookupClassifier(mlb, mlp, parsed_args.features)
+        tracking.save_model(x_train, mlp_model, REGISTERED_MODEL_NAME, ARTIFACT_PATH)
 
         logging.info("Predicting test ...")
         test_pred_df = mlp_model.predict(test_df)
+        data.save_df(test_pred_df, TEST_PRED_DF_FILENAME, TEST_PRED_DF_HTML_FILENAME)
         y_pred = test_pred_df[mlp_model.classes].to_numpy()
         y_prob = test_pred_df[mlp_model.prob_labels].to_numpy()
 
         logging.info("Evaluating model ...")
-        try:
-            if train_is_multiclass and test_is_multiclass:
-                logging.info("Train and test are multiclass. Using multiclass evaluation ...")
-                ravel_y_test = data.ravel_inverse_binarized_labels(mlb, y_test)
-                ravel_y_pred = data.ravel_inverse_binarized_labels(mlb, y_pred)
-                x_test = mlp_model.get_features(test_pred_df)
-                metrics = evaluate_multiclass(y_test, y_pred, y_prob, ravel_y_test, ravel_y_pred)
-            elif not train_is_multiclass and not test_is_multiclass:
-                logging.info("Train and test are multilabel. Using multilabel evaluation ...")
-                metrics = evaluate_multilabel(y_test, y_pred, y_prob)
-            else:
-                logging.warning("""Train and test do not have matching classification types. 
-                This could have consequences in evaluation. Trying multilabel evaluation ...""")
-                try:
-                    metrics = evaluate_multilabel(y_test, y_pred, y_prob)
-                except Exception as e:
-                    msg = "Unable to perform multilabel evaluation:\n{}\nTrying multiclass ...".format(e.args)
-                    logging.error(msg)
-                    try:
-                        metrics = evaluate_multiclass(y_test, y_pred, y_prob)
-                    except Exception as e:
-                        msg = "Unable to perform multiclass evaluation:\n{}\nStopping.".format(e.args)
-                        logging.error(msg)
-                        metrics = None
-        except Exception as e:
-            msg = "Unable to perform evaluation:\n{}".format(e.args)
-            logging.error(msg)
+        # try:
+        if train_is_multiclass and test_is_multiclass:
+            logging.info("Train and test are multiclass. Using multiclass evaluation ...")
+            ravel_y_test = data.ravel_inverse_binarized_labels(mlb, y_test)
+            ravel_y_pred = data.ravel_inverse_binarized_labels(mlb, y_pred)
+            x_test = mlp_model.get_features(test_pred_df)
+            try:
+                # do binary classification metrics
+                pos_label = [label for label in mlp_model.prob_labels if '_pos' in label].pop()
+                y_prob_pos = test_pred_df[pos_label].to_numpy()
+                metrics = binary_metrics(ravel_y_test, ravel_y_pred, y_prob_pos, pos_label)
+                logging.info("Binary classification metrics available.")
+            except Exception as e:
+                logging.info("Binary classification metrics not available:\n{}\n".format(e.args))
+                metrics = {}
+            metrics.update(
+                evaluate_multiclass(y_test, y_pred, y_prob, ravel_y_test, ravel_y_pred, x_test, mlp_model)
+            )
+
+        elif not train_is_multiclass and not test_is_multiclass:
+            logging.info("Train and test are multilabel. Using multilabel evaluation ...")
+            metrics = evaluate_multilabel(y_test, y_pred, y_prob, mlp_model)
+
+        else:
+            logging.warning("""Train and test do not have matching classification types. 
+            This could have consequences in evaluation. Check data before continuing ...""")
             metrics = None
 
-        logging.info("Logging artifacts and saving model ...")
-        log_artifacts(parsed_args.train_path, parsed_args.test_path)
+        # except Exception as e:
+        #     msg = "Unable to perform evaluation:\n{}".format(e.args)
+        #     logging.error(msg)
+        #     metrics = None
+
+        logging.info("Logging artifacts ...")
+        tracking.log(TRAIN_PARAMS, metrics)
 
 
 if __name__ == '__main__':

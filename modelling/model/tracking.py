@@ -1,25 +1,35 @@
+import os
+from model import TMP_ARTIFACTS
+from glob import glob
 import mlflow
+import logging
 
 
-def log(train_path, test_path):
-    mlflow.log_artifact(train_path)
-    mlflow.log_artifact(test_path)
-    mlflow.log_artifact(X_TRAIN_FILENAME)
-    mlflow.log_artifact(TRAIN_DF_HTML_FILENAME)
-    mlflow.log_artifact(TEST_PRED_DF_FILENAME)
-    mlflow.log_artifact(TEST_PRED_DF_HTML_FILENAME)
-    # mlflow.log_artifact(CONFUSION_MATRIX_FILENAME)
-    mlflow.log_artifact(LOGGING_FILENAME)
+def log(train_params, metrics):
+    filenames = glob(os.path.join(TMP_ARTIFACTS, '*'))
+
+    # Log the data points, label matrix, and labeled training data as artifacts
+    # mlflow.log_params(train_params)
+    try:
+        mlflow.log_metrics(metrics)
+    except:
+        logging.warning("Metrics not logged.")
+
+    # log all of the artifacts kept in the temporary folder into the proper run folder and remove them once logged
+    for filename in filenames:
+        try:
+            mlflow.log_artifact(filename)
+            os.remove(filename)
+        except:
+            print("An artifact could not be logged: {}".format(filename))
 
 
-def save_model(x_train, test_pred_df, model, artifact_path, registered_model_name):
-    # signature = infer_signature(x_train, test_pred_df)
+def save_model(x_train, model, registered_model_name, artifact_path):
     input_example = x_train[:5]
     mlflow.pyfunc.log_model(
         artifact_path=artifact_path,
         python_model=model,
         conda_env=model.conda_env,
         registered_model_name=registered_model_name,
-        # signature=signature,
         input_example=input_example
     )
