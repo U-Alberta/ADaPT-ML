@@ -203,8 +203,13 @@ def main():
 
         logging.info("Training mlp ...")
         mlp = MLPClassifier(**TRAIN_PARAMS)
-        mlp.fit(x_train, y_train)
-        mlp_model = LookupClassifier(mlb, mlp, parsed_args.features)
+        if train_is_multiclass and test_is_multiclass:
+            ravel_y_train = data.ravel_inverse_binarized_labels(mlb, y_train)
+            mlp.fit(x_train, ravel_y_train)
+            mlp_model = LookupClassifier(mlb, mlp, parsed_args.features, used_inverse_labels=True)
+        else:
+            mlp.fit(x_train, y_train)
+            mlp_model = LookupClassifier(mlb, mlp, parsed_args.features)
         tracking.save_model(x_train, mlp_model, REGISTERED_MODEL_NAME, ARTIFACT_PATH)
 
         logging.info("Predicting test ...")
