@@ -50,10 +50,18 @@ class LookupClassifier(mlflow.pyfunc.PythonModel):
         self.prob_labels = ['prob_{}'.format(c) for c in self.classes]
 
     def get_features(self, id_df):
-        features_df = pd.read_sql(self.query.format(column=', '.join(self.features),
-                                                    table=id_df.at[0, 'table'],
-                                                    ids=str(tuple(id_df.id.tolist()))), self.db)
-        feature_arrays = [np.array(features_df[feature].tolist()) for feature in features_df]
+        features_df = pd.DataFrame()
+        for tbl in id_df.table.unique():
+            tbl_df = id_df.loc[(id_df.table == tbl)]
+            tbl_f_df = pd.read_sql(self.query.format(column=', '.join(['id'] + self.features),
+                                                     table=tbl,
+                                                     ids=str(tuple(tbl_df.id.tolist()))),
+                                   self.db,
+                                   chunksize=100)
+            for data in tbl_f_df:
+                features_df = features_df.append(data, ignore_index=True)
+        id_f_df = pd.merge(id_df, features_df, on='id')
+        feature_arrays = [np.array(id_f_df[feature].tolist()) for feature in self.features]
         try:
             x = np.concatenate(feature_arrays, axis=1)
         except np.AxisError:
@@ -71,11 +79,14 @@ class LookupClassifier(mlflow.pyfunc.PythonModel):
         preds = self.classifier.predict(x)
         if self.used_inverse_labels:
             preds = self.mlb.transform(list(map(lambda p: [p], preds)))
-        result_df = pd.merge(id_df, pd.DataFrame(preds, columns=self.classes), left_index=True, right_index=True)
+        pred_df = pd.DataFrame(preds, columns=self.classes)
+        pred_df['id'] = id_df['id']
+        result_df = pd.merge(id_df, pred_df, on='id')
         if self.can_predict_probs:
             probs = self.classifier.predict_proba(x)
-            result_df = pd.merge(result_df, pd.DataFrame(probs, columns=self.prob_labels),
-                                 left_index=True, right_index=True)
+            prob_df = pd.DataFrame(probs, columns=self.prob_labels)
+            prob_df['id'] = id_df['id']
+            result_df = pd.merge(result_df, prob_df, on='id')
         return result_df
 
     def predict_to_csv(self, id_df):

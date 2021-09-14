@@ -60,7 +60,8 @@ def main():
         # use the label model to label the data
         logging.info("Predicting {} ...".format(parsed_args.task))
         labeled_train_df = procedure.apply_label_preds(train_df, train_L, label_model, ExampleLabels, parsed_args.task)
-        procedure.save_df(labeled_train_df, TRAINING_DATA_FILENAME, TRAINING_DATA_HTML_FILENAME)
+        procedure.save_df(labeled_train_df[['table', 'id', 'label', 'label_probs']],
+                          TRAINING_DATA_FILENAME, TRAINING_DATA_HTML_FILENAME)
         try:
             labeled_dev_df = procedure.apply_label_preds(dev_df, dev_L, label_model, ExampleLabels, parsed_args.task)
             procedure.save_df(labeled_dev_df, DEV_DF_FILENAME, DEV_DF_HTML_FILENAME)
@@ -69,7 +70,7 @@ def main():
             dev_pred = None
 
         # validate the training data
-        print("Validating training data ...")
+        logging.info("Validating training data ...")
         procedure.validate_training_data(labeled_train_df, ExampleLabels)
 
         # evaluate the labeling functions and label model predictions

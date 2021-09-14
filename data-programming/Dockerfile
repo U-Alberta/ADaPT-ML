@@ -31,7 +31,6 @@ COPY ./conda.yaml .
 COPY ./setup.cfg .
 COPY ./setup.py .
 COPY ./label ./label
-COPY ./MLproject .
 RUN conda env create -f conda.yaml
 RUN echo "conda activate dp_env" >> ~/.bashrc
 

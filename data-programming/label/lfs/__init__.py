@@ -23,5 +23,5 @@ class ExampleLabels(Enum):
     cat = 0
     dog = 1
     bird = 2
-
-
+    horse = 3
+    snake = 4

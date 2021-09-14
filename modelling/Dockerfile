@@ -31,10 +31,10 @@ COPY ./conda.yaml .
 COPY ./setup.cfg .
 COPY ./setup.py .
 COPY ./model ./model
-#COPY ./MLproject .
+
 RUN conda env create -f conda.yaml
 RUN echo "conda activate modelling_env" >> ~/.bashrc
 
-COPY model_objs.py .
+COPY ./model_objs.py .
 
 CMD [ "/bin/bash" ]

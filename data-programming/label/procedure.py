@@ -109,6 +109,8 @@ def train_label_model(L_train: np.ndarray, y_dev: [[str]], labels) -> LabelModel
     label_model = LabelModel(cardinality=len(labels), **INIT_PARAMS)
     # to change the optimizer parameters, refer to LM_OPTIMIZER_SETTINGS at the top of this module
     TRAIN_PARAMS.update(LM_OPTIMIZER_SETTINGS[TRAIN_PARAMS['optimizer']])
+    if TRAIN_PARAMS['seed'] is None:
+        TRAIN_PARAMS['seed'] = np.random.randint(1e6)
     try:
         balance = calc_class_balance(y_dev, labels)
         logging.info("TRUE CLASS BALANCE: {}".format(balance))

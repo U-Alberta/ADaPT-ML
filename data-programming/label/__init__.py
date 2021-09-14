@@ -25,6 +25,7 @@ parser.add_argument('--n_epochs', default=1000, type=int,
 parser.add_argument('--optimizer', default='sgd', choices=('sgd', 'adam', 'adamax'),
                     help='which optimizer to use for the Label Model')
 parser.add_argument('--prec_init', default=0.7, type=float, help='LF precision initializations / priors')
+parser.add_argument('--seed', default=0, type=int, help='a random seed to initialize the random number generator with')
 parsed_args = parser.parse_args()
 
 TMP_ARTIFACTS = '/tmp_artifacts'
@@ -56,7 +57,8 @@ except IOError:
 TRAIN_PARAMS = {
     'n_epochs': parsed_args.n_epochs,
     'optimizer': parsed_args.optimizer,
-    'prec_init': parsed_args.prec_init
+    'prec_init': parsed_args.prec_init,
+    'seed': parsed_args.seed if parsed_args.seed else None
 }
 DATABASE_IP = os.environ['DATABASE_IP']
 SQL_QUERY = """

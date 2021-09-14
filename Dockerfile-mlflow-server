@@ -1,0 +1,12 @@
+FROM python:3.8-slim-buster
+
+RUN apt-get update \
+    && apt-get install -y wait-for-it
+
+RUN pip install mlflow \
+    && pip install pymysql \
+    && pip install cryptography
+
+WORKDIR /mlflow
+
+CMD ["/bin/bash"]

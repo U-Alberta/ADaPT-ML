@@ -16,9 +16,9 @@ def load(train_path: str, test_path: str) -> (pd.DataFrame, pd.DataFrame):
     logging.info("Getting train and test data ...")
     try:
         with open(train_path, 'rb') as infile:
-            train_df = pd.read_pickle(infile)
+            train_df = pd.read_pickle(infile).reset_index(drop=True)
         with open(test_path, 'rb') as infile:
-            test_df = pd.read_pickle(infile)
+            test_df = pd.read_pickle(infile).reset_index(drop=True)
     except IOError as e:
         sys.exit("Could not read data: {}".format(e.args))
 
@@ -65,15 +65,23 @@ def check_if_multiclass(y_train: [[int]], y_test: [[int]]) -> (bool, bool):
 
 
 def get_train_features(train_df: pd.DataFrame, features: [str]) -> np.ndarray:
-    train_features_df = pd.read_sql(SQL_QUERY.format(column=', '.join(features),
-                                                     table=train_df.at[0, 'table'],
-                                                     ids=str(tuple(train_df.id.tolist()))), DATABASE_IP)
-    feature_arrays = [np.array(train_features_df[feature].tolist()) for feature in train_features_df]
+    features_df = pd.DataFrame()
+    for tbl in train_df.table.unique():
+        tbl_df = train_df.loc[(train_df.table == tbl)]
+        tbl_f_df = pd.read_sql(SQL_QUERY.format(column=', '.join(['id'] + features),
+                                                table=tbl,
+                                                ids=str(tuple(tbl_df.id.tolist()))),
+                               DATABASE_IP,
+                               chunksize=100)
+        for data in tbl_f_df:
+            features_df = features_df.append(data, ignore_index=True)
+    id_f_df = pd.merge(train_df, features_df, on='id')
+    feature_arrays = [np.array(id_f_df[feature].tolist()) for feature in features]
     try:
-        x_train = np.concatenate(feature_arrays, axis=1)
+        x = np.concatenate(feature_arrays, axis=1)
     except np.AxisError:
-        x_train = feature_arrays[0]
-    return x_train
+        x = feature_arrays[0]
+    return x
 
 
 def save_df(df: pd.DataFrame, pkl_filename: str, html_filename: str):

@@ -40,6 +40,12 @@ KEYWORD_DICT = {
     'bird': [
         'bird', 'chirp', 'squawk', 'wing', 'beak', 'feather', 'eagle', 'parrot',
         'vulture', 'toucan', 'talon', 'birdbath', 'penguin', 'chick'
+    ],
+    'horse': [
+        'horse', 'pony', 'neigh', 'hoof', 'gallop', 'whinny', 'stallion', 'clydesdale'
+    ],
+    'snake': [
+        'snake', 'serpent', 'hiss', 'slither', 'cobra', 'rattlesnake'
     ]
 }
 

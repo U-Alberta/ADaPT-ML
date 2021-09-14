@@ -33,7 +33,8 @@ jobs:
     - name: Check running containers
       run: docker ps -a
 
-    # Testing out the data programming functionality
-    - name: Test 1 -- mlp for multiclass
-      run: docker exec modelling-mlflow sh -c ". ~/.bashrc && wait-for-it modelling-mlflow-db:3306 -s -- mlflow run --no-conda -e mlp --experiment-name test -P train_data=/example_data/multiclass_training_data.pkl -P test_data=/example_data/multiclass_training_data.pkl -P features=txt_use -P random_state=8 ."
-
+    # Testing out the modelling functionality
+    - name: Test 1 -- multiclass
+      run: docker exec modelling-mlflow sh -c ". ~/.bashrc && wait-for-it modelling-mlflow-db:3306 -s -- mlflow run --no-conda -e mlp --experiment-name test -P train_data=/example_data/multiclass_training_data.pkl -P test_data=/example_data/multiclass_training_data.pkl -P features=txt_use -P solver=lbfgs -P random_state=8 ."
+    - name: Test 2 -- multilabel
+      run: docker exec modelling-mlflow sh -c ". ~/.bashrc && wait-for-it modelling-mlflow-db:3306 -s -- mlflow run --no-conda -e mlp --experiment-name test -P train_data=/example_data/multilabel_training_data.pkl -P test_data=/example_data/multilabel_training_data.pkl -P features=txt_use -P solver=lbfgs -P random_state=8 ."

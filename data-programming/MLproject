@@ -11,11 +11,13 @@ entry_points:
             n_epochs: {type: int, default: 1000}
             optimizer: {type: string, default: sgd}
             prec_init: {type: float, default: 0.7}
+            seed: {type: int, default: 0}
         command: "python ./label/example.py
         --task {task}
         --dev_data {dev_data}
         --n_epochs {n_epochs}
         --optimizer {optimizer}
         --prec_init {prec_init}
+        --seed {seed}
         {train_data}
         "

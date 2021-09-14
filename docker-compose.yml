@@ -78,7 +78,7 @@ services:
     profiles:
       - dev
     restart: on-failure
-    image: nullberry/adapt-ml-dp-web:latest
+    image: nullberry/adapt-ml-mlflow-server:latest
     container_name: dp-mlflow-server
     ports:
       - 5000:5000
@@ -144,7 +144,7 @@ services:
     profiles:
       - dev
     restart: on-failure
-    image: nullberry/adapt-ml-m-web:latest
+    image: nullberry/adapt-ml-mlflow-server:latest
     container_name: modelling-mlflow-server
     ports:
       - 5001:5000
@@ -178,6 +178,7 @@ services:
       - ${MODELLING_DATA_PATH}/test_data:/test_data
       - ${MODELLING_DATA_PATH}/tmp_artifacts:/tmp_artifacts
       - ./modelling/model:/code/model
+      - ./modelling/model_objs.py:/code/model_objs.py
       - ./modelling/MLproject:/code/MLproject
       - ./modelling/conda.yaml:/code/conda.yaml
       - ./example_data:/example_data

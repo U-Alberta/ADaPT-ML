@@ -93,8 +93,6 @@ def common_metrics(y_true: np.ndarray, y_pred: np.ndarray, y_prob: np.ndarray, l
     """
     functions that can be used for multiclass or multilabel.
     """
-    print(y_true)
-    print(y_pred)
     metrics_dict = {
         'accuracy': eval.accuracy_score(y_true, y_pred),
         'macro average precision score': eval.average_precision_score(y_true, y_prob),
@@ -147,8 +145,7 @@ def evaluate_multilabel(y_true: np.ndarray,
                         mlp_model: LookupClassifier) -> dict:
     metrics_dict = common_metrics(y_true, y_pred, y_prob, mlp_model)
     metrics_dict.update({
-        'discounted cumulative gain': eval.dcg_score(y_true, y_prob),
-        'log loss': eval.log_loss(y_true, y_prob, labels=mlp_model.classes)
+        'discounted cumulative gain': eval.dcg_score(y_true, y_prob)
     })
 
     # make multilabel confusion matrix with TPs in 1,1 and TN in 0,0
@@ -192,7 +189,6 @@ def main():
         logging.info("Loading training and testing sets, and feature sets")
         train_df, test_df = data.load(parsed_args.train_path, parsed_args.test_path)
         data.save_df(train_df, TRAIN_DF_FILENAME, TRAIN_DF_HTML_FILENAME)
-
         x_train = data.get_train_features(train_df, parsed_args.features)
         data.save_training_features(x_train, X_TRAIN_FILENAME)
 
@@ -217,7 +213,6 @@ def main():
         data.save_df(test_pred_df, TEST_PRED_DF_FILENAME, TEST_PRED_DF_HTML_FILENAME)
         y_pred = test_pred_df[mlp_model.classes].to_numpy()
         y_prob = test_pred_df[mlp_model.prob_labels].to_numpy()
-
         logging.info("Evaluating model ...")
         # try:
         if train_is_multiclass and test_is_multiclass:
