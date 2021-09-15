@@ -4,6 +4,7 @@ This module performs all MLFlow tracking tasks.
 import logging
 import os
 from glob import glob
+import pprint as pp
 
 import mlflow
 import mlflow.pytorch
@@ -18,6 +19,7 @@ def log(metrics, input_example, model_name, label_model):
     mlflow.log_params(train_params_dict(label_model))
     try:
         mlflow.log_metrics(metrics)
+        logging.info("Metrics:\n{}".format(pp.pformat(metrics)))
     except:
         logging.warning("Metrics not available.")
 

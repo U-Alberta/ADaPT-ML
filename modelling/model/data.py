@@ -76,6 +76,8 @@ def get_train_features(train_df: pd.DataFrame, features: [str]) -> np.ndarray:
         for data in tbl_f_df:
             features_df = features_df.append(data, ignore_index=True)
     id_f_df = pd.merge(train_df, features_df, on='id')
+    logging.info("Training features loaded. Here's a peek:")
+    logging.info(id_f_df.head())
     feature_arrays = [np.array(id_f_df[feature].tolist()) for feature in features]
     try:
         x = np.concatenate(feature_arrays, axis=1)
@@ -85,6 +87,8 @@ def get_train_features(train_df: pd.DataFrame, features: [str]) -> np.ndarray:
 
 
 def save_df(df: pd.DataFrame, pkl_filename: str, html_filename: str):
+    logging.info("Here's a preview of {}:".format(pkl_filename))
+    logging.info(df.head())
     df.to_pickle(pkl_filename)
     df.head().to_html(html_filename)
 

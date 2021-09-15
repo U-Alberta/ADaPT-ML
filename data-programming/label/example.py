@@ -16,6 +16,9 @@ EXAMPLE_DEV_COMPLETIONS_DIRECTORY = os.path.join('/labeled_data', 'eg_completion
 
 def main():
     with mlflow.start_run():
+        run = mlflow.active_run()
+        logging.info("Active run_id: {}".format(run.info.run_id))
+
         # get the needed information for the pv lfs
         logging.info("Getting information for lfs ...")
         train_df = procedure.load_lf_info(TRAIN_DF, LF_FEATURES)

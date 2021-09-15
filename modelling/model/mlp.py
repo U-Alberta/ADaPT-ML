@@ -2,6 +2,7 @@
 multi-layer perceptron classifier
 https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html
 """
+import os
 from math import floor, ceil
 import argparse
 import logging
@@ -131,11 +132,11 @@ def evaluate_multiclass(y_true: np.ndarray,
         'balanced accuracy score': eval.balanced_accuracy_score(ravel_y_true, ravel_y_pred),
         'MCC': eval.matthews_corrcoef(ravel_y_true, ravel_y_pred)
     })
-    cm = eval.confusion_matrix(ravel_y_true, ravel_y_pred, labels=mlp_model.classes)
+    # cm = eval.confusion_matrix(ravel_y_true, ravel_y_pred, labels=mlp_model.classes)
 
-    # eval.plot_confusion_matrix(mlp_model.classifier, x_test, y_true, labels=mlp_model.classes)
-    # plt.savefig(CONFUSION_MATRIX_FILENAME)
-    # plt.close()
+    eval.plot_confusion_matrix(mlp_model.classifier, x_test, ravel_y_true, labels=mlp_model.classes)
+    plt.savefig(CONFUSION_MATRIX_FILENAME)
+    plt.close()
     return metrics_dict
 
 
@@ -186,6 +187,9 @@ def plot_multilabel_confusion_matrix(confusion_matrix, axes, class_label, class_
 
 def main():
     with mlflow.start_run():
+        run = mlflow.active_run()
+        logging.info("Active run_id: {}".format(run.info.run_id))
+
         logging.info("Loading training and testing sets, and feature sets")
         train_df, test_df = data.load(parsed_args.train_path, parsed_args.test_path)
         data.save_df(train_df, TRAIN_DF_FILENAME, TRAIN_DF_HTML_FILENAME)

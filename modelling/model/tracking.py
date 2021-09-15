@@ -1,4 +1,5 @@
 import os
+import pprint as pp
 from model import TMP_ARTIFACTS
 from glob import glob
 import mlflow
@@ -12,6 +13,7 @@ def log(train_params, metrics):
     # mlflow.log_params(train_params)
     try:
         mlflow.log_metrics(metrics)
+        logging.info("Metrics:\n{}".format(pp.pformat(metrics)))
     except:
         logging.warning("Metrics not logged.")
 

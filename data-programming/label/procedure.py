@@ -255,6 +255,8 @@ def calc_class_balance(y: [[str]], labels) -> dict:
 
 
 def save_df(df: pd.DataFrame, pkl_filename: str, html_filename: str):
+    logging.info("Here's a preview of {}:".format(pkl_filename))
+    logging.info(df.head())
     df.to_pickle(pkl_filename)
     df.head().to_html(html_filename)
 
