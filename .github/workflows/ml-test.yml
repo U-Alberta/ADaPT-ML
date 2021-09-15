@@ -35,10 +35,10 @@ jobs:
 
     # Testing out the modelling functionality
     - name: Test 1 -- multiclass
-      run: docker exec modelling-mlflow sh -c ". ~/.bashrc && wait-for-it modelling-mlflow-db:3306 -s -- mlflow run --no-conda -e mlp --experiment-name test --run-id test1 -P train_data=/example_data/multiclass_training_data.pkl -P test_data=/example_data/multiclass_training_data.pkl -P features=txt_use -P solver=lbfgs -P random_state=8 ."
+      run: docker exec modelling-mlflow sh -c ". ~/.bashrc && wait-for-it modelling-mlflow-db:3306 -s -- mlflow run --no-conda -e mlp --experiment-name test1 -P train_data=/example_data/multiclass_training_data.pkl -P test_data=/example_data/multiclass_training_data.pkl -P features=txt_use -P solver=lbfgs -P random_state=8 ."
     - name: Check the run results
-      run: cat /test_data/mlruns/1/test1/artifacts/log.txt
+      run: cat /test_data/mlruns/1/**/artifacts/log.txt
     - name: Test 2 -- multilabel
-      run: docker exec modelling-mlflow sh -c ". ~/.bashrc && wait-for-it modelling-mlflow-db:3306 -s -- mlflow run --no-conda -e mlp --experiment-name test --run-id test2 -P train_data=/example_data/multilabel_training_data.pkl -P test_data=/example_data/multilabel_training_data.pkl -P features=txt_use -P solver=lbfgs -P random_state=8 ."
+      run: docker exec modelling-mlflow sh -c ". ~/.bashrc && wait-for-it modelling-mlflow-db:3306 -s -- mlflow run --no-conda -e mlp --experiment-name test2 -P train_data=/example_data/multilabel_training_data.pkl -P test_data=/example_data/multilabel_training_data.pkl -P features=txt_use -P solver=lbfgs -P random_state=8 ."
     - name: Check the run results
-      run: cat /test_data/mlruns/1/test2/artifacts/log.txt
+      run: cat /test_data/mlruns/2/**/artifacts/log.txt
