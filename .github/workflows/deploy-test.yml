@@ -1,0 +1,29 @@
+# This is a workflow containing an automated test suite covering the core functionality of the software.
+
+name: ADaPT-ML Model Deployment CI
+
+on: [push]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+    env:
+      DB_DATA_PATH: ./crate
+
+      MODELLING_DATA_PATH: ./example_data/m
+      EXAMPLE_MODEL_PATH: ./example_data/deploy/python_model.pkl
+
+    steps:
+    - uses: actions/checkout@v2
+
+    # Building and setting up the containers
+    - name: Build the docker-compose stack
+      run: docker-compose -f docker-compose.yml --profile deploy up -d
+    - name: Give database a chance to start up
+      run: sleep 30
+    - name: Check running containers
+      run: docker ps -a
+
+    # Testing out the deployment functionality

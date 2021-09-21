@@ -10,10 +10,10 @@ jobs:
 
     runs-on: ubuntu-latest
     env:
-      DATA_PATH: /test_data
       DB_DATA_PATH: ./crate
-      LS_DATA_PATH: /test_data/ls
-      DP_DATA_PATH: /test_data/dp
+
+      LS_ANNOTATIONS_PATH: ./example_data/ls
+      DP_DATA_PATH: ./example_data/dp
       DATABASE_IP: crate://crate-db:4200
 
       DP_MYSQL_DATABASE: mlruns.db
@@ -36,10 +36,10 @@ jobs:
         
     # Testing out the data programming functionality
     - name: Test 1 -- multiclass
-      run: docker exec dp-mlflow sh -c ". ~/.bashrc && wait-for-it dp-mlflow-db:3306 -s -- mlflow run --no-conda -e example --experiment-name test1 -P train_data=/example_data/multiclass_df.pkl -P dev_data=0 -P task=multiclass -P seed=8 ."
+      run: docker exec dp-mlflow sh -c ". ~/.bashrc && wait-for-it dp-mlflow-db:3306 -s -- mlflow run --no-conda -e example --experiment-name test1 -P train_data=/unlabeled_data/multiclass_df.pkl -P dev_data=0 -P task=multiclass -P seed=8 ."
     - name: Check the run results
       run: cat $DP_DATA_PATH/mlruns/1/**/artifacts/log.txt
     - name: Test 2 -- multilabel
-      run: docker exec dp-mlflow sh -c ". ~/.bashrc && wait-for-it dp-mlflow-db:3306 -s -- mlflow run --no-conda -e example --experiment-name test2 -P train_data=/example_data/multilabel_df.pkl -P dev_data=0 -P task=multilabel -P seed=8 ."
+      run: docker exec dp-mlflow sh -c ". ~/.bashrc && wait-for-it dp-mlflow-db:3306 -s -- mlflow run --no-conda -e example --experiment-name test2 -P train_data=/unlabeled_data/multilabel_df.pkl -P dev_data=0 -P task=multilabel -P seed=8 ."
     - name: Check the run results
       run: cat $DP_DATA_PATH/mlruns/2/**/artifacts/log.txt

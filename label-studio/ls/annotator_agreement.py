@@ -9,83 +9,106 @@ import argparse
 import json
 import logging
 import os
+import sys
 from functools import reduce
 from glob import glob
 
 import krippendorff
 import pandas as pd
-from ls import LABEL_STUDIO_DIRECTORY
+from ls import LS_ANNOTATIONS_PATH
 from sklearn.feature_extraction.text import CountVectorizer
 
 RELIABLE = 0.8
 UNRELIABLE = 0.667
+LABEL_PREFIX = 'worker_'
+
+LOGGING_FILENAME = os.path.join(LS_ANNOTATIONS_PATH, 'agreement_log.txt')
+logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO, filename=LOGGING_FILENAME, filemode='w')
 
 
-def get_dev_df(completions_dir):
-    completion_files = glob(completions_dir)
-    dev_df = pd.DataFrame()
-    for filename in completion_files:
-        with open(filename, 'r') as infile:
-            completion = json.load(infile)
+def create_annotations_df(filename):
+    with open(os.path.join(LS_ANNOTATIONS_PATH, filename), 'r') as infile:
+        ann_json = json.load(infile)
+    df = pd.json_normalize(ann_json, sep='_').drop_duplicates(subset='data_ref_id', ignore_index=True)
 
-        df = pd.json_normalize(completion)
-        try:
-            gold_label = df.at[0, 'completions'][0]['result'][0]['value']['choices']
-            if "NONE" not in gold_label:
-                df = df.rename(columns={'id': 'file_id', 'data.ref_id': 'id', 'data.meta_info.table': 'table'})
-                df['gold_label'] = [gold_label]
-                dev_df = dev_df.append(df, ignore_index=True)
-        except IndexError:
-            logging.warning("This completion has no result?: {}".format(df.at[0, 'completions']))
+    ann_df = pd.DataFrame()
 
-    return dev_df
+    for row in df.itertuples(index=False):
+        row_dict = {'id': [row.data_ref_id], 'task': [row.data_meta_info_task]}
+        row_dict.update(dict(zip(
+            ['{0}{1}'.format(LABEL_PREFIX, d['completed_by']['id']) for d in row.annotations],
+            [[d['result'][0]['value']['choices']] for d in row.annotations]
+        )))
+        ann_df = ann_df.append(pd.DataFrame(row_dict), ignore_index=True)
+    logging.info("Annotation df completed. Here is a peek:")
+    logging.info(ann_df.head())
+
+    return ann_df
 
 
-def calc_krippendorff_alpha(dfs: pd.DataFrame) -> float:
+def calc_krippendorff_alpha(df: pd.DataFrame) -> float:
     """
     This function calculates krippendorff's alpha to measure annotator agreement for both multiclass and multilabel
     settings with two or more annotators.
-    :param dfs: pd.Dataframe with columns id and gold_label_# for all data points that have been labeled by all
-    annotators
+    :param df: pd.Dataframe for a specific task with columns id, task, and worker_# for all data points that have been
+    labeled by all annotators.
     :return: the nominal alpha
     """
-    gold_label_cols_df = dfs[[col for col in dfs.columns if 'gold_label' in col]]
-    gold_labels_combined = [' '.join(labels) for labels in [
-        [val for sublist in label for val in sublist] for label in gold_label_cols_df.itertuples(index=False)]
-                            ]
+    labels_df = df[[col for col in df.columns if LABEL_PREFIX in col]]
+    labels_combined = [' '.join(labels) for labels in [
+        [val for sublist in label for val in sublist] for label in labels_df.itertuples(index=False)]
+                       ]
     vectorizer = CountVectorizer()
-    label_count_matrix = vectorizer.fit_transform(gold_labels_combined).toarray()
+    label_count_matrix = vectorizer.fit_transform(labels_combined).toarray()
     nominal_metric = krippendorff.alpha(value_counts=label_count_matrix, level_of_measurement='nominal')
+
     return nominal_metric
 
 
+def report(task, alpha):
+    """
+    This function generates a plain text report of the resulting nominal alpha for the given task, and the
+    interpretation based on this Wikipedia article section:
+    https://en.wikipedia.org/wiki/Krippendorff%27s_alpha#Significance
+    :param task: The classification task these data points correspond to
+    :param alpha: the nominal alpha
+    """
+    if alpha >= RELIABLE:
+        result = "{0} >= {1}. Feel free to use these annotations as a benchmark.".format(alpha, RELIABLE)
+    elif alpha < UNRELIABLE:
+        result = "{0} < {1}. Discard these annotations and start again.".format(alpha, UNRELIABLE)
+    else:
+        result = "{0} <= {1} < {2}. Use these annotations to make tentative conclusions only.".format(UNRELIABLE,
+                                                                                                      alpha, RELIABLE)
+    summary_str = """
+    TASK: {task}
+    NOMINAL ALPHA: {alpha}
+    RESULT: {result} 
+    """.format(task=task, alpha=alpha, result=result)
+    logging.info(summary_str)
+    print(summary_str)
+
+
 def main():
-    parser = argparse.ArgumentParser(description='Compute the inter-annotator agreement for a given task.')
-    parser.add_argument('task', type=str, help='What task has the annotated data? {pv}')
+    parser = argparse.ArgumentParser(description='Compute the inter-annotator agreement for completed annotations.')
+    parser.add_argument('filename', type=str, help='Name of the exported annotations file to calculate agreement for.')
     parsed_args = parser.parse_args()
 
-    project_directories = glob(os.path.join(LABEL_STUDIO_DIRECTORY, '{}_project_*'.format(parsed_args.task)))
-    assert project_directories
+    try:
+        ann_df = create_annotations_df(parsed_args.filename)
+    except Exception as e:
+        logging.error("There was an issue creating the DataFrame:\n{}\nStopping.".format(e.args))
+        sys.exit(1)
 
-    df_list = []
-    for d in project_directories:
-        completions_directory = os.path.join(d, 'completions', '*')
-        df = get_dev_df(completions_directory).drop(columns=['completions', 'file_id', 'table', 'data.tweet'])
-        suffix = '_{}'.format(d[-1])
-        df = df.add_suffix(suffix).rename(columns={'id{}'.format(suffix): 'id'})
-        df_list.append(df)
-    dfs = reduce(lambda left, right: pd.merge(left, right, on=['id'], how='outer'), df_list).dropna()
-    print("Annotations loaded. Here's a preview:")
-    print(dfs)
-    nominal_alpha = calc_krippendorff_alpha(dfs)
-    logging.info("Nominal Alpha: {}".format(nominal_alpha))
-    print("\n\nNominal Alpha: {}".format(nominal_alpha))
-    if nominal_alpha >= RELIABLE:
-        print("Feel free to use these annotations as a benchmark.\n\n")
-    elif nominal_alpha < UNRELIABLE:
-        print("Discard these annotations and start again.\n\n")
-    else:
-        print("Use these annotations to make tentative conclusions only.\n\n")
+    for task in ann_df.task.unique():
+        try:
+            # drop annotators who didn't annotate this data, then drop data points with at least one annotator missing
+            task_df = ann_df[(ann_df.task == task)].dropna(axis='columns', how='all').dropna()
+            nominal_alpha = calc_krippendorff_alpha(task_df)
+            report(task, nominal_alpha)
+        except Exception as e:
+            logging.error("Could not generate report for {0}:\n{1}\nStopping.".format(task, e.args))
+            sys.exit(1)
 
 
 if __name__ == '__main__':

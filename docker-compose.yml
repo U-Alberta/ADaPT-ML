@@ -9,6 +9,7 @@ services:
     networks:
       - dp_network
       - m_network
+      - ls_network
     volumes:
       - ${DB_DATA_PATH}:/data
     command: [ "crate", "-Cnetwork.host=_site_" ]
@@ -31,8 +32,10 @@ services:
     networks:
       - ls_network
     volumes:
-      - ${LS_DATA_PATH}:/label-studio/data
       - ./label-studio/config:/config
+      - ${LS_DATA_PATH}:/label-studio/data
+      - ${LS_TASKS_PATH}:/tasks
+      - ${LS_ANNOTATIONS_PATH}:/annotations
     environment:
       - LABEL_STUDIO_LOCAL_FILES_SERVING_ENABLED=true
       - LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT=/label-studio/files
@@ -50,6 +53,8 @@ services:
     volumes:
       - ./label-studio/ls:/code/ls
       - ${LS_DATA_PATH}:/label-studio/data
+      - ${LS_TASKS_PATH}:/tasks
+      - ${LS_ANNOTATIONS_PATH}:/annotations
     environment:
       - DATABASE_IP=${DATABASE_IP}
     stdin_open: true
@@ -114,7 +119,6 @@ services:
       - ./data-programming/label:/code/label
       - ./data-programming/MLproject:/code/MLproject
       - ./data-programming/conda.yaml:/code/conda.yaml
-      - ./example_data:/example_data
     environment:
       - MLFLOW_TRACKING_URI=${DP_MLFLOW_TRACKING_URI}
       - DATABASE_IP=${DATABASE_IP}
@@ -181,7 +185,6 @@ services:
       - ./modelling/model_objs.py:/code/model_objs.py
       - ./modelling/MLproject:/code/MLproject
       - ./modelling/conda.yaml:/code/conda.yaml
-      - ./example_data:/example_data
     environment:
       - MLFLOW_TRACKING_URI=${MODELLING_MLFLOW_TRACKING_URI}
       - DATABASE_IP=${DATABASE_IP}

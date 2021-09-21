@@ -1,0 +1,39 @@
+# This is a workflow containing an automated test suite covering the core functionality of the software.
+
+name: ADaPT-ML Label Studio CI
+
+on: [push]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+    env:
+      DB_DATA_PATH: ./crate
+
+      LS_DATA_PATH: ./example_data/ls/data
+      DATABASE_IP: crate://crate-db:4200
+      LS_TASKS_PATH: ./example_data/ls/tasks
+      LS_ANNOTATIONS_PATH: ./example_data/ls/annotations
+
+    steps:
+    - uses: actions/checkout@v2
+
+    # Building and setting up the containers
+    - name: Build the docker-compose stack
+      run: docker-compose -f docker-compose.yml --profile label up -d
+    - name: Give database a chance to start up
+      run: sleep 30
+    - name: Check running containers
+      run: docker ps -a
+
+    # Testing out the modelling functionality
+    - name: Test 1 -- Sample Tasks
+      run: docker exec label-studio-dev python ./ls/sample_tasks.py example_data txt 30 example --filename example_tasks.json
+    - name: Check the run results
+      run: cat $LS_TASKS_PATH/*log.txt
+    - name: Test 2 -- Annotator Agreement
+      run: docker exec label-studio-dev python ./ls/annotator_agreement.py example_annotations.json
+    - name: Check the run results
+      run: cat $LS_ANNOTATIONS_PATH/*log.txt
