@@ -10,6 +10,7 @@ services:
       - dp_network
       - m_network
       - ls_network
+      - deploy_network
     volumes:
       - ${DB_DATA_PATH}:/data
     command: [ "crate", "-Cnetwork.host=_site_" ]
@@ -200,7 +201,7 @@ services:
     ports:
       - "80:80"
     networks:
-      - m_network
+      - deploy_network
     volumes:
       - ${MODELLING_DATA_PATH}/mlruns:/mlruns
       - ./modelling/app:/app
@@ -216,4 +217,6 @@ networks:
   dp_network:
     driver: bridge
   m_network:
+    driver: bridge
+  deploy_network:
     driver: bridge

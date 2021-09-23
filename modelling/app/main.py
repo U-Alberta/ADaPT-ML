@@ -98,7 +98,7 @@ def predict_multiclass_example(data_point_item: DataPointItem):
     try:
         assert loaded_models_dict['Multiclass Example Model']
     except Exception as error:
-        raise ModelException(name="ExampleModel", code="load", error=error)
+        raise ModelException(name="ExampleModel", code="load")
     json_data_point_item = jsonable_encoder(data_point_item)
     id_json = json.dumps(json_data_point_item)
     id_df = pd.read_json(id_json, dtype={'id': str, 'table': str})
@@ -135,7 +135,7 @@ def predict_multilabel_example(data_point_item: DataPointItem):
     try:
         assert loaded_models_dict['Multilabel Example Model']
     except Exception as error:
-        raise ModelException(name="ExampleModel", code="load", error=error)
+        raise ModelException(name="ExampleModel", code="load")
     json_data_point_item = jsonable_encoder(data_point_item)
     id_json = json.dumps(json_data_point_item)
     id_df = pd.read_json(id_json, dtype={'id': str, 'table': str})
