@@ -13,7 +13,8 @@ jobs:
       DB_DATA_PATH: ./crate
 
       MODELLING_DATA_PATH: ./example_data/m
-      EXAMPLE_MODEL_PATH: ./example_data/deploy/python_model.pkl
+      MULTICLASS_EXAMPLE_MODEL_PATH: ./example_data/deploy/multiclass_model.pkl
+      MULTILABEL_EXAMPLE_MODEL_PATH: ./example_data/deploy/multilabel_model.pkl
 
     steps:
     - uses: actions/checkout@v2
@@ -27,3 +28,31 @@ jobs:
       run: docker ps -a
 
     # Testing out the deployment functionality
+    - name: Predict multiclass
+      run: |
+        curl -X 'POST' \
+        'http://localhost/predict_multiclass_example' \
+        -H 'accept: application/json' \
+        -H 'Content-Type: application/json' \
+        -d '{
+          "table": [
+            "example_data", "example_data", "example_data", "example_data", "example_data"
+          ],
+          "id": [
+            "22", "24", "19", "15", "18"
+          ]
+        }'
+    - name: Predict multilabel
+      run: |
+        curl -X 'POST' \
+        'http://localhost/predict_multilabel_example' \
+        -H 'accept: application/json' \
+        -H 'Content-Type: application/json' \
+        -d '{
+          "table": [
+            "example_data", "example_data", "example_data", "example_data", "example_data"
+          ],
+          "id": [
+            "03", "05", "12", "06", "08"
+          ]
+        }'

@@ -6,5 +6,4 @@ FROM tiangolo/uvicorn-gunicorn-fastapi:python3.8
 COPY ./requirements-deploy.txt .
 RUN pip install -r requirements-deploy.txt
 
-COPY ./model_objs.py .
 COPY ./app /app

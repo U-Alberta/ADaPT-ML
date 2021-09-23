@@ -5,7 +5,7 @@ services:
     image: crate:latest
     container_name: crate-db
     ports:
-      - 4200:4200
+      - "4200:4200"
     networks:
       - dp_network
       - m_network
@@ -28,7 +28,7 @@ services:
     image: heartexlabs/label-studio:latest
     container_name: label-studio-web
     ports:
-      - 8080:8080
+      - "8080:8080"
     networks:
       - ls_network
     volumes:
@@ -86,7 +86,7 @@ services:
     image: nullberry/adapt-ml-mlflow-server:latest
     container_name: dp-mlflow-server
     ports:
-      - 5000:5000
+      - "5000:5000"
     networks:
       - dp_network
     depends_on:
@@ -151,7 +151,7 @@ services:
     image: nullberry/adapt-ml-mlflow-server:latest
     container_name: modelling-mlflow-server
     ports:
-      - 5001:5000
+      - "5001:5000"
     networks:
       - m_network
     depends_on:
@@ -198,14 +198,17 @@ services:
     image: nullberry/adapt-ml-m-deploy:latest
     container_name: modelling-mlflow-deploy
     ports:
-      - 80:80
+      - "80:80"
     networks:
       - m_network
     volumes:
       - ${MODELLING_DATA_PATH}/mlruns:/mlruns
+      - ./modelling/app:/app
+      - ./modelling/model_objs.py:/app/model_objs.py
     environment:
       - DATABASE_IP=${DATABASE_IP}
-      - EXAMPLE_MODEL_PATH=${EXAMPLE_MODEL_PATH}
+      - MULTICLASS_EXAMPLE_MODEL_PATH=${MULTICLASS_EXAMPLE_MODEL_PATH}
+      - MULTILABEL_EXAMPLE_MODEL_PATH=${MULTILABEL_EXAMPLE_MODEL_PATH}
 
 networks:
   ls_network:
@@ -214,7 +217,3 @@ networks:
     driver: bridge
   m_network:
     driver: bridge
-
-#>
-#      sh -c "label-studio init example_project --label-config=/config/example_config.xml
-#      && label-studio start"
