@@ -12,7 +12,7 @@ jobs:
     env:
       DB_DATA_PATH: ./crate
 
-      MODELLING_DATA_PATH: ./example_data/deploy
+      MODELLING_DATA_PATH: ./example_data/m
       MULTICLASS_EXAMPLE_MODEL_PATH: /mlruns/multiclass_model.pkl
       MULTILABEL_EXAMPLE_MODEL_PATH: /mlruns/multilabel_model.pkl
 
