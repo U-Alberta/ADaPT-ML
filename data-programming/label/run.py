@@ -83,6 +83,7 @@ def start(registered_model_name, lf_features, dev_annotations_path, get_lfs, cla
                 dev_pred = [label for sublist in dev_pred for label in sublist]
                 dev_true_lfs = [class_labels[label].value for label in dev_true]
             except Exception as e:
+                dev_true_lfs = None
                 if dev_true is not None and dev_pred is not None:
                     logging.warning("Problem flattening development labels and predictions:\n{}\n".format(e.args))
             metrics = evaluate.multiclass_summary(train_L, dev_L, lfs, dev_true, dev_true_lfs, dev_pred, label_model)
