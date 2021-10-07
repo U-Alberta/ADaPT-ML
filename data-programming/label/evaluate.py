@@ -42,7 +42,7 @@ def lf_summary(train_L, dev_L, lfs, label_model, dev_true_lfs=None):
                                                               est_weights=label_model.get_weights())
         dev_summary.to_html(LF_SUMMARY_DEV_FILENAME)
     except Exception as err:
-        if dev_L is not None:
+        if dev_L and dev_true_lfs:
             logging.warning("No empirical evaluation of LFs available:\n{}\n".format(err.args))
     train_summary = LFAnalysis(L=train_L, lfs=lfs).lf_summary(est_weights=label_model.get_weights())
     train_summary.to_html(LF_SUMMARY_TRAIN_FILENAME)
@@ -62,7 +62,8 @@ def multiclass_summary(train_L, dev_L, lfs, dev_true, dev_true_lfs, dev_pred, la
         class_labels = list(set(dev_true))
         dev_true_lfs = np.array(dev_true_lfs)
     except Exception as err:
-        if dev_true is not None and dev_true_lfs is not None:
+        class_labels = None
+        if dev_true and dev_true_lfs:
             logging.warning("Problem formatting labels:\n{}\n".format(err.args))
     lf_summary(train_L, dev_L, lfs, label_model, dev_true_lfs)
     try:
@@ -71,14 +72,16 @@ def multiclass_summary(train_L, dev_L, lfs, dev_true, dev_true_lfs, dev_pred, la
         disp.plot()
         plt.savefig(CONFUSION_MATRIX_FILENAME, format='jpg')
     except Exception as err:
-        logging.warning("Confusion matrix not available:\n{}\n".format(err.args))
+        if dev_true and dev_pred and class_labels:
+            logging.warning("Confusion matrix not available:\n{}\n".format(err.args))
     try:
         if len(class_labels) == 2:
             lm_metrics = label_model.score(dev_L, dev_true_lfs, MULTICLASS_METRICS['binary'])
         else:
             lm_metrics = label_model.score(dev_L, dev_true_lfs, MULTICLASS_METRICS['multiclass'])
     except Exception as err:
-        logging.warning("Label model metrics not available:\n{}\n".format(err.args))
+        if class_labels and dev_L and dev_true_lfs:
+            logging.warning("Label model metrics not available:\n{}\n".format(err.args))
         lm_metrics = None
     return lm_metrics
 
@@ -112,7 +115,8 @@ def multilabel_summary(train_L, dev_L, lfs, dev_true, dev_pred, label_model) -> 
             'F1 samples': f1_score(dev_true, dev_pred, average='samples')
         }
     except Exception as err:
-        logging.warning("Summary will not be available:\n{}\n".format(err.args))
+        if dev_true and dev_pred:
+            logging.warning("Summary will not be available:\n{}\n".format(err.args))
         lm_metrics = None
     return lm_metrics
 

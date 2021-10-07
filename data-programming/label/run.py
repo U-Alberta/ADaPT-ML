@@ -39,7 +39,7 @@ def start(registered_model_name, lf_features, dev_annotations_path, get_lfs, cla
             procedure.save_label_matrix(dev_L, DEV_MATRIX_FILENAME)
         except Exception as e:
             dev_L = None
-            if dev_df is not None:
+            if dev_df:
                 msg = "Unable to create dev label matrix:\n{}\nProceeding without class balance.".format(e.args)
                 logging.warning(msg)
 
@@ -67,7 +67,7 @@ def start(registered_model_name, lf_features, dev_annotations_path, get_lfs, cla
         except Exception as e:
             dev_pred = None
             dev_true = None
-            if dev_df is not None:
+            if dev_df:
                 msg = "Unable to create final dev df:\n{}\nProceeding without evaluation.".format(e.args)
                 logging.warning(msg)
 
@@ -84,7 +84,7 @@ def start(registered_model_name, lf_features, dev_annotations_path, get_lfs, cla
                 dev_true_lfs = [class_labels[label].value for label in dev_true]
             except Exception as e:
                 dev_true_lfs = None
-                if dev_true is not None and dev_pred is not None:
+                if dev_true and dev_pred:
                     logging.warning("Problem flattening development labels and predictions:\n{}\n".format(e.args))
             metrics = evaluate.multiclass_summary(train_L, dev_L, lfs, dev_true, dev_true_lfs, dev_pred, label_model)
         elif parsed_args.task == 'multilabel':
