@@ -1,29 +1,27 @@
 import argparse
-from ls import DATABASE_IP, LS_TASKS_PATH
+from ls import DATABASE_IP, LS_TASKS_PATH, CLASSIFICATION_TASKS
 import pandas as pd
 import json
 from datetime import datetime
 import os
 import logging
 
-
 date_str = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-filename = date_str+'.json'
-
 
 parser = argparse.ArgumentParser(description='Sample a number of data points from a table to annotate.')
 parser.add_argument('table', type=str, help='Table name that stores the data points.')
 parser.add_argument('columns', nargs='+', type=str, help='column name(s) of the data point fields to use for '
                                                          'annotation.')
 parser.add_argument('n', type=int, help='Number of data points to sample.')
-parser.add_argument('task', type=str, default='example', choices=('example',), help='What classification task is this '
-                                                                                    'sample for?')
-parser.add_argument('--filename', default=filename, type=str, help='What would you like the task file to be called?')
-
+parser.add_argument('task', type=str, choices=CLASSIFICATION_TASKS, help='What classification task is this '
+                                                                         'sample for?')
+parser.add_argument('--filename', default=None, type=str, help='What would you like the task file to be called?')
 parsed_args = parser.parse_args()
 
-json_tasks_path = os.path.join(LS_TASKS_PATH, parsed_args.filename)
-LOGGING_FILENAME = os.path.join(LS_TASKS_PATH, '{}_log.txt'.format(parsed_args.filename))
+FILENAME = parsed_args.filename if parsed_args.filename is not None else "{d}_{t}.json".format(d=date_str,
+                                                                                               t=parsed_args.task)
+JSON_TASKS_PATH = os.path.join(LS_TASKS_PATH, FILENAME)
+LOGGING_FILENAME = os.path.join(LS_TASKS_PATH, '{}_log.txt'.format(FILENAME))
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO, filename=LOGGING_FILENAME, filemode='w')
 
 
@@ -48,10 +46,10 @@ def main():
             }
         )
 
-    with open(json_tasks_path, 'w') as outfile:
+    with open(JSON_TASKS_PATH, 'w') as outfile:
         json.dump(task_json, outfile)
 
-    logging.info("Saved {task} tasks in {path}".format(task=parsed_args.task, path=json_tasks_path))
+    logging.info("Saved {task} tasks in {path}".format(task=parsed_args.task, path=JSON_TASKS_PATH))
 
 
 if __name__ == '__main__':

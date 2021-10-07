@@ -113,6 +113,7 @@ services:
     depends_on:
       - dp_db
     volumes:
+      - ${LS_ANNOTATIONS_PATH}:/annotations
       - ${DP_DATA_PATH}/mlruns:/code/mlruns
       - ${DP_DATA_PATH}/unlabeled_data:/unlabeled_data
       - ${DP_DATA_PATH}/tmp_artifacts:/tmp_artifacts

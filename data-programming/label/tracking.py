@@ -20,8 +20,9 @@ def log(metrics, input_example, model_name, label_model):
     try:
         mlflow.log_metrics(metrics)
         logging.info("Metrics:\n{}".format(pp.pformat(metrics)))
-    except:
-        logging.warning("Metrics not available.")
+    except Exception as err:
+        if metrics is not None:
+            logging.warning("Metrics failed to log:\n{}\n".format(err.args))
 
     # LabelModel subclasses torch.nn.Module
     mlflow.pytorch.log_model(

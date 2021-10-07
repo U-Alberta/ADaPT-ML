@@ -75,7 +75,7 @@ def load_lf_info(id_df, features) -> pd.DataFrame:
     return lf_info_df
 
 
-def create_label_matrix(df, lfs, parallel=False) -> np.ndarray:
+def create_label_matrix(df, lfs, parallel) -> np.ndarray:
     """
     This function applies the LFs over the datapoints in the given DataFrame to create an n X m numpy matrix where each
     row is for a datapoint and each column is the integer vote from each LF if its check is successful or -1 if it
@@ -247,7 +247,7 @@ def calc_class_balance(y: [[str]], labels) -> dict:
     :param y: The annotations
     """
     y_len = len(y)
-    flat_y_dev = np.array(y).flatten().tolist()
+    flat_y_dev = [label for sublist in y for label in sublist]
     label_names = [label.name for label in labels]
     counts = map(lambda l: flat_y_dev.count(l), label_names)
     balance = list(map(lambda count: count / y_len, counts))

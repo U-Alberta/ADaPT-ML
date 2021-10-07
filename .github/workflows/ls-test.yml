@@ -29,11 +29,32 @@ jobs:
       run: docker ps -a
 
     # Testing out the modelling functionality
-    - name: Test 1 -- Sample Tasks
+    - name: Test 1 -- sample tasks
       run: docker exec label-studio-dev python ./ls/sample_tasks.py example_data txt 30 example --filename example_tasks.json
     - name: Check the run results
       run: cat $LS_TASKS_PATH/*log.txt
-    - name: Test 2 -- Annotator Agreement
-      run: docker exec label-studio-dev python ./ls/annotator_agreement.py example_annotations.json
+
+    - name: Test 2 -- process annotations with random gold choice
+      run: docker exec label-studio-dev python ./ls/process_annotations.py example_annotations.json example random
     - name: Check the run results
-      run: cat $LS_ANNOTATIONS_PATH/*log.txt
+      run: cat $LS_ANNOTATIONS_PATH/example/process_log.txt
+
+    - name: Test 3 -- process annotations with drop gold choice
+      run: docker exec label-studio-dev python ./ls/process_annotations.py example_annotations.json example drop
+    - name: Check the run results
+      run: cat $LS_ANNOTATIONS_PATH/example/process_log.txt
+
+    - name: Test 4 -- process annotations with majority gold choice
+      run: docker exec label-studio-dev python ./ls/process_annotations.py example_annotations.json example majority
+    - name: Check the run results
+      run: cat $LS_ANNOTATIONS_PATH/example/process_log.txt
+
+    - name: Test 5 -- process annotations with worker_1 gold choice
+      run: docker exec label-studio-dev python ./ls/process_annotations.py example_annotations.json example 1
+    - name: Check the run results
+      run: cat $LS_ANNOTATIONS_PATH/example/process_log.txt
+
+    - name: Test 6 -- annotator agreement
+      run: docker exec label-studio-dev python ./ls/annotator_agreement.py example
+    - name: Check the run results
+      run: cat $LS_ANNOTATIONS_PATH/example/agreement_log.txt

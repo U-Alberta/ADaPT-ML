@@ -86,15 +86,17 @@ MULTILABEL_EXAMPLE_MODEL_PATH=/mlruns/multilabel_model.pkl
 
 Setting up ADaPT-ML to work with a new classification task requires adding new Python modules and editing some existing files. You can follow along with the Example Use Case to get an overview, but the details are as follows, file-by-file:
 
-#### data-programming/label/lfs/__init__.py ####
+#### [Define your class names](data-programming/label/lfs/__init__.py) ####
 
-This is where you need to define the object that will hold both the name of each class and the number representing that class, which the Labeling Functions will use to vote, and which will ultimately make up the Label Matrix.
+This is where you need to define the Class that will hold both the name of each class and the number representing that class, which the Labeling Functions will use to vote, and which will ultimately make up the Label Matrix.
 
-#### data-programming/label/lfs/your_new_task.py ####
+#### [Write your Labeling Functions](data-programming/label/lfs/your_new_task.py) ####
 
 This module that you can name after your new classification task is where you will write your Labeling Functions, and create a function called `get_lfs` that will produce an iterable containing all of the Labeling Functions you have defined.
 
-#### data-programming/
+#### [Create your main function as an MLflow endpoint](data-programming/label/your_new_task.py) ####
+
+This is the main module for your new task. You will need to import the Class you defined in [this step](#define-your-class-namesdata-programminglabellfs__init__py) and the `get_lfs` function defined in [this step](#write-your-labeling-functionsdata-programminglabellfsyour_new_taskpy). You will also need to create a name for the Label Model that will be specific to your new task, and a dictionary with the names of the columns holding the features extracted for use with the Labeling Functions you defined as keys and any functions necessary to properly transform or unpack the featurized data point as values.
 
 ## Example Usage ##
 Our example use case is to develop a model that can predict whether a data point is about a cat, dog, bird, horse, or snake. This task has been divided into a multiclass setting, where there is only one possible class that the data point can belong to, and a multilabel setting, where one data point can belong to one or many classes, to demonstrate how to handle both tasks. We do not have an existing annotated dataset for this classification task, so the first step will be to create one. When you first get started, you will need to gather the appropriate data for your task, and featurize it in two ways:

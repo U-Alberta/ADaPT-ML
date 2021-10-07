@@ -1,95 +1,16 @@
-import logging
 import os
-import sys
 
-import mlflow
-from label import (TRAIN_DF, TRAIN_DF_FILENAME, TRAIN_MATRIX_FILENAME, TRAINING_DATA_FILENAME,
-                   TRAINING_DATA_HTML_FILENAME, DEV_DF_FILENAME, DEV_DF_HTML_FILENAME, DEV_MATRIX_FILENAME,
-                   LABEL_MODEL_FILENAME, parsed_args, procedure, evaluate, tracking)
+from label import run
 from label.lfs import ExampleLabels
 from label.lfs.example import get_lfs
 
 REGISTERED_MODEL_NAME = 'ExampleLabelModel'
 LF_FEATURES = {'txt_clean_lemma': None}
-EXAMPLE_DEV_COMPLETIONS_DIRECTORY = os.path.join('/labeled_data', 'eg_completions', '*')
+DEV_ANNOTATIONS_PATH = os.path.join('/annotations', 'example', 'gold_df.pkl')
 
 
 def main():
-    with mlflow.start_run():
-        run = mlflow.active_run()
-        logging.info("Active run_id: {}".format(run.info.run_id))
-
-        # get the needed information for the pv lfs
-        logging.info("Getting information for lfs ...")
-        train_df = procedure.load_lf_info(TRAIN_DF, LF_FEATURES)
-
-        if parsed_args.dev_data:
-            logging.info("Getting development data if available ...")
-            dev_df = procedure.load_lf_info(evaluate.get_dev_df(EXAMPLE_DEV_COMPLETIONS_DIRECTORY), LF_FEATURES)
-            dev_true = dev_df.gold_label.tolist()
-        else:
-            logging.info("Skipping development data ...")
-            dev_df = None
-            dev_true = None
-
-        # create the label matrix
-        lfs = get_lfs()
-        logging.info("Creating label matrix ...")
-        try:
-            train_L = procedure.create_label_matrix(train_df, lfs, parallel=False)
-            procedure.save_label_matrix(train_L, TRAIN_MATRIX_FILENAME)
-        except Exception as e:
-            msg = "Unable to create train label matrix:\n{}\nStopping.".format(e.args)
-            logging.error(msg)
-            sys.exit(msg)
-        try:
-            dev_L = procedure.create_label_matrix(dev_df, lfs)
-            procedure.save_label_matrix(dev_L, DEV_MATRIX_FILENAME)
-        except Exception as e:
-            dev_L = None
-            msg = "Unable to create dev label matrix:\n{}\nProceeding without class balance.".format(e.args)
-            logging.warning(msg)
-
-        # train the label model
-        logging.info("Training label model ...")
-        try:
-            label_model = procedure.train_label_model(train_L, dev_true, ExampleLabels)
-            label_model.save(LABEL_MODEL_FILENAME)
-        except Exception as e:
-            msg = "Unable to train label model:\n{}\nStopping.".format(e.args)
-            logging.error(msg)
-            sys.exit(msg)
-
-        # use the label model to label the data
-        logging.info("Predicting {} ...".format(parsed_args.task))
-        labeled_train_df = procedure.apply_label_preds(train_df, train_L, label_model, ExampleLabels, parsed_args.task)
-        procedure.save_df(labeled_train_df[['table', 'id', 'label', 'label_probs']],
-                          TRAINING_DATA_FILENAME, TRAINING_DATA_HTML_FILENAME)
-        try:
-            labeled_dev_df = procedure.apply_label_preds(dev_df, dev_L, label_model, ExampleLabels, parsed_args.task)
-            procedure.save_df(labeled_dev_df, DEV_DF_FILENAME, DEV_DF_HTML_FILENAME)
-            dev_pred = labeled_dev_df.label.tolist()
-        except:
-            dev_pred = None
-
-        # validate the training data
-        logging.info("Validating training data ...")
-        procedure.validate_training_data(labeled_train_df, ExampleLabels)
-
-        # evaluate the labeling functions and label model predictions
-        logging.info("Evaluating ...")
-        evaluate.lf_summary(train_L, dev_L, lfs, label_model, dev_true)
-        if parsed_args.task == 'multiclass':
-            metrics = evaluate.multiclass_summary(dev_L, dev_true, dev_pred, label_model)
-        elif parsed_args.task == 'multilabel':
-            metrics = evaluate.multilabel_summary(dev_true, dev_pred)
-
-        logging.info("Logging artifacts and saving ...")
-        input_example = train_L[:5, :]
-        tracking.log(metrics,
-                     input_example,
-                     REGISTERED_MODEL_NAME,
-                     label_model)
+    run.start(REGISTERED_MODEL_NAME, LF_FEATURES, DEV_ANNOTATIONS_PATH, get_lfs, ExampleLabels)
 
 
 if __name__ == '__main__':

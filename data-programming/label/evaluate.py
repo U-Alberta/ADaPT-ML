@@ -5,23 +5,28 @@ that all true labels are predicted. This is useful if you want to know how many 
 average without missing any true one. The best value of this metrics is thus the average number of true labels."
 
 """
-import json
 import logging
-from glob import glob
 
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
-from sklearn.metrics import confusion_matrix, multilabel_confusion_matrix, f1_score
+import numpy as np
+from label import CONFUSION_MATRIX_FILENAME, LF_SUMMARY_DEV_FILENAME, LF_SUMMARY_TRAIN_FILENAME
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, multilabel_confusion_matrix, f1_score
 from sklearn.preprocessing import MultiLabelBinarizer
 from snorkel.labeling import LFAnalysis
 
-from label import CONFUSION_MATRIX_FILENAME, LF_SUMMARY_DEV_FILENAME, LF_SUMMARY_TRAIN_FILENAME
+MULTICLASS_METRICS = {
+    'binary': [
+        'accuracy', 'coverage', 'precision', 'recall', 'f1', 'f1_micro', 'f1_macro', 'matthews_corrcoef',
+        'roc_auc'
+    ],
+    'multiclass': [
+        'coverage', 'f1_micro', 'f1_macro', 'matthews_corrcoef'
+    ]
+}
 
-MULTICLASS_METRICS = ['accuracy', 'coverage', 'f1_micro', 'f1_macro']
 
-
-def lf_summary(train_L, dev_L, lfs, label_model, dev_true):
+def lf_summary(train_L, dev_L, lfs, label_model, dev_true_lfs=None):
     """
     This function uses the train and dev label matrices, along with the LFs used to create them and the LF weights
     from the Label Model to calculate the coverage, conflict, empirical accuracy, and other metrics.
@@ -29,19 +34,21 @@ def lf_summary(train_L, dev_L, lfs, label_model, dev_true):
     :param dev_L: NumPy matrix of ints corresponding to the votes from the LFs for the dev data points
     :param lfs: [LabelingFunction] for the classification task curently in progress
     :param label_model: LabelModel that has been trained on train_L
-    :param dev_true: [[label.name]] for the label class for the task in progress from Label Studio
+    :param dev_true_lfs: [[label.value]] for the label class for the task in progress from Label Studio
     """
     try:
         # Try to get the empirical accuracy using the development set
-        dev_summary = LFAnalysis(L=dev_L, lfs=lfs).lf_summary(Y=dev_true, est_weights=label_model.get_weights())
+        dev_summary = LFAnalysis(L=dev_L, lfs=lfs).lf_summary(Y=dev_true_lfs,
+                                                              est_weights=label_model.get_weights())
         dev_summary.to_html(LF_SUMMARY_DEV_FILENAME)
-    except:
-        logging.warning("No empirical evaluation of LFs available.")
+    except Exception as err:
+        if dev_L is not None:
+            logging.warning("No empirical evaluation of LFs available:\n{}\n".format(err.args))
     train_summary = LFAnalysis(L=train_L, lfs=lfs).lf_summary(est_weights=label_model.get_weights())
     train_summary.to_html(LF_SUMMARY_TRAIN_FILENAME)
 
 
-def multiclass_summary(dev_L, dev_true, dev_pred, label_model) -> dict:
+def multiclass_summary(train_L, dev_L, lfs, dev_true, dev_true_lfs, dev_pred, label_model) -> dict:
     """
     The multiclass summary is comprised of the confusion matrix for the label model's predicted labels against the
     gold labels, the accuracy, coverage, f1 micro, and f1 macro of the predictions on the development set.
@@ -51,28 +58,28 @@ def multiclass_summary(dev_L, dev_true, dev_pred, label_model) -> dict:
     :param label_model: LabelModel that has been trained on train_L
     :return: either None if no dev labels are available, or a dict for the metrics from the label model
     """
+    class_labels = list(set(dev_true))
+    dev_true_lfs = np.array(dev_true_lfs)
+    lf_summary(train_L, dev_L, lfs, label_model, dev_true_lfs)
     try:
-        # flatten arrays for evaluation
-        dev_true = np.array(dev_true).flatten()
-        dev_pred = np.array(dev_pred).flatten()
-    except:
-        logging.warning("Summary will not be available.")
-    try:
-        c = confusion_matrix(dev_true, dev_pred)
-        plt.matshow(c)
-        plt.colorbar()
+        cm = confusion_matrix(dev_true, dev_pred, labels=class_labels)
+        disp = ConfusionMatrixDisplay(cm, display_labels=class_labels)
+        disp.plot()
         plt.savefig(CONFUSION_MATRIX_FILENAME, format='jpg')
-    except:
-        logging.warning("Confusion matrix not available.")
+    except Exception as err:
+        logging.warning("Confusion matrix not available:\n{}\n".format(err.args))
     try:
-        lm_metrics = label_model.score(dev_L, dev_true, MULTICLASS_METRICS)
-    except:
-        logging.warning("Label model metrics not available.")
+        if len(class_labels) == 2:
+            lm_metrics = label_model.score(dev_L, dev_true_lfs, MULTICLASS_METRICS['binary'])
+        else:
+            lm_metrics = label_model.score(dev_L, dev_true_lfs, MULTICLASS_METRICS['multiclass'])
+    except Exception as err:
+        logging.warning("Label model metrics not available:\n{}\n".format(err.args))
         lm_metrics = None
     return lm_metrics
 
 
-def multilabel_summary(dev_true, dev_pred) -> dict:
+def multilabel_summary(train_L, dev_L, lfs, dev_true, dev_pred, label_model) -> dict:
     """
     For the multilabel summary, the confusion matrix is used to calculate performance metrics for the label model since
     the label model does not natively support a multilabel setting.
@@ -80,45 +87,38 @@ def multilabel_summary(dev_true, dev_pred) -> dict:
     :param dev_pred: [[label.name]] for the label class for the task in progress from the label model
     :return: either None if no dev labels are available, or a dict for the metrics from the label model
     """
+    lf_summary(train_L, dev_L, lfs, label_model)
     mlb = MultiLabelBinarizer()
     try:
         dev_true = mlb.fit_transform(dev_true)
         dev_pred = mlb.transform(dev_pred)
         mcm = multilabel_confusion_matrix(dev_true, dev_pred)
-        tn = mcm[:, 0, 0]
-        tp = mcm[:, 1, 1]
-        fn = mcm[:, 1, 0]
-        fp = mcm[:, 0, 1]
-        lm_metrics = {'recall': tp / (tp + fn),
-                      'specificity': tn / (tn + fp),
-                      'fall_out': fp / (fp + tn),
-                      'miss_rate': fn / (fn + tp),
-                      'f1_weighted': f1_score(dev_true, dev_pred, average='weighted'),
-                      'f1_samples': f1_score(dev_true, dev_pred, average='samples')}
-    except:
-        logging.warning("Summary will not be available.")
+        tn = sum(mcm[:, 0, 0])
+        tp = sum(mcm[:, 1, 1])
+        fn = sum(mcm[:, 1, 0])
+        fp = sum(mcm[:, 0, 1])
+        lm_metrics = {
+            'accuracy': (tp + tn) / (tn + tp + fn + fp),
+            'precision': tp / (tp + fp),
+            'recall': tp / (tp + fn),
+            'specificity': tn / (tn + fp),
+            'fall out': fp / (fp + tn),
+            'miss rate': fn / (fn + tp),
+            'F1 weighted': f1_score(dev_true, dev_pred, average='weighted'),
+            'F1 samples': f1_score(dev_true, dev_pred, average='samples')
+        }
+    except Exception as err:
+        logging.warning("Summary will not be available:\n{}\n".format(err.args))
         lm_metrics = None
     return lm_metrics
 
 
-def get_dev_df(completions_dir) -> pd.DataFrame:
+def get_dev_df(gold_df_path) -> pd.DataFrame:
     """
-
+    Load the gold DataFrame that has compiled all workers' labels into one gold label set.
     """
-    completion_files = glob(completions_dir)
-    dev_df = pd.DataFrame()
-    for filename in completion_files:
-        with open(filename, 'r') as infile:
-            completion = json.load(infile)
-
-        df = pd.json_normalize(completion)
-        try:
-            gold_label = df.at[0, 'completions'][0]['result'][0]['value']['choices']
-            if "NONE" not in gold_label:
-                df = df.rename(columns={'id': 'file_id', 'data.ref_id': 'id', 'data.meta_info.table': 'table'})
-                df['gold_label'] = [gold_label]
-                dev_df = dev_df.append(df, ignore_index=True)
-        except IndexError:
-            logging.warning("This completion has no result?: {}".format(df.at[0, 'completions']))
-
-    return dev_df
+    gold_df = pd.read_pickle(gold_df_path)
+    gold_df['gold_label'] = gold_df['gold_label'].apply(lambda x: list(x))
+    logging.info("Gold df loaded. Here's a peek:")
+    logging.info(gold_df.head())
+    return gold_df

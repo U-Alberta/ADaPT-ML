@@ -38,8 +38,33 @@ jobs:
     - name: Test 1 -- multiclass
       run: docker exec dp-mlflow sh -c ". ~/.bashrc && wait-for-it dp-mlflow-db:3306 -s -- mlflow run --no-conda -e example --experiment-name test1 -P train_data=/unlabeled_data/multiclass_df.pkl -P dev_data=0 -P task=multiclass -P seed=8 ."
     - name: Check the run results
-      run: cat $DP_DATA_PATH/mlruns/1/**/artifacts/log.txt
-    - name: Test 2 -- multilabel
-      run: docker exec dp-mlflow sh -c ". ~/.bashrc && wait-for-it dp-mlflow-db:3306 -s -- mlflow run --no-conda -e example --experiment-name test2 -P train_data=/unlabeled_data/multilabel_df.pkl -P dev_data=0 -P task=multilabel -P seed=8 ."
+      run: |
+        ls $DP_DATA_PATH/mlruns/1/**/artifacts
+        cat $DP_DATA_PATH/mlruns/1/**/artifacts/log.txt
+
+    - name: Test 2 -- multiclass with development data
+      run: |
+        mv $LS_ANNOTATIONS_PATH/example/multiclass_gold_df.pkl $LS_ANNOTATIONS_PATH/example/gold_df.pkl
+        docker exec dp-mlflow sh -c ". ~/.bashrc && wait-for-it dp-mlflow-db:3306 -s -- mlflow run --no-conda -e example --experiment-name test2 -P train_data=/unlabeled_data/multiclass_df.pkl -P dev_data=1 -P task=multiclass -P seed=8 ."
+        mv $LS_ANNOTATIONS_PATH/example/gold_df.pkl $LS_ANNOTATIONS_PATH/example/multiclass_gold_df.pkl
     - name: Check the run results
-      run: cat $DP_DATA_PATH/mlruns/2/**/artifacts/log.txt
+      run: |
+        ls $DP_DATA_PATH/mlruns/2/**/artifacts
+        cat $DP_DATA_PATH/mlruns/2/**/artifacts/log.txt
+
+    - name: Test 3 -- multilabel
+      run: docker exec dp-mlflow sh -c ". ~/.bashrc && wait-for-it dp-mlflow-db:3306 -s -- mlflow run --no-conda -e example --experiment-name test3 -P train_data=/unlabeled_data/multilabel_df.pkl -P dev_data=0 -P task=multilabel -P seed=8 ."
+    - name: Check the run results
+      run: |
+        ls $DP_DATA_PATH/mlruns/3/**/artifacts
+        cat $DP_DATA_PATH/mlruns/3/**/artifacts/log.txt
+
+    - name: Test 4 -- multilabel with development data
+      run: |
+        mv $LS_ANNOTATIONS_PATH/example/multilabel_gold_df.pkl $LS_ANNOTATIONS_PATH/example/gold_df.pkl
+        docker exec dp-mlflow sh -c ". ~/.bashrc && wait-for-it dp-mlflow-db:3306 -s -- mlflow run --no-conda -e example --experiment-name test4 -P train_data=/unlabeled_data/multilabel_df.pkl -P dev_data=1 -P task=multilabel -P seed=8 ."
+        mv $LS_ANNOTATIONS_PATH/example/gold_df.pkl $LS_ANNOTATIONS_PATH/example/multilabel_gold_df.pkl
+    - name: Check the run results
+      run: |
+        ls $DP_DATA_PATH/mlruns/4/**/artifacts
+        cat $DP_DATA_PATH/mlruns/4/**/artifacts/log.txt
