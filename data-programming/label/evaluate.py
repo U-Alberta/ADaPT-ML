@@ -58,8 +58,12 @@ def multiclass_summary(train_L, dev_L, lfs, dev_true, dev_true_lfs, dev_pred, la
     :param label_model: LabelModel that has been trained on train_L
     :return: either None if no dev labels are available, or a dict for the metrics from the label model
     """
-    class_labels = list(set(dev_true))
-    dev_true_lfs = np.array(dev_true_lfs)
+    try:
+        class_labels = list(set(dev_true))
+        dev_true_lfs = np.array(dev_true_lfs)
+    except Exception as err:
+        if dev_true is not None and dev_true_lfs is not None:
+            logging.warning("Problem formatting labels:\n{}\n".format(err.args))
     lf_summary(train_L, dev_L, lfs, label_model, dev_true_lfs)
     try:
         cm = confusion_matrix(dev_true, dev_pred, labels=class_labels)
