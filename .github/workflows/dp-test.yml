@@ -12,7 +12,7 @@ jobs:
     env:
       DB_DATA_PATH: ./crate
 
-      LS_ANNOTATIONS_PATH: ./example_data/ls
+      LS_ANNOTATIONS_PATH: ./example_data/ls/annotations
       DP_DATA_PATH: ./example_data/dp
       DATABASE_IP: crate://crate-db:4200
 
