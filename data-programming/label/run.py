@@ -64,7 +64,7 @@ def start(registered_model_name, lf_features, dev_annotations_path, get_lfs, cla
                               DEV_DF_FILENAME, DEV_DF_HTML_FILENAME)
             dev_pred = labeled_dev_df.label.tolist()
             dev_true = labeled_dev_df.gold_label.tolist()
-        except:
+        except Exception as e:
             dev_pred = None
             dev_true = None
             if dev_df is not None:
@@ -78,9 +78,13 @@ def start(registered_model_name, lf_features, dev_annotations_path, get_lfs, cla
         # evaluate the labeling functions and label model predictions
         logging.info("Evaluating ...")
         if parsed_args.task == 'multiclass':
-            dev_true = [label for sublist in dev_true for label in sublist]
-            dev_pred = [label for sublist in dev_pred for label in sublist]
-            dev_true_lfs = [class_labels[label].value for label in dev_true]
+            try:
+                dev_true = [label for sublist in dev_true for label in sublist]
+                dev_pred = [label for sublist in dev_pred for label in sublist]
+                dev_true_lfs = [class_labels[label].value for label in dev_true]
+            except Exception as e:
+                if dev_true is not None and dev_pred is not None:
+                    logging.warning("Problem flattening development labels and predictions:\n{}\n".format(e.args))
             metrics = evaluate.multiclass_summary(train_L, dev_L, lfs, dev_true, dev_true_lfs, dev_pred, label_model)
         elif parsed_args.task == 'multilabel':
             metrics = evaluate.multilabel_summary(train_L, dev_L, lfs, dev_true, dev_pred, label_model)
