@@ -94,7 +94,7 @@ This configures how each component of a datapoint will be displayed to the annot
 
 #### [Define your classification task name and classes](./label-studio/ls/__init__.py) ####
 
-Until there is one configuration file for defining the classification task name and classes across all steps in the ADaPT-ML pipeline (see [Contributing](#community-guidelines)), you will need to update the CLASSIFICATION_TASKS variable with your new task name and corresponding classes.
+Until there is one configuration file for defining the classification task name and classes across all steps in the ADaPT-ML pipeline (see [Contributing](#community-guidelines)), you will need to update the `CLASSIFICATION_TASKS` variable with your new task name and corresponding classes.
 
 #### Please note: ####
 
@@ -155,11 +155,11 @@ Then it's ready! Import your data into a table in CrateDB and refer to the [Exam
 
 ### Step 7: Run a data programming experiment ###
 
-Once you have determined how you will sample some of your data for training an End Model, you need to save it as a pickled Pandas DataFrame with columns `id` and `table`, and optionally other columns if you need them. `table` needs to have the name of the table in CrateDB where the datapoint is stored. Once this DataFrame is in the directory $DP_DATA_PATH/unlabeled_data, you can run this command to label your data:
+Once you have determined how you will sample some of your data for training an End Model, you need to save it as a pickled Pandas DataFrame with columns `id` and `table`, and optionally other columns if you need them. `table` needs to have the name of the table in CrateDB where the datapoint is stored. Once this DataFrame is in the directory `$DP_DATA_PATH/unlabeled_data`, you can run this command to label your data:
 ```shell
 docker exec dp-mlflow sh -c ". ~/.bashrc && wait-for-it dp-mlflow-db:3306 -s -- mlflow run --no-conda -e ENTRYPOINT --experiment-name EXP_NAME -P train_data=/unlabeled_data/[DATA].pkl -P task=[TASK] ."
 ```
-where `ENTRYPOINT` is the name of the entrypoint you specified in [this step](#add-your-mlflow-endpoint-to-the-mlproject-filedata-programmingmlproject), EXP_NAME is a name for the experiment of your choosing, DATA is the name of the Pandas DataFrame holding your unlabeled data, and TASK is the type of classification that is appropriate for your new task (multiclass or multilabel). You can then check http://localhost:5000 to access the MLflow UI and see the experiment log, Labeling Function evaluation, artifacts, metrics, and more. Your labeled data will be stored in the directory `$DP_DATA_PATH/mlruns/EXP_ID/RUN_ID/artifacts/training_data.pkl` where EXP_ID is the id corresponding to EXP_NAME, and RUN_ID is a unique id created by MLflow for the run.
+where `ENTRYPOINT` is the name of the entrypoint you specified in [this step](#add-your-mlflow-endpoint-to-the-mlproject-filedata-programmingmlproject), `EXP_NAME` is a name for the experiment of your choosing, `DATA` is the name of the Pandas DataFrame holding your unlabeled data, and `TASK` is the type of classification that is appropriate for your new task (multiclass or multilabel). You can then check http://localhost:5000 to access the MLflow UI and see the experiment log, Labeling Function evaluation, artifacts, metrics, and more. Your labeled data will be stored in the directory `$DP_DATA_PATH/mlruns/EXP_ID/RUN_ID/artifacts/training_data.pkl` where `EXP_ID` is the id corresponding to `EXP_NAME`, and `RUN_ID` is a unique id created by MLflow for the run.
 
 ### Step 8: Run a modelling experiment ###
 
@@ -167,7 +167,7 @@ Once you have run some experiments and are happy with the resulting labeled data
 ```shell
 docker exec modelling-mlflow sh -c ". ~/.bashrc && wait-for-it modelling-mlflow-db:3306 -s -- mlflow run --no-conda -e mlp --experiment-name EXP_NAME -P train_data=/train_data/[TRAIN_DATA].pkl -P test_data=/train_data/[TEST_DATA].pkl -P features=[FEATURE] ."
 ```
-where EXP_NAME is a name for the experiment of your choosing, TRAIN_DATA is the name of the Pandas DataFrame holding your training data, TEST_DATA is the name of the Pandas DataFrame holding your testing data, and FEATURE is a list of column names holding the feature vectors in CrateDB. You can then check http://localhost:5001 to access the MLflow UI and see the experiment log, artifacts, metrics, and more. Take note of the path to your trained End Model, and if you are satisfied with its performance, you can update your End Model's [environment variable](#step-2-setting-up-the-environment-variables-for-docker-compose) to this path.
+where `EXP_NAME` is a name for the experiment of your choosing, `TRAIN_DATA` is the name of the Pandas DataFrame holding your training data, `TEST_DATA` is the name of the Pandas DataFrame holding your testing data, and `FEATURE` is a list of column names holding the feature vectors in CrateDB. You can then check http://localhost:5001 to access the MLflow UI and see the experiment log, artifacts, metrics, and more. Take note of the path to your trained End Model, and if you are satisfied with its performance, you can update your End Model's [environment variable](#step-2-setting-up-the-environment-variables-for-docker-compose) to this path.
 
 ### Step 9: Deploying your model ###
 
