@@ -21,7 +21,7 @@ belongs to; this data point can be text, an image, audio, or can even be multimo
 2. Lack of available annotators with domain expertise, and/or time and money to label large amounts of data.
 3. Studying a phenomenon that changes rapidly, so what constitutes a class may change over time, making the available training data obsolete. 
 
-ADaPT-ML is an MLOps system that covers the data processing, data labelling, model design, model training and optimization, and endpoint deployment, with the particular ability to adapt to classification tasks that have the aforementioned challenges. ADaPT-ML is designed to accomplish this by:
+ADaPT-ML is a multimodal-ready MLOps system that covers the data processing, data labelling, model design, model training and optimization, and endpoint deployment, with the particular ability to adapt to classification tasks that have the aforementioned challenges. ADaPT-ML is designed to accomplish this by:
 1. Using `Snorkel` [@Snorkel] as the data programming framework to create large, annotated, multimodal datasets that can easily adapt to changing classification needs for training data-driven models.
 2. Integrating `Label Studio` for annotating multimodal data. Entire training and testing datasets can be annotated using this tool, or just a subset of the training data can be annotated to validate the Label Model and to account for class balance during Label Model training.
 3. Orchestrating the Labeling Function / Label Model / End Model development, testing, and monitoring using `MLflow` [@MLflow]. It is easy to add new machine learning algorithms 

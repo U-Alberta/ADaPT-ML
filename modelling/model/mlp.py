@@ -2,23 +2,22 @@
 multi-layer perceptron classifier
 https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html
 """
-import os
-from math import floor, ceil
 import argparse
 import logging
-import seaborn as sns
+from math import floor, ceil
+
 import matplotlib.pyplot as plt
 import mlflow
-import numpy as np
-import pandas as pd
-import sklearn.metrics as eval
-from sklearn.neural_network import MLPClassifier
-
-from model import (X_TRAIN_FILENAME, TRAIN_DF_FILENAME, TRAIN_DF_HTML_FILENAME, TEST_PRED_DF_FILENAME,
-                   TEST_PRED_DF_HTML_FILENAME, CONFUSION_MATRIX_FILENAME, LOGGING_FILENAME)
 import model.data as data
 import model.tracking as tracking
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import sklearn.metrics as eval
+from model import (X_TRAIN_FILENAME, TRAIN_DF_FILENAME, TRAIN_DF_HTML_FILENAME, TEST_PRED_DF_FILENAME,
+                   TEST_PRED_DF_HTML_FILENAME, CONFUSION_MATRIX_FILENAME)
 from model_objs import LookupClassifier
+from sklearn.neural_network import MLPClassifier
 
 parser = argparse.ArgumentParser(description='Train a multi-layer perceptron classifier.')
 parser.add_argument('train_path', type=str, help='File path or URL to the training data')
@@ -90,7 +89,7 @@ REGISTERED_MODEL_NAME = '{}_MLP'.format('_'.join(parsed_args.features))
 ARTIFACT_PATH = 'mlp'
 
 
-def common_metrics(y_true: np.ndarray, y_pred: np.ndarray, y_prob: np.ndarray, labels: [str]) -> dict:
+def common_metrics(y_true: np.ndarray, y_pred: np.ndarray, y_prob: np.ndarray) -> dict:
     """
     functions that can be used for multiclass or multilabel.
     """
@@ -127,12 +126,11 @@ def evaluate_multiclass(y_true: np.ndarray,
                         ravel_y_pred: [str],
                         x_test: np.ndarray,
                         mlp_model: LookupClassifier) -> dict:
-    metrics_dict = common_metrics(y_true, y_pred, y_prob, mlp_model.classes)
+    metrics_dict = common_metrics(y_true, y_pred, y_prob)
     metrics_dict.update({
         'balanced accuracy score': eval.balanced_accuracy_score(ravel_y_true, ravel_y_pred),
         'MCC': eval.matthews_corrcoef(ravel_y_true, ravel_y_pred)
     })
-    # cm = eval.confusion_matrix(ravel_y_true, ravel_y_pred, labels=mlp_model.classes)
 
     eval.plot_confusion_matrix(mlp_model.classifier, x_test, ravel_y_true, labels=mlp_model.classes)
     plt.savefig(CONFUSION_MATRIX_FILENAME)
@@ -144,14 +142,14 @@ def evaluate_multilabel(y_true: np.ndarray,
                         y_pred: np.ndarray,
                         y_prob: np.ndarray,
                         mlp_model: LookupClassifier) -> dict:
-    metrics_dict = common_metrics(y_true, y_pred, y_prob, mlp_model)
+    metrics_dict = common_metrics(y_true, y_pred, y_prob)
     metrics_dict.update({
         'discounted cumulative gain': eval.dcg_score(y_true, y_prob)
     })
 
     # make multilabel confusion matrix with TPs in 1,1 and TN in 0,0
     try:
-        cm = eval.multilabel_confusion_matrix(y_true, y_pred, labels=mlp_model.classes)
+        cm = eval.multilabel_confusion_matrix(y_true, y_pred)
         fig, ax = plt.subplots(floor(mlp_model.num_classes / 2), ceil(mlp_model.num_classes / 2), figsize=(12, 7))
 
         for axes, cfs_matrix, label in zip(ax.flatten(), cm, mlp_model.classes):
@@ -218,38 +216,39 @@ def main():
         y_pred = test_pred_df[mlp_model.classes].to_numpy()
         y_prob = test_pred_df[mlp_model.prob_labels].to_numpy()
         logging.info("Evaluating model ...")
-        # try:
-        if train_is_multiclass and test_is_multiclass:
-            logging.info("Train and test are multiclass. Using multiclass evaluation ...")
-            ravel_y_test = data.ravel_inverse_binarized_labels(mlb, y_test)
-            ravel_y_pred = data.ravel_inverse_binarized_labels(mlb, y_pred)
-            x_test = mlp_model.get_features(test_pred_df)
-            try:
-                # do binary classification metrics
-                pos_label = [label for label in mlp_model.prob_labels if '_pos' in label].pop()
-                y_prob_pos = test_pred_df[pos_label].to_numpy()
-                metrics = binary_metrics(ravel_y_test, ravel_y_pred, y_prob_pos, pos_label)
-                logging.info("Binary classification metrics available.")
-            except Exception as e:
-                logging.info("Binary classification metrics not available:\n{}\n".format(e.args))
-                metrics = {}
-            metrics.update(
-                evaluate_multiclass(y_test, y_pred, y_prob, ravel_y_test, ravel_y_pred, x_test, mlp_model)
-            )
+        try:
+            if train_is_multiclass and test_is_multiclass:
+                logging.info("Train and test are multiclass. Using multiclass evaluation ...")
+                ravel_y_test = data.ravel_inverse_binarized_labels(mlb, y_test)
+                ravel_y_pred = data.ravel_inverse_binarized_labels(mlb, y_pred)
+                x_test = mlp_model.get_features(test_pred_df)
+                try:
+                    # do binary classification metrics
+                    pos_label = [label for label in mlp_model.prob_labels if '_pos' in label].pop()
+                    y_prob_pos = test_pred_df[pos_label].to_numpy()
+                    metrics = binary_metrics(ravel_y_test, ravel_y_pred, y_prob_pos, pos_label)
+                    logging.info("Binary classification metrics available.")
+                except IndexError:
+                    logging.info("The task is not binary, so no binary classification metrics are available.")
+                except Exception as e:
+                    logging.warning("Problem computing binary classification metrics:\n{}\n".format(e.args))
+                    metrics = {}
+                metrics.update(
+                    evaluate_multiclass(y_test, y_pred, y_prob, ravel_y_test, ravel_y_pred, x_test, mlp_model)
+                )
 
-        elif not train_is_multiclass and not test_is_multiclass:
-            logging.info("Train and test are multilabel. Using multilabel evaluation ...")
-            metrics = evaluate_multilabel(y_test, y_pred, y_prob, mlp_model)
+            elif not train_is_multiclass and not test_is_multiclass:
+                logging.info("Train and test are multilabel. Using multilabel evaluation ...")
+                metrics = evaluate_multilabel(y_test, y_pred, y_prob, mlp_model)
 
-        else:
-            logging.warning("""Train and test do not have matching classification types. 
-            This could have consequences in evaluation. Check data before continuing ...""")
+            else:
+                logging.warning("""Train and test do not have matching classification types. 
+                This could have consequences in evaluation. Check data before continuing ...""")
+                metrics = None
+        except Exception as e:
+            msg = "Unable to perform evaluation:\n{}\n".format(e.args)
+            logging.error(msg)
             metrics = None
-
-        # except Exception as e:
-        #     msg = "Unable to perform evaluation:\n{}".format(e.args)
-        #     logging.error(msg)
-        #     metrics = None
 
         logging.info("Logging artifacts ...")
         tracking.log(TRAIN_PARAMS, metrics)
