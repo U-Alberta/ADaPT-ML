@@ -196,8 +196,8 @@ def add_labels(df: pd.DataFrame, labels: [[str]], label_probs: [[float]]) -> pd.
     :param label_probs: The probabilities associated with all labels, not just the chosen ones
     :return: pd.DataFrame that has columns id, table, label, label_probs
     """
-    df.insert(len(df.columns), 'label', labels)
-    df.insert(len(df.columns), 'label_probs', label_probs)
+    df['label'] = labels
+    df['label_probs'] = label_probs
     logging.info("Labels inserted. Here's a peek:")
     logging.info(df.head())
     return df

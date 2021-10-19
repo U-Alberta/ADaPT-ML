@@ -179,6 +179,7 @@ services:
     depends_on:
       - m_db
     volumes:
+      - ${LS_ANNOTATIONS_PATH}:/annotations
       - ${MODELLING_DATA_PATH}/mlruns:/code/mlruns
       - ${MODELLING_DATA_PATH}/train_data:/train_data
       - ${MODELLING_DATA_PATH}/test_data:/test_data

@@ -14,8 +14,8 @@ def log(train_params, metrics):
     try:
         mlflow.log_metrics(metrics)
         logging.info("Metrics:\n{}".format(pp.pformat(metrics)))
-    except:
-        logging.warning("Metrics not logged.")
+    except Exception as e:
+        logging.warning("Metrics not logged:\n{}\n".format(e.args))
 
     # log all of the artifacts kept in the temporary folder into the proper run folder and remove them once logged
     for filename in filenames:

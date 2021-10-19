@@ -180,7 +180,7 @@ and visit http://localhost:80/docs to see the deployment API. You can use this A
 
 ## Example Usage ##
 
-Our Example Use Case is to develop a model that can predict whether a data point is about a cat, dog, bird, horse, or snake. Although intuitively this is purely a multilabel task where it is reasonable to assume that multiple animals could be mentioned in one datapoint, this task has been divided into a multiclass setting, where there is only one possible class that the data point can belong to, and a multilabel setting, where one data point can belong to one or many classes, to demonstrate how to handle both tasks (it is not necessary for you to also divide your new classification task into multiclass and multilabel settings). 
+Our Example Use Case is to develop a model that can predict whether a data point is about a cat, dog, bird, horse, or snake. Although intuitively this is purely a multilabel task where it is reasonable to assume that one or more animals could be mentioned in one datapoint, this task has been divided into a multiclass setting, where there is only one possible class that the data point can belong to, and a multilabel setting, where one data point can belong to one or many classes, to demonstrate how to handle both tasks (it is not necessary for you to also divide your new classification task into multiclass and multilabel settings). 
 
 We do not have an existing annotated dataset for this classification task, so the first step will be to create one. When you first get started, you will need to gather the appropriate data for your task, and featurize it in two ways:
 1. Decide on which features you would pull out to assist in annotation if you were going to manually assign classes to the datapoints.
@@ -196,13 +196,18 @@ In this use case, I manually created data points with only a text component to k
 
 ![Step One](./graphics/step_1.jpg)
 
-This diagram demonstrates the process of setting up the example use case data in a table in CrateDB so that it is ready for ADaPT-ML:
+This diagram demonstrates the process of setting up the example use case data in a table in CrateDB so that it is ready for ADaPT-ML. As long as each table has these essential columns, you can combine multiple tables to create your training and testing data:
 - column **1f** has the _essential_ `id` column: your data table must have this column to work with ADaPT-ML. It can be any combination of numbers and letters.
 - column **1g** has the unprocessed, raw text component of each datapoint. Note the column name `txt`: this is the column used in Label Studio for annotation, so this name appears three times in the [Labeling Config file](./label-studio/config/example_config.xml): in `<Text name="txt" value="$txt"/>` and `<Choices name="topic" toName="txt" choice="multiple" showInLine="false">`
 - column **1h** has the first featurization step -- features that will be used by the Labeling Functions. Note the column name `txt_clean_lemma`: this column name is specified in our [data programming MLflow endpoint](./data-programming/label/example.py) for this example task, with no loader function: `LF_FEATURES = {'txt_clean_lemma': None}`. For this use case, as mentioned before, our Labeling Functions will have access to the text in 1g that has been lemmatized. Consider, though, a more rich set of features for the text component such as word embeddings, emoji normalization, hashtag splitting, and so on. If our datapoint had an image component, then we could pull out features such as the prediction from an image classifier that has been trained on one or more categories included in our task, the output from an image classifier that can detect language embedded within the image, and so on. The output from all of these different featurization methods would be held in different columns in this table.
 - column **1i** has the second featurization step -- features that will be used to train and get predictions from the End Model. For this use case, we have put the text in 1g through the Universal Sentence Encoder to obtain a semantic representation of the text. As in the first featurization step, you can create multiple feature vectors for the datapoint's different components, and ADaPT-ML will concatenate these vectors in the order given, not necessarily the order it appears in the table.
 
-As long as each table has these essential columns, you can combine multiple tables to create your training and testing data.
+We are now ready to annotate a sample of data in Label Studio! Because we only have a total of 15 datapoints for the multiclass setting and 15 for the multilabel setting, I annotated all of them manually, but in a real-world application of this classification task, it is likely we would have hundreds of thousands of datapoints. In this case, we would instruct two or more annotators to manually label a few hundred datapoints for a few purposes:
+1. Gather feedback from the annotators to inform how we can update or create new Labeling Functions
+2. Estimate the class balance and make it available to the Label Model during training
+3. Perform an empirical evaluation of the Labeling Functions and Label Model
+4. Validate the End Model
+
 ## Community Guidelines ##
 
 Follow these guidelines to see where you can contribute new modules to expand the system's functionality and adaptability. The following items are on ADaPT-ML's "wish list":

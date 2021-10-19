@@ -1,6 +1,9 @@
+import os.path
+
 import pandas as pd
 import numpy as np
 import sys
+import os
 import logging
 from sklearn.preprocessing import MultiLabelBinarizer
 from model_objs import SQL_QUERY, DATABASE_IP
@@ -19,23 +22,31 @@ def load(train_path: str, test_path: str) -> (pd.DataFrame, pd.DataFrame):
             train_df = pd.read_pickle(infile).reset_index(drop=True)
         with open(test_path, 'rb') as infile:
             test_df = pd.read_pickle(infile).reset_index(drop=True)
+
     except IOError as e:
         sys.exit("Could not read data: {}".format(e.args))
 
     return train_df, test_df
 
 
-def binarize_labels(y_train: [[str]], y_test: [[str]]) -> (MultiLabelBinarizer, [[int]], [[int]]):
+def binarize_labels(y_train: [[str]], y_test: [[str]], y_gold: [[str]] = None) -> (MultiLabelBinarizer,
+                                                                                   [[int]],
+                                                                                   [[int]],
+                                                                                   [[int]]):
     """
     This function takes the list of label names and turns it into a one-hot encoding for each data point, then returns
     the binarizer and transformed labels for training and testing
     :param y_train: list of labels such as [['cat'],['dog','bird']]
-    :param y_test: list of labels such as [['cat'],['dog','bird']]
+    :param y_test: list of labels from label model such as [['cat'],['dog','bird']]
+    :param y_gold: list of labels from manual annotation such as [['cat'],['dog','bird']]
+
     """
     mlb = MultiLabelBinarizer()
     y_train = mlb.fit_transform(y_train)
     y_test = mlb.transform(y_test)
-    return mlb, y_train, y_test
+    if y_gold:
+        y_gold = mlb.transform(y_gold)
+    return mlb, y_train, y_test, y_gold
 
 
 def ravel_inverse_binarized_labels(mlb: MultiLabelBinarizer, y: [[int]]) -> [str]:
