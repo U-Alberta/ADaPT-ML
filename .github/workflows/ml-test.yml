@@ -55,7 +55,7 @@ jobs:
         ls $MODELLING_DATA_PATH/mlruns/3/**/artifacts
         cat $MODELLING_DATA_PATH/mlruns/3/**/artifacts/log.txt
 
-    - name: multilabel with gold test data
+    - name: Test 4 -- multilabel with gold test data
       run: docker exec modelling-mlflow sh -c ". ~/.bashrc && wait-for-it modelling-mlflow-db:3306 -s -- mlflow run --no-conda -e mlp --experiment-name test4 -P train_data=/train_data/multilabel_training_data.pkl -P test_data=/test_data/multilabel_development_data.pkl -P features=txt_use -P solver=lbfgs -P random_state=8 ."
     - name: Check the run results
       run: |
