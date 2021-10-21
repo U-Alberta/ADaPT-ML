@@ -2,14 +2,19 @@
 title: 'ADaPT-ML: A Data Programming Template for Machine Learning'
 tags:
   - Python
+  - Docker
+  - MLOps
+  - data programming
+  - machine learning
+  - model lifecycle
 authors:
   - name: Andrea M. Whittaker^[first author] # note this makes a footnote saying 'first author'
     orcid: 0000-0001-8512-1810
     affiliation: 1
 affiliations:
- - name: University of Alberta
-   index: 1
-date: 24 June 2021
+  - name: University of Alberta
+    index: 1
+date: 21 October 2021
 bibliography: paper.bib
 ---
 
@@ -23,8 +28,8 @@ belongs to; this data point can be text, an image, audio, or can even be multimo
 
 ADaPT-ML is a multimodal-ready MLOps system that covers the data processing, data labelling, model design, model training and optimization, and endpoint deployment, with the particular ability to adapt to classification tasks that have the aforementioned challenges. ADaPT-ML is designed to accomplish this by:
 1. Using `Snorkel` [@Snorkel] as the data programming framework to create large, annotated, multimodal datasets that can easily adapt to changing classification needs for training data-driven models.
-2. Integrating `Label Studio` for annotating multimodal data. Entire training and testing datasets can be annotated using this tool, or just a subset of the training data can be annotated to validate the Label Model and to account for class balance during Label Model training.
-3. Orchestrating the Labeling Function / Label Model / End Model development, testing, and monitoring using `MLflow` [@MLflow]. It is easy to add new machine learning algorithms 
+2. Integrating `Label Studio` [@LabelStudio] for annotating multimodal data.
+3. Orchestrating the Labeling Function / Label Model / End Model development, testing, and monitoring using `MLflow` [@MLflow].
 4. Deploying all End Models using `FastAPI` [@FastAPI]
 
 
@@ -34,20 +39,8 @@ ADaPT-ML is a multimodal-ready MLOps system that covers the data processing, dat
 
 # Related Work
 This software was developed in tandem with the software architecture described in [@Gutierrez2021], to be presented at CASCON x EVOKE 2021. During the development of this software, `Snorkel` progressed into `Snorkel Flow`, a proprietary MLOps system that incorporates data cleaning, model training and deployment, and model evaluation and monitoring into its existing data programming framework.
-A description of how this software compares to other commonly-used packages in this research area.
-Mentions (if applicable) of any ongoing research projects using the software or recent scholarly publications enabled by it.
-A list of key references including a link to the software archive.
 
 # Acknowledgements
 We acknowledge contributions from Mitacs and The Canadian Energy and Climate Nexus / Le Lien Canadien de L’Energie et du Climat for funding.
 
 # References
-
-
-#Paper:
-
-Summary: Has a clear description of the high-level functionality and purpose of the software for a diverse, non-specialist audience been provided?
-A statement of need: Does the paper have a section titled ‘Statement of Need’ that clearly states what problems the software is designed to solve and who the target audience is?
-State of the field: Do the authors describe how this software compares to other commonly-used packages?
-Quality of writing: Is the paper well written (i.e., it does not require editing for structure, language, or writing quality)?
-References: Is the list of references complete, and is everything cited appropriately that should be cited (e.g., papers, datasets, software)? Do references in the text use the proper citation syntax?

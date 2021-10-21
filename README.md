@@ -189,14 +189,16 @@ We do not have an existing annotated dataset for this classification task, so th
 2. Decide on how you would represent the datapoints as feature vectors for the End Model.
 Again, to keep it simple for this use case, our first feature set is simply lemmatized tokens. Our second feature set is the output from the Universal Sentence Encoder, given the raw text as input.
 
-In this use case, I manually created data points with only a text component to keep it simple, but consider the tweets **1a**-**1e** in the diagram below. Many of them have both text and images that can provide information for more accurate classification. Let's run through each datapoint:
+In this use case, I manually created data points with only a text component to keep it simple, but consider the tweets **1a**-**1e** in the diagram below. 
+
+![Step One](./graphics/step_1.png)
+
+Many of them have both text and images that can provide information for more accurate classification. Let's run through each datapoint:
 - **1a** has a textual component with the keyword "Birds", and an image component that is a painting where birds can be identified.
 - **1b** has a textual component with the keyword "horse", and an image component that does not on its own provide information that it is related to horses.
 - **1c** only has a textual component with the keyword "dogs".
 - **1d** has a reference to cats in its textual component with a :pouting_cat: emoji and hashtags. Its image component is an obvious picture of a cat.
 - **1e** has a textual component that has the keyword "snake", but it is actually not about the animal. The image component does not on its own provide information that is related to snakes.
-
-![Step One](./graphics/step_1.png)
 
 This diagram demonstrates the process of setting up the example use case data in a table in CrateDB so that it is ready for ADaPT-ML. As long as each table has these essential columns, you can combine multiple tables to create your training and testing data:
 - column **1f** has the _essential_ `id` column: your data table must have this column to work with ADaPT-ML. It can be any combination of numbers and letters.
@@ -235,6 +237,12 @@ docker exec label-studio-dev python ./ls/sample_tasks.py example_data txt 30 exa
 This module will format the data in the column names provided so that it can be read by Label Studio, and save a file in the `$LS_TASKS_PATH` directory. The diagram below shows the process of using Label Studio to import the sampled data, annotate it, and export it.
 
 ![Step Two](./graphics/step_2.png)
+
+- **2a** shows all of the created projects, allowing for multiple classification problems. 
+- **2b** has the popup for importing our `example_tasks.json` file.
+- **2c** shows the imported tasks, which can be clicked on to arrive at the labeling page.
+- **2d** is the main labeling interface determined by the [example config file](label-studio/config/example_config.xml), with different tabs for multiple annotators.
+- **2e** once annotation is complete, the tasks are exported as JSON and moved and renamed to `$LS_ANNOTATIONS_PATH/annotations/example_annotations.json`
 
 Now that we have labeled all of our sample data and exported the results, we need to process the JSON file back into the Pandas DataFrames that ADaPT-ML can use. Because we had multiple annotators label each datapoint, we need to decide how we want to compile these into one gold label set. These two tasks can be accomplished using the command at the end of this code block:
 ```shell
@@ -279,23 +287,26 @@ This module uses `task_df.pkl` to calculate Krippendorff's alpha.
 
 ### Step 3: use data programming to create a labeled dataset ###
 
-Now that we have our gold labels, we are ready to perform data programming to label more data. If we skipped the manual annotation step, then we cannot use class balance as a parameter in training the Label Model, or perform an empirical evaluation of the Labeling Functions and Label Model. However, even without gold labels, the labeled data from this step can be split into training and testing sets if the Label Model performs to our satisfaction.
+Now that we have our gold labels, we are ready to perform data programming to label more data. If we skipped the manual annotation step, then we would not be able to use class balance as a parameter in training the Label Model, or perform an empirical evaluation of the Labeling Functions and Label Model. However, even without gold labels, the labeled data from this step can be split into training and testing sets if the Label Model performs to our satisfaction.
 
 We have followed [these instructions](#step-4-changes-to-data-programmingdata-programming) to modify ADaPT-ML for our example classification task. We also sampled some data from CrateDB that we want to use as training data; for this example use case, we have one DataFrame with the multiclass datapoints and one DataFrame with the multilabel datapoints, and both DataFrames only have the columns `id` and `table`. Note: this sampling and DataFrame creation is not performed by ADaPT-ML (see [Contributing](#community-guidelines)). The DataFrames are called `multiclass_df.pkl` and `multilabel_df.pkl`, and both are stored in `$DP_DATA_PATH/unlabeled_data`.
 
-Once we run the first command in the following code block, we can check out the results using the MLflow UI, as seen in the diagram below. Now we have two DataFrames for the multiclass setting: 
-- `training_data.pkl` has the Label Model's predicted labels in the column `label` and the probability distribution over all classes in the column `label_probs`
-- `development_data.pkl` has the aforementioned columns in addition to the `gold_label` column from the `gold_df`
-
-We can run the second command in the following code block to get these DataFrames for the multilabel setting.
-
+Once we run the commands in the following code block...
 ```shell
 docker exec dp-mlflow sh -c ". ~/.bashrc && wait-for-it dp-mlflow-db:3306 -s -- mlflow run --no-conda -e example --experiment-name eg -P train_data=/unlabeled_data/multiclass_df.pkl -P dev_data=1 -P task=multiclass -P seed=8 ."
 
 docker exec dp-mlflow sh -c ". ~/.bashrc && wait-for-it dp-mlflow-db:3306 -s -- mlflow run --no-conda -e example --experiment-name eg -P train_data=/unlabeled_data/multilabel_df.pkl -P dev_data=1 -P task=multilabel -P seed=8 ."
 ```
+...we can check out the results using the MLflow UI, as seen in the diagram below. 
 
 ![Step 3](./graphics/step_3.png)
+
+- **3a** shows the landing page for MLflow, where runs can be filtered and selected.
+- **3b** has some metadata for the run, including the run command showing that default parameters were used.
+- **3c** shows the metrics available under the multilabel setting.
+- **3d** the result of Labeling Function evaluation against the gold labels in the `gold_df` are seen in `lf_summary_dev.html`
+- **3e** `development_data.pkl` has the aforementioned columns in addition to the `gold_label` column from the `gold_df`
+- **3f** `training_data.pkl` has the Label Model's predicted labels in the column `label` and the probability distribution over all classes in the column `label_probs`
 
 Once we have experimented with the Label Model parameters, Labeling Functions, and datasets to our satisfaction, we can copy and rename the final `training_data.pkl` and `development_data.pkl` for the multiclass setting from their spot in the `$DP_DATA_PATH/mlruns/1/eg/RUN_ID/artifacts` directory into `$MODELLING_DATA_PATH/train_data/multiclass_training_data.pkl` and `$MODELLING_DATA_PATH/test_data/multiclass_development_data.pkl`. We repeat the same procedure for the DataFrames from the multilabel setting. 
 
@@ -303,20 +314,28 @@ Once we have experimented with the Label Model parameters, Labeling Functions, a
 
 Now that we have our training data labeled by the Label Model and testing data with gold labels, we can create an End Model that, given a DataFrame containing only the `id` and `table` columns, will look up the appropriate features for each datapoint in CrateDB and produce a DataFrame with a binary encoding for the predicted class(es), and the probability distribution over all classes. Currently, ADaPT-ML only has one machine learning algorithm, [scikit-learn's Multi-layer Perceptron (MLP)](https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html), a classifier that optimizes the log-loss function using LBFGS or stochastic gradient descent. If you need a different algorithm in ADaPT-ML, please consider [contributing](#community-guidelines)!
 
-After running the commands in this code block, we can check out the results in MLflow, as shown in the diagram below. Note that the `txt_use` parameter is the column 1i in the [diagram for Step 1](#step-1-obtain-and-featurize-some-data).
+After running the commands in this code block...
 ```shell
 docker exec modelling-mlflow sh -c ". ~/.bashrc && wait-for-it modelling-mlflow-db:3306 -s -- mlflow run --no-conda -e mlp --experiment-name eg -P train_data=/train_data/multiclass_training_data.pkl -P test_data=/test_data/multiclass_development_data.pkl -P features=txt_use -P solver=lbfgs -P random_state=8 ."
 
 docker exec modelling-mlflow sh -c ". ~/.bashrc && wait-for-it modelling-mlflow-db:3306 -s -- mlflow run --no-conda -e mlp --experiment-name eg -P train_data=/train_data/multilabel_training_data.pkl -P test_data=/test_data/multilabel_development_data.pkl -P features=txt_use -P solver=lbfgs -P random_state=8 ."
 ```
+...we can check out the results in MLflow, as shown in the diagram below.
 
 ![Step 4](./graphics/step_4.png)
 
-Once we have experimented with the MLP parameters, and possibly iterated more on the data programming step if necessary, we can prepare our models for deployment by simply updating the model environment variables in `.env` to point to `python_model.pkl`. Note that this is relative to the `mlruns` volume in the container, which is shared with the volume `$MODELLING_DATA_PATH/mlruns`.
+- **4a** shows all of the training parameters for the MLP model, in addition to the specific features used for the given training data. Note that the `txt_use` parameter is the column 1i in the [diagram for Step 1](#step-1-obtain-and-featurize-some-data).
+- **4b** if the test data has gold labels in addition to the Label Model's labels, then the model will be evaluated against both, and they will show up here with "GOLD" and "LM" prefixes. If there are no gold labels, then the metrics will only have "LM".
+- **4c** is the confusion matrix for the gold labels and predicted labels in the multiclass setting.
+- **4d** is the confusion matrix for the gold labels and predicted labels in the multilabel setting.
+- **4e** is the DataFrame with the model's predicted label(s) and the probability distribution over all classes.
+
+Once we have experimented with the MLP parameters, and possibly iterated more on the data programming step if necessary, we can prepare our models for deployment by simply updating the model environment variables in `.env` to point to `python_model.pkl`:
 ```shell
 MULTICLASS_EXAMPLE_MODEL_PATH=/mlruns/1/71a7ab2f6b694420820d707f699b32eb/artifacts/mlp/python_model.pkl
 MULTILABEL_EXAMPLE_MODEL_PATH=/mlruns/1/ab741913d3b44abdbfc3a381a551366a/artifacts/mlp/python_model.pkl
 ```
+Note that this is relative to the `mlruns` volume in the container, which is shared with the volume `$MODELLING_DATA_PATH/mlruns`.
 
 ### Step 5: deploy the End Model ###
 
@@ -324,7 +343,11 @@ This diagram shows the FastAPI UI for the deployed models.
 
 ![Step 5](./graphics/step_5.png)
 
-We have updated the model environment variable and followed [these steps](#step-5-changes-to-modellingmodelling-including-model-deployment) to create two endpoints for predicting multiclass and multilabel, so now we can get multiclass predictions...
+- **5a** on the landing page, we can see the endpoints we created following [these steps](#step-5-changes-to-modellingmodelling-including-model-deployment) for predicting multiclass and multilabel.
+- **5b** below the endpoints is a schema of the expected format for posting data, and the data format that the model will return in response.
+- **5c** this shows an example of how to use the UI to get the Curl command for the endpoint, and what the response looks like.
+
+Now we can get multiclass predictions...
 ```shell
 curl -X 'POST' \
   'http://localhost/predict_multiclass_example' \
@@ -434,14 +457,17 @@ curl -X 'POST' \
   ]
 }
 ```
-for any datapoint that has the `txt_use` feature set. We have successfully created a model for our new example use case!
+...for any datapoint that has the `txt_use` feature set in CrateDB. We have successfully created a model for our new example use case!
 
 ## Community Guidelines ##
 
-Follow these guidelines to see where you can contribute new modules to expand the system's functionality and adaptability. The following items are on ADaPT-ML's "wish list":
-
-
-
+Follow these guidelines to see where you can contribute to expand the system's functionality and adaptability. The following items are on ADaPT-ML's "wish list":
+- a configuration file that can be used by the label-studio, data-programming, and modelling projects to automatically create the classification task directory for label studio, a coding schema for annotators, the Enum object that stores values that the Labeling Functions use, the ModelResponse schema for deployment, and anything else where it is important to have consistency and maintainability in the classification task name and classes.
+- a main UI with links to all of the different UIs, buttons that can run commands to sample data, move files, and run end-to-end experiments, forms for submitting new classification tasks, an interface that makes writing labeling functions easier, etc.
+- implement some algorithms that can take a representative sample of a table in CrateDB for training data creation.
+- implement classification algorithms in addition to the MLP.
+- determine the best method for updating the CrateDB tables with worker labels, gold labels, Label model labels and probabilities, and model predictions and probabilities to eliminate the need for reading and writing DataFrames to disk.
+- perhaps a separate project for creating a flexible feature store.
 
 ## Additional Installation Notes: ##
 If you want to use CrateDB on your host machine but are experiencing issues, please go through these bootstrap checks,
