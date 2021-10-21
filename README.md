@@ -196,7 +196,7 @@ In this use case, I manually created data points with only a text component to k
 - **1d** has a reference to cats in its textual component with a :pouting_cat: emoji and hashtags. Its image component is an obvious picture of a cat.
 - **1e** has a textual component that has the keyword "snake", but it is actually not about the animal. The image component does not on its own provide information that is related to snakes.
 
-![Step One](./graphics/step_1.jpg)
+![Step One](./graphics/step_1.png)
 
 This diagram demonstrates the process of setting up the example use case data in a table in CrateDB so that it is ready for ADaPT-ML. As long as each table has these essential columns, you can combine multiple tables to create your training and testing data:
 - column **1f** has the _essential_ `id` column: your data table must have this column to work with ADaPT-ML. It can be any combination of numbers and letters.
@@ -234,7 +234,7 @@ docker exec label-studio-dev python ./ls/sample_tasks.py example_data txt 30 exa
 ```
 This module will format the data in the column names provided so that it can be read by Label Studio, and save a file in the `$LS_TASKS_PATH` directory. The diagram below shows the process of using Label Studio to import the sampled data, annotate it, and export it.
 
-![Step Two](./graphics/step_2.jpg)
+![Step Two](./graphics/step_2.png)
 
 Now that we have labeled all of our sample data and exported the results, we need to process the JSON file back into the Pandas DataFrames that ADaPT-ML can use. Because we had multiple annotators label each datapoint, we need to decide how we want to compile these into one gold label set. These two tasks can be accomplished using the command at the end of this code block:
 ```shell
@@ -295,7 +295,7 @@ docker exec dp-mlflow sh -c ". ~/.bashrc && wait-for-it dp-mlflow-db:3306 -s -- 
 docker exec dp-mlflow sh -c ". ~/.bashrc && wait-for-it dp-mlflow-db:3306 -s -- mlflow run --no-conda -e example --experiment-name eg -P train_data=/unlabeled_data/multilabel_df.pkl -P dev_data=1 -P task=multilabel -P seed=8 ."
 ```
 
-![Step 3](graphics/step_3.jpg)
+![Step 3](./graphics/step_3.png)
 
 Once we have experimented with the Label Model parameters, Labeling Functions, and datasets to our satisfaction, we can copy and rename the final `training_data.pkl` and `development_data.pkl` for the multiclass setting from their spot in the `$DP_DATA_PATH/mlruns/1/eg/RUN_ID/artifacts` directory into `$MODELLING_DATA_PATH/train_data/multiclass_training_data.pkl` and `$MODELLING_DATA_PATH/test_data/multiclass_development_data.pkl`. We repeat the same procedure for the DataFrames from the multilabel setting. 
 
@@ -310,7 +310,7 @@ docker exec modelling-mlflow sh -c ". ~/.bashrc && wait-for-it modelling-mlflow-
 docker exec modelling-mlflow sh -c ". ~/.bashrc && wait-for-it modelling-mlflow-db:3306 -s -- mlflow run --no-conda -e mlp --experiment-name eg -P train_data=/train_data/multilabel_training_data.pkl -P test_data=/test_data/multilabel_development_data.pkl -P features=txt_use -P solver=lbfgs -P random_state=8 ."
 ```
 
-![Step 4](graphics/step_4.jpg)
+![Step 4](./graphics/step_4.png)
 
 Once we have experimented with the MLP parameters, and possibly iterated more on the data programming step if necessary, we can prepare our models for deployment by simply updating the model environment variables in `.env` to point to `python_model.pkl`. Note that this is relative to the `mlruns` volume in the container, which is shared with the volume `$MODELLING_DATA_PATH/mlruns`.
 ```shell
@@ -319,6 +319,10 @@ MULTILABEL_EXAMPLE_MODEL_PATH=/mlruns/1/ab741913d3b44abdbfc3a381a551366a/artifac
 ```
 
 ### Step 5: deploy the End Model ###
+
+This diagram shows the FastAPI UI for the deployed models.
+
+![Step 5](./graphics/step_5.png)
 
 We have updated the model environment variable and followed [these steps](#step-5-changes-to-modellingmodelling-including-model-deployment) to create two endpoints for predicting multiclass and multilabel, so now we can get multiclass predictions...
 ```shell
