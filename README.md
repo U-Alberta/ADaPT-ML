@@ -1,6 +1,7 @@
-# ADaPT-ML
+# ADaPT-ML #
+## A Data Programming Template for Machine Learning ##
 
-A Data Programming Template for Machine Learning
+ADaPT-ML is a response to the need for an MLOps system that incorporates data programming for multimodal data, and that can quickly incorporate new classification tasks into one system that works mostly without needing knowledge of whether the task is multiclass or multilabel, and with no hard-coded feature engineering. I created this software especially for any researcher with: some programming experience or interest in learning how to write code based off of examples; access to large amounts of unlabeled data that is constantly changing, such as social media data; and domain expertise or an intuition about how they would follow rules, heuristics, or use knowledge bases to annotate the unlabeled data. I have aimed to take as much of the development work as possible out of creating novel models of phenomenon that have well-developed theories and have yet to be applied to big data.
 
 ## Installation and Usage Guidelines ##
 
