@@ -24,7 +24,7 @@ Before getting started, please make sure you are familiar with the following:
 Now that you are familiar with the concepts, terminology, and tools that make up ADaPT-ML, let's get started!
 
 ### Step 1: Installing Docker and Docker Compose ###
-Docker and Docker Compose are required to use ADaPT-ML. Please follow the links for each and review the installation instructions, and make sure that they are installed on the host machine where you will be cloning this repository to.
+Docker and Docker Compose are required to use ADaPT-ML. Please follow the links for each and review the installation instructions, and make sure that they are installed on the host machine where you will be cloning or forking this repository to.
 
 ### Step 2: Setting up the environment variables for Docker Compose ###
 Create a `.env` file in the repository's root directory with the environment variables listed below or add them to the host machine's environment variable list, and define these variables based off of the description listed for each one:

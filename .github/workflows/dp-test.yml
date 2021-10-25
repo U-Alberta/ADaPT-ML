@@ -9,19 +9,19 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    env:
-      DB_DATA_PATH: ./crate
-
-      LS_ANNOTATIONS_PATH: ./example_data/ls/annotations
-      DP_DATA_PATH: ./example_data/dp
-      DATABASE_IP: crate://crate-db:4200
-
-      DP_MYSQL_DATABASE: mlruns.db
-      DP_MYSQL_USER: testusr
-      DP_MYSQL_PASSWORD: testpassword
-      DP_MYSQL_ROOT_PASSWORD: strongtestpassword
-      DP_HOST_NAME: dp-mlflow-db
-      DP_MLFLOW_TRACKING_URI: mysql+pymysql://testusr:testpassword@dp-mlflow-db:3306/mlruns.db
+#    env:
+#      DB_DATA_PATH: ./crate
+#
+#      LS_ANNOTATIONS_PATH: ./example_data/ls/annotations
+#      DP_DATA_PATH: ./example_data/dp
+#      DATABASE_IP: crate://crate-db:4200
+#
+#      DP_MYSQL_DATABASE: mlruns.db
+#      DP_MYSQL_USER: testusr
+#      DP_MYSQL_PASSWORD: testpassword
+#      DP_MYSQL_ROOT_PASSWORD: strongtestpassword
+#      DP_HOST_NAME: dp-mlflow-db
+#      DP_MLFLOW_TRACKING_URI: mysql+pymysql://testusr:testpassword@dp-mlflow-db:3306/mlruns.db
 
     steps:
     - uses: actions/checkout@v2

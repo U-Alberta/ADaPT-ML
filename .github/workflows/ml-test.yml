@@ -9,18 +9,18 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    env:
-      DB_DATA_PATH: ./crate
-
-      MODELLING_DATA_PATH: ./example_data/m
-      DATABASE_IP: crate://crate-db:4200
-
-      MODELLING_MYSQL_DATABASE: mlruns.db
-      MODELLING_MYSQL_USER: testusr
-      MODELLING_MYSQL_PASSWORD: testpassword
-      MODELLING_MYSQL_ROOT_PASSWORD: strongtestpassword
-      MODELLING_HOST_NAME: modelling-mlflow-db
-      MODELLING_MLFLOW_TRACKING_URI: mysql+pymysql://testusr:testpassword@modelling-mlflow-db:3306/mlruns.db
+#    env:
+#      DB_DATA_PATH: ./crate
+#
+#      MODELLING_DATA_PATH: ./example_data/m
+#      DATABASE_IP: crate://crate-db:4200
+#
+#      MODELLING_MYSQL_DATABASE: mlruns.db
+#      MODELLING_MYSQL_USER: testusr
+#      MODELLING_MYSQL_PASSWORD: testpassword
+#      MODELLING_MYSQL_ROOT_PASSWORD: strongtestpassword
+#      MODELLING_HOST_NAME: modelling-mlflow-db
+#      MODELLING_MLFLOW_TRACKING_URI: mysql+pymysql://testusr:testpassword@modelling-mlflow-db:3306/mlruns.db
 
     steps:
     - uses: actions/checkout@v2
