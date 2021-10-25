@@ -23,67 +23,13 @@ Before getting started, please make sure you are familiar with the following:
 
 Now that you are familiar with the concepts, terminology, and tools that make up ADaPT-ML, let's get started!
 
-### Step 1: Installing Docker and Docker Compose ###
+### Step 1: Install Docker and Docker Compose ###
 Docker and Docker Compose are required to use ADaPT-ML. Please follow the links for each and review the installation instructions, and make sure that they are installed on the host machine where you will be cloning or forking this repository to.
 
-### Step 2: Setting up the environment variables for Docker Compose ###
-Create a `.env` file in the repository's root directory with the environment variables listed below or add them to the host machine's environment variable list, and define these variables based off of the description listed for each one:
-```shell
-# The root directory for storing all Label Studio projects (including tasks and exported annotations) and all data programming / modelling artifacts and experiment runs (was set to ./example_data for the example use case).
-DATA_PATH=
+**If you want to test ADaPT-ML using the example use case at this point, proceed directly to [Step 6](#step-6-starting-adapt-ml) to get ADaPT-ML started, then to [Step 2](#step-2-create-a-gold-dataset-using-label-studio) of the [Example Use Case](#example-usage) to follow along. If you want to skip that and get started on adding your classification task to ADaPT-ML, then continue to [Step 2](#step-2-set-up-the-environment-variables-for-docker-compose).**
 
-# The root directory for CrateDB (was set to ./crate for the example use case). If your SQLAlchemy database is stored on a remote server, then you can ignore this and delete the cratedb service from docker-compose.yml. If you want your database to be set up remotely but have not created it yet, then you can extract the cratedb service from docker-compose.yml and use it to set CrateDB up on the remote server and set this variable.
-DB_DATA_PATH=
-
-# Feel free to rename the Label Studio directory, but remember to change it in docker-compose.yml if you do.
-LS_PATH=${DATA_PATH}/ls
-
-# Feel free to rename the Label Studio data directory, but remember to change it in docker-compose.yml if you do.
-LS_DATA_PATH=${LS_PATH}/data
-
-# Feel free to rename the Label Studio tasks directory, but remember to change it in docker-compose.yml if you do.
-LS_TASKS_PATH=${LS_PATH}/tasks
-
-# Feel free to rename the Label Studio annotations directory, but remember to change it in docker-compose.yml if you do.
-LS_ANNOTATIONS_PATH=${LS_PATH}/annotations
-
-# Feel free to rename the data programming directory, but remember to change it in docker-compose.yml if you do.
-DP_DATA_PATH=${DATA_PATH}/dp
-
-# Feel free to rename the modelling directory, but remember to change it in docker-compose.yml if you do.
-MODELLING_DATA_PATH=${DATA_PATH}/m
-
-# If your CrateDB database is stored on a remote server, then change crate-db to the IP address of the host machine. If your database is supported by SQLAlchemy but is not specifically CrateDB, then refer to [2] at the bottom of this README.
-DATABASE_IP=crate://crate-db:4200
-
-# Feel free to rename the data programming MLflow database, or leave it as-is.
-DP_MYSQL_DATABASE=mlruns.db
-
-# Set the following username, password, and root password variables to your preferences.
-DP_MYSQL_USER=
-DP_MYSQL_PASSWORD=
-DP_MYSQL_ROOT_PASSWORD=
-
-# Leave these variables as-is.
-DP_HOST_NAME=dp-mlflow-db
-DP_MLFLOW_TRACKING_URI=mysql+pymysql://${DP_MYSQL_USER}:${DP_MYSQL_PASSWORD}@${DP_HOST_NAME}:3306/${DP_MYSQL_DATABASE}
-
-# Feel free to rename the modelling MLflow database, or leave it as-is.
-MODELLING_MYSQL_DATABASE=mlruns.db
-
-# Set the following username, password, and root password variables to your preferences.
-MODELLING_MYSQL_USER=
-MODELLING_MYSQL_PASSWORD=
-MODELLING_MYSQL_ROOT_PASSWORD=
-
-# Leave these variables as-is.
-MODELLING_HOST_NAME=modelling-mlflow-db
-MODELLING_MLFLOW_TRACKING_URI=mysql+pymysql://${MODELLING_MYSQL_USER}:${MODELLING_MYSQL_PASSWORD}@${MODELLING_HOST_NAME}:3306/${MODELLING_MYSQL_DATABASE}
-
-# If you want to run through the example use case, then leave these variables as-is and make sure that DATA_PATH and DB_DATA_PATH are set to ./example_data and ./crate respectively. Otherwise, these variables are not required to be set. Once you have a model of your own ready to be deployed, set these according to the path to the python_model.pkl artifact displayed in MLflow (see [3])
-MULTICLASS_EXAMPLE_MODEL_PATH=/mlruns/multiclass_model.pkl
-MULTILABEL_EXAMPLE_MODEL_PATH=/mlruns/multilabel_model.pkl
-```
+### Step 2: Set up the environment variables for Docker Compose ###
+Review the `.env` file in the repository's root directory, and edit the variables according to their descriptions.
 
 ### Step 3: Changes to [label-studio](./label-studio) ###
 
@@ -115,7 +61,7 @@ This module that you can name after your new classification task is where you wi
 
 #### [Create your main function as an MLflow endpoint](./data-programming/label/example.py) ####
 
-This is the main module for your new task. You will need to import the Class you defined in [this step](#define-your-class-namesdata-programminglabellfs__init__py) and the `get_lfs` function defined in [this step](#write-your-labeling-functionsdata-programminglabellfsyour_new_taskpy). You will also need to create a name for the Label Model that will be specific to your new task, and a dictionary with the names of the columns holding the features extracted for use with the Labeling Functions you defined as keys and any functions necessary to properly transform or unpack the featurized data point as values. You will also need to specify the path within the Label Studio annotations directory to the DataFrame that holds the annotated development data. Another optional argument is whether or not you want to apply the Labeling Functions in sequence or in parallel -- supply this argument if you find that it takes too long to create the Label Matrix.
+This is the main module for your new task. You will need to import the Class you defined in [this step](#define-your-class-namesdata-programminglabellfs__init__py) and the `get_lfs` function defined in [this step](#write-your-labeling-functionsdata-programminglabellfsexamplepy). You will also need to create a name for the Label Model that will be specific to your new task, and a dictionary with the names of the columns holding the features extracted for use with the Labeling Functions you defined as keys and any functions necessary to properly transform or unpack the featurized data point as values. You will also need to specify the path within the Label Studio annotations directory to the DataFrame that holds the annotated development data. Another optional argument is whether or not you want to apply the Labeling Functions in sequence or in parallel -- supply this argument if you find that it takes too long to create the Label Matrix.
 
 #### [Add your MLflow endpoint to the MLproject file](./data-programming/MLproject) ####
 
@@ -127,9 +73,9 @@ There is not much that you have to edit in this project directory unless you nee
 
 #### [Add your class response format and endpoint to the deployment app](./modelling/app/main.py) ####
 
-Until there is one configuration file for defining the classification task name and classes across all steps in the ADaPT-ML pipeline (see [Contributing](#community-guidelines)), you will need to add a response model that validates the output from your prediction endpoint. You will also need to create and set environment variables in [this step](#setting-up-the-environment-variables-for-docker-compose) for your new End Model and add functions to load them. You can add an element to the `loaded_models_dict` for your model, so you will know if it loaded successfully by visiting the root page. Finally, you will need to add an endpoint to get predictions for new datapoints from your model.
+Until there is one configuration file for defining the classification task name and classes across all steps in the ADaPT-ML pipeline (see [Contributing](#community-guidelines)), you will need to add a response model that validates the output from your prediction endpoint. You will also need to create and set environment variables in [this step](#step-2-set-up-the-environment-variables-for-docker-compose) for your new End Model and add functions to load them. You can add an element to the `loaded_models_dict` for your model, so you will know if it loaded successfully by visiting the root page. Finally, you will need to add an endpoint to get predictions for new datapoints from your model.
 
-### Step 6: Starting ADaPT-ML ###
+### Step 6: Start ADaPT-ML ###
 
 Once you have your new classification task ready to go by completing Steps 1-5, all you need to do is:
 ```shell
@@ -209,13 +155,13 @@ This diagram demonstrates the process of setting up the example use case data in
 
 ### Step 2: create a gold dataset using Label Studio ###
 
-We are now ready to annotate a sample of data in Label Studio! Because we only have a total of 15 datapoints for the multiclass setting and 15 for the multilabel setting, I annotated all of them manually, but in a real-world application of this classification task, it is likely we would have hundreds of thousands of datapoints. In this case, we would instruct two or more annotators to manually label a few hundred datapoints for a few purposes:
+We are now ready to annotate a sample of data in Label Studio! Because we only have a total of 15 datapoints for the multiclass setting and 15 for the multilabel setting, they were all annotated manually, but in a real-world application of this classification task, it is likely we would have hundreds of thousands of datapoints. In this case, we would instruct two or more annotators to manually label a few hundred datapoints for a few purposes:
 1. Gather feedback from the annotators to inform how we can update or create new Labeling Functions
 2. Estimate the class balance and make it available to the Label Model during training
 3. Perform an empirical evaluation of the Labeling Functions and Label Model
 4. Validate the End Model
 
-The first step to annotate data using Label Studio is to sample it from CrateDB. The sampling method implemented currently in ADaPT-ML is a random N, so the command at the end of this code segment was used to sample all 30 datapoints for the multiclass and multilabel settings:
+The first step to annotate data using Label Studio is to sample it from CrateDB. The sampling method implemented currently in ADaPT-ML is a random N, so the command after this code segment was used to sample all 30 datapoints for the multiclass and multilabel settings:
 ```shell
 docker exec label-studio-dev python ./ls/sample_tasks.py --help
 
@@ -232,7 +178,8 @@ positional arguments:
 optional arguments:
   -h, --help           show this help message and exit
   --filename FILENAME  What would you like the task file to be called?
-
+```
+```shell
 docker exec label-studio-dev python ./ls/sample_tasks.py example_data txt 30 example --filename example_tasks.json
 ```
 This module will format the data in the column names provided so that it can be read by Label Studio, and save a file in the `$LS_TASKS_PATH` directory. The diagram below shows the process of using Label Studio to import the sampled data, annotate it, and export it.
@@ -245,7 +192,7 @@ This module will format the data in the column names provided so that it can be 
 - **2d** is the main labeling interface determined by the [example config file](label-studio/config/example_config.xml), with different tabs for multiple annotators.
 - **2e** once annotation is complete, the tasks are exported as JSON and moved and renamed to `$LS_ANNOTATIONS_PATH/annotations/example_annotations.json`
 
-Now that we have labeled all of our sample data and exported the results, we need to process the JSON file back into the Pandas DataFrames that ADaPT-ML can use. Because we had multiple annotators label each datapoint, we need to decide how we want to compile these into one gold label set. These two tasks can be accomplished using the command at the end of this code block:
+Now that we have labeled all of our sample data and exported the results, we need to process the JSON file back into the Pandas DataFrames that ADaPT-ML can use. Because we had multiple annotators label each datapoint, we need to decide how we want to compile these into one gold label set. These two tasks can be accomplished using the command after this code block:
 ```shell
 docker exec label-studio-dev python ./ls/process_annotations.py --help
 
@@ -256,12 +203,13 @@ Format exported annotations into DataFrames ready for downstream functions.
 positional arguments:
   filename     Name of the exported annotations file.
   {example}    Which task is the annotations file for?
-  gold_choice  How to settle disagreements between workers. id: Provide the id of the worker whose labels will be chosen every time. random: The least strict. Choose the label that the majority of workers agree on. If they are evenly split, choose a worker's label randomly. majority: More strict. Choose the
+  gold_choice  How to settle disagreements between workers. id: Provide the id of the worker whose labels will be chosen every time. random: The least strict. Choose the label that the majority of workers agree on. If they are evenly split, choose a worker label randomly. majority: More strict. Choose the
                label that the majority of workers agree on. If they are evenly split, drop that datapoint. drop: The most strict. If workers disagree at all, drop that datapoint.
 
 optional arguments:
   -h, --help   show this help message and exit
-
+```
+```shell
 docker exec label-studio-dev python ./ls/process_annotations.py example_annotations.json example 1
 ```
 The following DataFrames will be saved in `$LS_ANNOTATIONS_PATH/example`:
@@ -281,7 +229,8 @@ positional arguments:
 
 optional arguments:
   -h, --help  show this help message and exit
-
+```
+```shell
 docker exec label-studio-dev python ./ls/annotator_agreement.py example
 ```
 This module uses `task_df.pkl` to calculate Krippendorff's alpha.
@@ -331,7 +280,7 @@ docker exec modelling-mlflow sh -c ". ~/.bashrc && wait-for-it modelling-mlflow-
 - **4d** is the confusion matrix for the gold labels and predicted labels in the multilabel setting.
 - **4e** is the DataFrame with the model's predicted label(s) and the probability distribution over all classes.
 
-Once we have experimented with the MLP parameters, and possibly iterated more on the data programming step if necessary, we can prepare our models for deployment by simply updating the model environment variables in `.env` to point to `python_model.pkl`:
+Once we have experimented with the MLP parameters, and possibly iterated more on the data programming step if necessary, we can prepare our models for deployment by simply updating the model environment variables in `.env` to point to `python_model.pkl`. For this example use case, multiclass and multilabel models were copied and renamed to `./example_data/m/mlruns/multiclass_model.pkl` and `./example_data/m/mlruns/multilabel_model.pkl`, but their original path variables looked like this:
 ```shell
 MULTICLASS_EXAMPLE_MODEL_PATH=/mlruns/1/71a7ab2f6b694420820d707f699b32eb/artifacts/mlp/python_model.pkl
 MULTILABEL_EXAMPLE_MODEL_PATH=/mlruns/1/ab741913d3b44abdbfc3a381a551366a/artifacts/mlp/python_model.pkl
@@ -471,8 +420,10 @@ Follow these guidelines to see where you can contribute to expand the system's f
 - perhaps a separate project for creating a flexible feature store.
 
 ## Additional Installation Notes: ##
+
 If you want to use CrateDB on your host machine but are experiencing issues, please go through these bootstrap checks,
 as the host system must be configured correctly to use CrateDB with Docker.
-
 https://crate.io/docs/crate/howtos/en/latest/admin/bootstrap-checks.html
+
+Check this out if you are hosting CrateDB or another SQLAlchemy-based database on a remote server:
 https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_sql.html

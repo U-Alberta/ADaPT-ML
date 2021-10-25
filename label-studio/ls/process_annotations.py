@@ -129,7 +129,7 @@ def get_majority_label(worker_labels_series):
 def main():
     gold_choice_help = """How to settle disagreements between workers. id: Provide the id of the worker whose labels 
     will be chosen every time. {random}: The least strict. Choose the label that the majority of workers agree on. If 
-    they are evenly split, choose a worker's label randomly. {majority}: More strict. Choose the label that the 
+    they are evenly split, choose a worker label randomly. {majority}: More strict. Choose the label that the 
     majority of workers agree on. If they are evenly split, drop that datapoint. {drop}: The most strict. If workers 
     disagree at all, drop that datapoint.""".format(random=RANDOM,
                                                     majority=MAJORITY,
