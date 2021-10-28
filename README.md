@@ -26,7 +26,7 @@ Now that you are familiar with the concepts, terminology, and tools that make up
 ### Step 1: Install Docker and Docker Compose ###
 Docker and Docker Compose are required to use ADaPT-ML. Please follow the links for each and review the installation instructions, and make sure that they are installed on the host machine where you will be cloning or forking this repository to.
 
-**If you want to test ADaPT-ML using the example use case at this point, proceed directly to [Step 6](#step-6-starting-adapt-ml) to get ADaPT-ML started, then to [Step 2](#step-2-create-a-gold-dataset-using-label-studio) of the [Example Use Case](#example-usage) to follow along. If you want to skip that and get started on adding your classification task to ADaPT-ML, then continue to [Step 2](#step-2-set-up-the-environment-variables-for-docker-compose).**
+**If you want to test ADaPT-ML using the example use case at this point, proceed directly to [Step 6](#step-6-starting-adapt-ml) to get ADaPT-ML started, then to [Step 2](#step-2-create-a-gold-dataset-using-label-studio) of the [Example Use Case](#example-usage) to follow along. If you want to skip that and get started on adding your classification task to ADaPT-ML, then continue to Step 2 below.**
 
 ### Step 2: Set up the environment variables for Docker Compose ###
 Review the `.env` file in the repository's root directory, and edit the variables according to their descriptions.
@@ -84,7 +84,7 @@ docker-compose --profile dev up -d
 docker-compose ps
 ```
 Once you see Docker Compose report this:
-```shell
+```
          Name                        Command                  State                                  Ports                            
 --------------------------------------------------------------------------------------------------------------------------------------
 crate-db                  /docker-entrypoint.sh crat ...   Up             0.0.0.0:4200->4200/tcp,:::4200->4200/tcp, 4300/tcp, 5432/tcp
@@ -117,6 +117,8 @@ docker exec modelling-mlflow sh -c ". ~/.bashrc && wait-for-it modelling-mlflow-
 where `EXP_NAME` is a name for the experiment of your choosing, `TRAIN_DATA` is the name of the Pandas DataFrame holding your training data, `TEST_DATA` is the name of the Pandas DataFrame holding your testing data, and `FEATURE` is a list of column names holding the feature vectors in CrateDB. You can then check http://localhost:5001 to access the MLflow UI and see the experiment log, artifacts, metrics, and more. Take note of the path to your trained End Model, and if you are satisfied with its performance, you can update your End Model's [environment variable](#step-2-setting-up-the-environment-variables-for-docker-compose) to this path.
 
 ### Step 9: Deploying your model ###
+
+Edit the `environment` section of the `m_deploy` service in [docker-compose.yml](./docker-compose.yml) so that it has your End Model's environment variable.
 
 Once you have an End Model that is performant, and you have specified the path to it, you can reload the deployment API by running these commands:
 ```shell
@@ -164,7 +166,8 @@ We are now ready to annotate a sample of data in Label Studio! Because we only h
 The first step to annotate data using Label Studio is to sample it from CrateDB. The sampling method implemented currently in ADaPT-ML is a random N, so the command after this code segment was used to sample all 30 datapoints for the multiclass and multilabel settings:
 ```shell
 docker exec label-studio-dev python ./ls/sample_tasks.py --help
-
+```
+```
 usage: sample_tasks.py [-h] [--filename FILENAME] table columns [columns ...] n {example}
 
 Sample a number of data points from a table to annotate.
@@ -195,7 +198,8 @@ This module will format the data in the column names provided so that it can be 
 Now that we have labeled all of our sample data and exported the results, we need to process the JSON file back into the Pandas DataFrames that ADaPT-ML can use. Because we had multiple annotators label each datapoint, we need to decide how we want to compile these into one gold label set. These two tasks can be accomplished using the command after this code block:
 ```shell
 docker exec label-studio-dev python ./ls/process_annotations.py --help
-
+```
+```
 usage: process_annotations.py [-h] filename {example} gold_choice
 
 Format exported annotations into DataFrames ready for downstream functions.
@@ -219,7 +223,8 @@ The following DataFrames will be saved in `$LS_ANNOTATIONS_PATH/example`:
 Finally, before we use the gold labels, we need to check the level of agreement between the annotators. To do this, we will use the command at the end of this code block:
 ```shell
 docker exec label-studio-dev ./ls/annotator_agreement.py --help
-
+```
+```
 usage: annotator_agreement.py [-h] {example}
 
 Compute the inter-annotator agreement for completed annotations.
@@ -312,7 +317,7 @@ curl -X 'POST' \
   ]
 }'
 ```
-```shell
+```
 {
   "table": [
     "example_data"
@@ -367,7 +372,7 @@ curl -X 'POST' \
   ]
 }'
 ```
-```shell
+```
 {
   "table": [
     "example_data"
