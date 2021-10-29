@@ -57,7 +57,7 @@ def start(registered_model_name, lf_features, dev_annotations_path, get_lfs, cla
         # train the label model
         logging.info("Training label model ...")
         try:
-            label_model = procedure.train_label_model(train_L, train_params, dev_true, class_labels)
+            label_model = procedure.train_label_model(train_L, train_params, parsed_args.device, dev_true, class_labels)
             label_model.save(LABEL_MODEL_FILENAME)
         except Exception as e:
             msg = "Unable to train label model:\n{}\nStopping.".format(e.args)
