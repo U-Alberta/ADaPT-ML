@@ -7,7 +7,7 @@ from label import (TRAIN_MATRIX_FILENAME, TRAINING_DATA_FILENAME,
                    LABEL_MODEL_FILENAME, procedure, evaluate, tracking)
 
 
-def start(registered_model_name, lf_features, dev_annotations_path, get_lfs, class_labels, parsed_args, parallel=False):
+def start(registered_model_name, lf_features, dev_annotations_path, get_lfs, class_labels, parsed_args):
     with mlflow.start_run():
         run = mlflow.active_run()
         logging.info("Active run_id: {}".format(run.info.run_id))
@@ -39,14 +39,14 @@ def start(registered_model_name, lf_features, dev_annotations_path, get_lfs, cla
         lfs = get_lfs()
         logging.info("Creating label matrix ...")
         try:
-            train_L = procedure.create_label_matrix(train_df, lfs, parallel)
+            train_L = procedure.create_label_matrix(train_df, lfs, parsed_args.parallel)
             procedure.save_label_matrix(train_L, TRAIN_MATRIX_FILENAME)
         except Exception as e:
             msg = "Unable to create train label matrix:\n{}\nStopping.".format(e.args)
             logging.error(msg)
             sys.exit(msg)
         try:
-            dev_L = procedure.create_label_matrix(dev_df, lfs, parallel)
+            dev_L = procedure.create_label_matrix(dev_df, lfs, parsed_args.parallel)
             procedure.save_label_matrix(dev_L, DEV_MATRIX_FILENAME)
         except Exception as e:
             dev_L = None
