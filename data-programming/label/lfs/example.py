@@ -50,7 +50,7 @@ KEYWORD_DICT = {
 }
 
 
-def get_lfs() -> [LabelingFunction]:
+def get_lfs(parsed_args) -> [LabelingFunction]:
     """
     This function creates and returns a list of all lfs in this module
     :return: A list of LabelingFunctions defined in this module

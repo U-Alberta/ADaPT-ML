@@ -36,7 +36,7 @@ def start(registered_model_name, lf_features, dev_annotations_path, get_lfs, cla
             dev_df = None
             dev_true = None
         # create the label matrix
-        lfs = get_lfs()
+        lfs = get_lfs(parsed_args)
         logging.info("Creating label matrix ...")
         try:
             train_L = procedure.create_label_matrix(train_df, lfs, parsed_args.parallel)
