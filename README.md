@@ -432,3 +432,7 @@ https://crate.io/docs/crate/howtos/en/latest/admin/bootstrap-checks.html
 
 Check this out if you are hosting CrateDB or another SQLAlchemy-based database on a remote server:
 https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_sql.html
+
+If you want to train the Label Model using CUDA tensors, then please refer to these resources:
+https://developer.nvidia.com/cuda-toolkit
+https://pytorch.org/docs/stable/cuda.html

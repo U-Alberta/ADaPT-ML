@@ -1,6 +1,6 @@
 import os
 
-from label import run
+from label import run, parser
 from label.lfs import ExampleLabels
 from label.lfs.example import get_lfs
 
@@ -10,7 +10,8 @@ DEV_ANNOTATIONS_PATH = os.path.join('/annotations', 'example', 'gold_df.pkl')
 
 
 def main():
-    run.start(REGISTERED_MODEL_NAME, LF_FEATURES, DEV_ANNOTATIONS_PATH, get_lfs, ExampleLabels)
+    parsed_args = parser.parse_args()
+    run.start(REGISTERED_MODEL_NAME, LF_FEATURES, DEV_ANNOTATIONS_PATH, get_lfs, ExampleLabels, parsed_args)
 
 
 if __name__ == '__main__':

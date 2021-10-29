@@ -11,14 +11,9 @@ from snorkel.labeling import filter_unlabeled_dataframe
 from snorkel.labeling.model import LabelModel
 from snorkel.utils import probs_to_preds
 
-from label import TRAIN_PARAMS, SQL_QUERY, DATABASE_IP
+from label import SQL_QUERY, DATABASE_IP
 
 from snorkel.labeling.apply.dask import PandasParallelLFApplier
-
-INIT_PARAMS = {
-    'verbose': True,
-    'device': 'cpu'
-}
 
 LM_OPTIMIZER_SETTINGS = {
     'sgd': {
@@ -96,7 +91,7 @@ def create_label_matrix(df, lfs, parallel) -> np.ndarray:
     return label_matrix
 
 
-def train_label_model(L_train: np.ndarray, y_dev: [[str]], labels) -> LabelModel:
+def train_label_model(L_train: np.ndarray, train_params: dict, device: str, y_dev: [[str]], labels) -> LabelModel:
     """
     Uses the label matrix as input to train the Label Model to estimate the true label for each datapoint by learning
     the correlations, conflicts, and general noise of the LFs. It optionally calculates the class balance using the
@@ -106,11 +101,15 @@ def train_label_model(L_train: np.ndarray, y_dev: [[str]], labels) -> LabelModel
     :param labels: The Label class for the current classification task that holds the name and int value of each class
     :return: The trained Label Model
     """
-    label_model = LabelModel(cardinality=len(labels), **INIT_PARAMS)
+    init_params = {
+        'verbose': True,
+        'device': device
+    }
+    label_model = LabelModel(cardinality=len(labels), **init_params)
     # to change the optimizer parameters, refer to LM_OPTIMIZER_SETTINGS at the top of this module
-    TRAIN_PARAMS.update(LM_OPTIMIZER_SETTINGS[TRAIN_PARAMS['optimizer']])
-    if TRAIN_PARAMS['seed'] is None:
-        TRAIN_PARAMS['seed'] = np.random.randint(1e6)
+    train_params.update(LM_OPTIMIZER_SETTINGS[train_params['optimizer']])
+    if train_params['seed'] is None:
+        train_params['seed'] = np.random.randint(1e6)
     try:
         balance = calc_class_balance(y_dev, labels)
         logging.info("TRUE CLASS BALANCE: {}".format(balance))
@@ -118,7 +117,7 @@ def train_label_model(L_train: np.ndarray, y_dev: [[str]], labels) -> LabelModel
     except:
         balance = None
         logging.info("TRUE CLASS BALANCE: {}".format(balance))
-    label_model.fit(L_train, class_balance=balance, **TRAIN_PARAMS)
+    label_model.fit(L_train, class_balance=balance, **train_params)
     return label_model
 
 

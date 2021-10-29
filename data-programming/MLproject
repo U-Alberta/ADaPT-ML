@@ -12,6 +12,8 @@ entry_points:
             optimizer: {type: string, default: sgd}
             prec_init: {type: float, default: 0.7}
             seed: {type: int, default: 0}
+            parallel: {type: int, default: 0}
+            device: {type: string, default: cpu}
         command: "python ./label/example.py
         --task {task}
         --dev_data {dev_data}
@@ -19,5 +21,7 @@ entry_points:
         --optimizer {optimizer}
         --prec_init {prec_init}
         --seed {seed}
+        --parallel {parallel}
+        --device {device}
         {train_data}
         "

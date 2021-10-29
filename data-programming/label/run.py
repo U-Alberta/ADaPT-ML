@@ -1,20 +1,31 @@
 import logging
 import sys
-
+import pandas as pd
 import mlflow
-from label import (TRAIN_DF, TRAIN_MATRIX_FILENAME, TRAINING_DATA_FILENAME,
+from label import (TRAIN_MATRIX_FILENAME, TRAINING_DATA_FILENAME,
                    TRAINING_DATA_HTML_FILENAME, DEV_DF_FILENAME, DEV_DF_HTML_FILENAME, DEV_MATRIX_FILENAME,
-                   LABEL_MODEL_FILENAME, parsed_args, procedure, evaluate, tracking)
+                   LABEL_MODEL_FILENAME, procedure, evaluate, tracking)
 
 
-def start(registered_model_name, lf_features, dev_annotations_path, get_lfs, class_labels, parallel=False):
+def start(registered_model_name, lf_features, dev_annotations_path, get_lfs, class_labels, parsed_args, parallel=False):
     with mlflow.start_run():
         run = mlflow.active_run()
         logging.info("Active run_id: {}".format(run.info.run_id))
 
         # get the needed information for the pv lfs
+        logging.info("Loading unlabeled training data ...")
+        try:
+            train_df = pd.read_pickle(parsed_args.train_data)
+        except IOError:
+            sys.exit("Invalid path to data")
+        train_params = {
+            'n_epochs': parsed_args.n_epochs,
+            'optimizer': parsed_args.optimizer,
+            'prec_init': parsed_args.prec_init,
+            'seed': parsed_args.seed if parsed_args.seed else None
+        }
         logging.info("Getting information for lfs ...")
-        train_df = procedure.load_lf_info(TRAIN_DF, lf_features)
+        train_df = procedure.load_lf_info(train_df, lf_features)
 
         if parsed_args.dev_data:
             logging.info("Getting development data if available ...")
@@ -46,7 +57,7 @@ def start(registered_model_name, lf_features, dev_annotations_path, get_lfs, cla
         # train the label model
         logging.info("Training label model ...")
         try:
-            label_model = procedure.train_label_model(train_L, dev_true, class_labels)
+            label_model = procedure.train_label_model(train_L, train_params, dev_true, class_labels)
             label_model.save(LABEL_MODEL_FILENAME)
         except Exception as e:
             msg = "Unable to train label model:\n{}\nStopping.".format(e.args)
