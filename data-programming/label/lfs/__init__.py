@@ -25,3 +25,16 @@ class ExampleLabels(Enum):
     bird = 2
     horse = 3
     snake = 4
+
+
+class FramingLabels(Enum):
+    settled_science = 0
+    uncertain_science = 1
+    political_or_ideological_struggle = 2
+    disaster = 3
+    opportunity = 4
+    economic = 5
+    morality_and_ethics = 6
+    role_of_science = 7
+    security = 8
+    health = 9

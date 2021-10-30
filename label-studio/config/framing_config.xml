@@ -1,0 +1,16 @@
+<View>
+  <Text name="text" value="$txt"/>
+  <Choices name="frame" toName="txt" choice="single">
+    <Choice value="settled_science"/>
+    <Choice value="uncertain_science"/>
+    <Choice value="political_or_ideological_struggle"/>
+    <Choice value="disaster"/>
+    <Choice value="opportunity"/>
+    <Choice value="economic"/>
+    <Choice value="morality_and_ethics"/>
+    <Choice value="role_of_science"/>
+    <Choice value="security"/>
+    <Choice value="health"/>
+  </Choices>
+</View>
+
