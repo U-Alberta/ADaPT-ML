@@ -36,12 +36,12 @@ class ModelException(Exception):
 
 
 class DataPointItem(BaseModel):
-    table: List[str]
+    table_name: List[str]
     id: Set[str]
 
 
 class ExampleModelResponse(BaseModel):
-    table: List[str]
+    table_name: List[str]
     id: Set[str]
     cat: List[int]
     dog: List[int]
@@ -108,7 +108,7 @@ def predict_multiclass_example(data_point_item: DataPointItem):
     except Exception as error:
         raise ModelException(name="ExampleModel", code='predict', error=error)
     response_dict = {
-        'table': result_df.table.tolist(),
+        'table_name': result_df.table_name.tolist(),
         'id': result_df.id.tolist(),
         'cat': result_df.cat.tolist(),
         'dog': result_df.dog.tolist(),
@@ -144,7 +144,7 @@ def predict_multilabel_example(data_point_item: DataPointItem):
     except Exception as error:
         raise ModelException(name="ExampleModel", code='predict', error=error)
     response_dict = {
-        'table': result_df.table.tolist(),
+        'table_name': result_df.table_name.tolist(),
         'id': result_df.id.tolist(),
         'cat': result_df.cat.tolist(),
         'dog': result_df.dog.tolist(),

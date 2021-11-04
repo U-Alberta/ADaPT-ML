@@ -51,8 +51,8 @@ class LookupClassifier(mlflow.pyfunc.PythonModel):
 
     def get_features(self, id_df):
         features_df = pd.DataFrame()
-        for tbl in id_df.table.unique():
-            tbl_df = id_df.loc[(id_df.table == tbl)]
+        for tbl in id_df.table_name.unique():
+            tbl_df = id_df.loc[(id_df.table_name == tbl)]
             id_list = tbl_df.id.tolist()
             ids = str(tuple(id_list)) if len(id_list) > 1 else "('{}')".format(id_list[0])
             tbl_f_df = pd.read_sql(self.query.format(column=', '.join(['id'] + self.features),

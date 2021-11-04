@@ -67,11 +67,11 @@ def start(registered_model_name, lf_features, dev_annotations_path, get_lfs, cla
         # use the label model to label the data
         logging.info("Predicting {} ...".format(parsed_args.task))
         labeled_train_df = procedure.apply_label_preds(train_df, train_L, label_model, class_labels, parsed_args.task)
-        procedure.save_df(labeled_train_df[['table', 'id', 'label', 'label_probs']],
+        procedure.save_df(labeled_train_df[['table_name', 'id', 'label', 'label_probs']],
                           TRAINING_DATA_FILENAME, TRAINING_DATA_HTML_FILENAME)
         try:
             labeled_dev_df = procedure.apply_label_preds(dev_df, dev_L, label_model, class_labels, parsed_args.task)
-            procedure.save_df(labeled_dev_df[['table', 'id', 'gold_label', 'label', 'label_probs']],
+            procedure.save_df(labeled_dev_df[['table_name', 'id', 'gold_label', 'label', 'label_probs']],
                               DEV_DF_FILENAME, DEV_DF_HTML_FILENAME)
             dev_pred = labeled_dev_df.label.tolist()
             dev_true = labeled_dev_df.gold_label.tolist()

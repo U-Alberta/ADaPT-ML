@@ -29,7 +29,10 @@ def create_annotations_df(filename):
     ann_df = pd.DataFrame()
 
     for row in df.itertuples(index=False):
-        row_dict = {'id': [row.data_ref_id], 'table': [row.data_meta_info_table], 'task': [row.data_meta_info_task]}
+        row_dict = {
+            'id': [row.data_ref_id],
+            'table_name': [row.data_meta_info_table_name],
+            'task': [row.data_meta_info_task]}
         row_dict.update(dict(zip(
             ['{0}{1}'.format(LABEL_PREFIX, d['completed_by']['id']) for d in row.annotations],
             [[set(d['result'][0]['value']['choices'])] if not
