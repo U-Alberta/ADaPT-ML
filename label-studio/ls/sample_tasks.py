@@ -33,11 +33,11 @@ def main():
     tasks_df = pd.read_sql(random_query, DATABASE_IP)
 
     logging.info("Successfully sampled {n} data points from {table}".format(n=parsed_args.n, table=parsed_args.table))
-    tasks_df['table'] = parsed_args.table
+    tasks_df['table_name'] = parsed_args.table
 
     task_json = []
     for row in tasks_df.itertuples(index=False):
-        data_dict = {"ref_id": row.id, "meta_info": {"table": row.table, "task": parsed_args.task}}
+        data_dict = {"ref_id": row.id, "meta_info": {"table_name": row.table_name, "task": parsed_args.task}}
         data_dict.update(dict(zip(parsed_args.columns, [getattr(row, c) for c in parsed_args.columns])))
         task_json.append(
             {

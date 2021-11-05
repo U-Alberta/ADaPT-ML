@@ -14,7 +14,7 @@ def load(train_path: str, test_path: str) -> (pd.DataFrame, pd.DataFrame):
     Loads the training and testing pd.DataFrames from disk
     :param train_path: path to the training data given as an argument on startup
     :param test_path: path to the test data given as an argument on startup
-    :return: two DataFrames containing the testing data with columns id, table, label, label_probs
+    :return: two DataFrames containing the testing data with columns id, table_name, label, label_probs
     """
     logging.info("Getting train and test data ...")
     try:
@@ -77,8 +77,8 @@ def check_if_multiclass(y_train: [[int]], y_test: [[int]]) -> (bool, bool):
 
 def get_train_features(train_df: pd.DataFrame, features: [str]) -> np.ndarray:
     features_df = pd.DataFrame()
-    for tbl in train_df.table.unique():
-        tbl_df = train_df.loc[(train_df.table == tbl)]
+    for tbl in train_df.table_name.unique():
+        tbl_df = train_df.loc[(train_df.table_name == tbl)]
         tbl_f_df = pd.read_sql(SQL_QUERY.format(column=', '.join(['id'] + features),
                                                 table=tbl,
                                                 ids=str(tuple(tbl_df.id.tolist()))),

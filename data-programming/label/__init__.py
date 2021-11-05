@@ -12,7 +12,7 @@ import os
 
 parser = argparse.ArgumentParser(description='Perform data programming.')
 parser.add_argument('train_data', help='File path or URL to the unlabeled training data')
-parser.add_argument('--task', default='multilabel', type=str, choices=('multiclass', 'multilabel'),
+parser.add_argument('--task', default='multiclass', type=str, choices=('multiclass', 'multilabel'),
                     help='classification setting (multiclass or multilabel)')
 parser.add_argument('--dev_data', default=0, type=int, choices=(0, 1),
                     help='Use labeled development data for training and evaluation?')

@@ -47,8 +47,8 @@ def load_lf_info(id_df, features) -> pd.DataFrame:
     """
     data_df = pd.DataFrame()
     # get the feature columns from the database one table at a time
-    for table in id_df.table.unique():
-        table_df = id_df.loc[(id_df.table == table)]
+    for table in id_df.table_name.unique():
+        table_df = id_df.loc[(id_df.table_name == table)]
         lf_features_df = pd.read_sql(SQL_QUERY.format(column=', '.join(['id'] + list(features)),
                                                       table=table,
                                                       ids=str(tuple(table_df.id.tolist()))),

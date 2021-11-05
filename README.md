@@ -1,7 +1,18 @@
 # ADaPT-ML #
 ## A Data Programming Template for Machine Learning ##
 
-ADaPT-ML is a response to the need for an MLOps system that incorporates data programming for multimodal data, and that can quickly incorporate new classification tasks into one system that works mostly without needing knowledge of whether the task is multiclass or multilabel, and with no hard-coded feature engineering. I created this software especially for any researcher with: some programming experience or interest in learning how to write code based off of examples; access to large amounts of unlabeled data that is constantly changing, such as social media data; and domain expertise or an intuition about how they would follow rules, heuristics, or use knowledge bases to annotate the unlabeled data. I have aimed to take as much of the development work as possible out of creating novel models of phenomenon that have well-developed theories and have yet to be applied to big data.
+Often when studying natural phenomena by creating data-driven models, processing the data becomes the largest challenge. Without a framework to build upon and implement one's ideas, researchers are forced to hastily build inflexible programs from the ground up. When hypotheses need to be reworked or modelling a new aspect of the phenomena becomes necessary, even more time is spent on the program before finally being able to test out new ideas. This inherently causes problems, with additional problems arising such as including internal and external validation steps as an afterthought rather than a checkstop in the pipeline.
+
+ADaPT-ML aims to be the flexible framework upon which researchers can implement their understanding of the phenomena under study. This software was created especially for any researcher with:
+
+* Some programming experience or interest in learning how to write code based off of examples. 
+
+* Access to large amounts of unlabeled data that is constantly changing, such as social media data. 
+
+* Domain expertise or an intuition about how they would follow rules, heuristics, or use knowledge bases to annotate the unlabeled data. 
+
+ADaPT-ML takes as much of the development work as possible out of creating novel models of phenomenon for which we have well-developed theories that have yet to be applied to big data.
+
 
 ## Installation and Usage Guidelines ##
 
@@ -61,11 +72,11 @@ This module that you can name after your new classification task is where you wi
 
 #### [Create your main function as an MLflow endpoint](./data-programming/label/example.py) ####
 
-This is the main module for your new task. You will need to import the Class you defined in [this step](#define-your-class-namesdata-programminglabellfs__init__py) and the `get_lfs` function defined in [this step](#write-your-labeling-functionsdata-programminglabellfsexamplepy). You will also need to create a name for the Label Model that will be specific to your new task, and a dictionary with the names of the columns holding the features extracted for use with the Labeling Functions you defined as keys and any functions necessary to properly transform or unpack the featurized data point as values. You will also need to specify the path within the Label Studio annotations directory to the DataFrame that holds the annotated development data. Another optional argument is whether or not you want to apply the Labeling Functions in sequence or in parallel -- supply this argument if you find that it takes too long to create the Label Matrix.
+This is the main module for your new task. You will need to import the Class you defined in [this step](#define-your-class-namesdata-programminglabellfs__init__py) and the `get_lfs` function defined in [this step](#write-your-labeling-functionsdata-programminglabellfsexamplepy). You will also need to create a name for the Label Model that will be specific to your new task, and a dictionary with the names of the columns holding the features extracted for use with the Labeling Functions you defined as keys and any functions necessary to properly transform or unpack the featurized data point as values. You will also need to specify the path within the Label Studio annotations directory to the DataFrame that holds the annotated development data. Here you can add additional arguments to the argument parser if your Labeling Functions need them, like thresholds.
 
 #### [Add your MLflow endpoint to the MLproject file](./data-programming/MLproject) ####
 
-This file is where you will specify the default hyperparameters for training the Label Model, the type of classification your new task falls under (multiclass or multilabel), and the path to the main module you created in [this step](#create-your-main-function-as-an-mlflow-endpointdata-programminglabelexamplepy). If you perform hyperparameter tuning and find a configuration that works well for your task, then change the defaults here!
+This file is where you will specify the default hyperparameters for training the Label Model, additional parameters for your Labeling Functions, the type of classification your new task falls under (multiclass or multilabel), and the path to the main module you created in [this step](#create-your-main-function-as-an-mlflow-endpointdata-programminglabelexamplepy). If you perform hyperparameter tuning and find a configuration that works well for your task, then change the defaults here!
 
 ### Step 5: Changes to [modelling](./modelling) (including model deployment) ###
 
@@ -102,7 +113,7 @@ Then it's ready! Import your data into a table in CrateDB and refer to the [Exam
 
 ### Step 7: Run a data programming experiment ###
 
-Once you have determined how you will sample some of your data for training an End Model, you need to save it as a pickled Pandas DataFrame with columns `id` and `table`, and optionally other columns if you need them. `table` needs to have the name of the table in CrateDB where the datapoint is stored. Once this DataFrame is in the directory `$DP_DATA_PATH/unlabeled_data`, you can run this command to label your data:
+Once you have determined how you will sample some of your data for training an End Model, you need to save it as a pickled Pandas DataFrame with columns `id` and `table_name`, and optionally other columns if you need them. `table_name` needs to have the name of the table in CrateDB where the datapoint is stored. Once this DataFrame is in the directory `$DP_DATA_PATH/unlabeled_data`, you can run this command to label your data:
 ```shell
 docker exec dp-mlflow sh -c ". ~/.bashrc && wait-for-it dp-mlflow-db:3306 -s -- mlflow run --no-conda -e ENTRYPOINT --experiment-name EXP_NAME -P train_data=/unlabeled_data/DATA.pkl -P task=TASK ."
 ```
@@ -244,7 +255,7 @@ This module uses `task_df.pkl` to calculate Krippendorff's alpha.
 
 Now that we have our gold labels, we are ready to perform data programming to label more data. If we skipped the manual annotation step, then we would not be able to use class balance as a parameter in training the Label Model, or perform an empirical evaluation of the Labeling Functions and Label Model. However, even without gold labels, the labeled data from this step can be split into training and testing sets if the Label Model performs to our satisfaction.
 
-We have followed [these instructions](#step-4-changes-to-data-programmingdata-programming) to modify ADaPT-ML for our example classification task. We also sampled some data from CrateDB that we want to use as training data; for this example use case, we have one DataFrame with the multiclass datapoints and one DataFrame with the multilabel datapoints, and both DataFrames only have the columns `id` and `table`. Note: this sampling and DataFrame creation is not performed by ADaPT-ML (see [Contributing](#community-guidelines)). The DataFrames are called `multiclass_df.pkl` and `multilabel_df.pkl`, and both are stored in `$DP_DATA_PATH/unlabeled_data`.
+We have followed [these instructions](#step-4-changes-to-data-programmingdata-programming) to modify ADaPT-ML for our example classification task. We also sampled some data from CrateDB that we want to use as training data; for this example use case, we have one DataFrame with the multiclass datapoints and one DataFrame with the multilabel datapoints, and both DataFrames only have the columns `id` and `table_name`. Note: this sampling and DataFrame creation is not performed by ADaPT-ML (see [Contributing](#community-guidelines)). The DataFrames are called `multiclass_df.pkl` and `multilabel_df.pkl`, and both are stored in `$DP_DATA_PATH/unlabeled_data`.
 
 Once we run the commands in the following code block...
 ```shell
@@ -267,7 +278,7 @@ Once we have experimented with the Label Model parameters, Labeling Functions, a
 
 ### Step 4: create an End Model ###
 
-Now that we have our training data labeled by the Label Model and testing data with gold labels, we can create an End Model that, given a DataFrame containing only the `id` and `table` columns, will look up the appropriate features for each datapoint in CrateDB and produce a DataFrame with a binary encoding for the predicted class(es), and the probability distribution over all classes. Currently, ADaPT-ML only has one machine learning algorithm, [scikit-learn's Multi-layer Perceptron (MLP)](https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html), a classifier that optimizes the log-loss function using LBFGS or stochastic gradient descent. If you need a different algorithm in ADaPT-ML, please consider [contributing](#community-guidelines)!
+Now that we have our training data labeled by the Label Model and testing data with gold labels, we can create an End Model that, given a DataFrame containing only the `id` and `table_name` columns, will look up the appropriate features for each datapoint in CrateDB and produce a DataFrame with a binary encoding for the predicted class(es), and the probability distribution over all classes. Currently, ADaPT-ML only has one machine learning algorithm, [scikit-learn's Multi-layer Perceptron (MLP)](https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html), a classifier that optimizes the log-loss function using LBFGS or stochastic gradient descent. If you need a different algorithm in ADaPT-ML, please consider [contributing](#community-guidelines)!
 
 After running the commands in this code block...
 ```shell
@@ -309,7 +320,7 @@ curl -X 'POST' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -d '{
-  "table": [
+  "table_name": [
     "example_data"
   ],
   "id": [
@@ -319,7 +330,7 @@ curl -X 'POST' \
 ```
 ```
 {
-  "table": [
+  "table_name": [
     "example_data"
   ],
   "id": [
@@ -364,7 +375,7 @@ curl -X 'POST' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -d '{
-  "table": [
+  "table_name": [
     "example_data"
   ],
   "id": [
@@ -374,7 +385,7 @@ curl -X 'POST' \
 ```
 ```
 {
-  "table": [
+  "table_name": [
     "example_data"
   ],
   "id": [
