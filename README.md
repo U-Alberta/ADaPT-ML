@@ -170,7 +170,7 @@ docker exec dp-mlflow sh -c ". ~/.bashrc && wait-for-it dp-mlflow-db:3306 -s -- 
 - **3e** `development_data.pkl` has the aforementioned columns in addition to the `gold_label` column from the `gold_df`
 - **3f** `training_data.pkl` has the Label Model's predicted labels in the column `label` and the probability distribution over all classes in the column `label_probs`
 
-Once we have experimented with the Label Model parameters, Labeling Functions, and datasets to our satisfaction, we can copy and rename the final `training_data.pkl` and `development_data.pkl` for the multiclass setting from their spot in the `$DP_DATA_PATH/mlruns/1/eg/RUN_ID/artifacts` directory into `$MODELLING_DATA_PATH/train_data/multiclass_training_data.pkl` and `$MODELLING_DATA_PATH/test_data/multiclass_development_data.pkl`. We repeat the same procedure for the DataFrames from the multilabel setting. 
+Once we have experimented with the Label Model parameters, Labeling Functions, and datasets to our satisfaction, we can make note of the experiment ID (`EXP_ID`) and run ID (`RUN_ID`) to access the `training_data.pkl` and `development_data.pkl` that we want to use in End Model training and evaluation. For ease of demonstration, these artifacts have been placed in `$DP_DATA_PATH/mlruns`, but normally these artifacts would be found in `$DP_DATA_PATH/mlruns/EXP_ID/RUN_ID/artifacts`.
 
 ### Step 4: create an End Model ###
 
@@ -178,9 +178,9 @@ Now that we have our training data labeled by the Label Model and testing data w
 
 After running the commands in this code block...
 ```shell
-docker exec modelling-mlflow sh -c ". ~/.bashrc && wait-for-it modelling-mlflow-db:3306 -s -- mlflow run --no-conda -e mlp --experiment-name eg -P train_data=/train_data/multiclass_training_data.pkl -P test_data=/test_data/multiclass_development_data.pkl -P features=txt_use -P solver=lbfgs -P random_state=8 ."
+docker exec modelling-mlflow sh -c ". ~/.bashrc && wait-for-it modelling-mlflow-db:3306 -s -- mlflow run --no-conda -e mlp --experiment-name eg -P train_data=/dp_mlruns/multiclass_training_data.pkl -P test_data=/dp_mlruns/multiclass_development_data.pkl -P features=txt_use -P solver=lbfgs -P random_state=8 ."
 
-docker exec modelling-mlflow sh -c ". ~/.bashrc && wait-for-it modelling-mlflow-db:3306 -s -- mlflow run --no-conda -e mlp --experiment-name eg -P train_data=/train_data/multilabel_training_data.pkl -P test_data=/test_data/multilabel_development_data.pkl -P features=txt_use -P solver=lbfgs -P random_state=8 ."
+docker exec modelling-mlflow sh -c ". ~/.bashrc && wait-for-it modelling-mlflow-db:3306 -s -- mlflow run --no-conda -e mlp --experiment-name eg -P train_data=/dp_mlruns/multilabel_training_data.pkl -P test_data=/dp_mlruns/multilabel_development_data.pkl -P features=txt_use -P solver=lbfgs -P random_state=8 ."
 ```
 ...we can check out the results in MLflow, as shown in the diagram below.
 
@@ -192,7 +192,7 @@ docker exec modelling-mlflow sh -c ". ~/.bashrc && wait-for-it modelling-mlflow-
 - **4d** is the confusion matrix for the gold labels and predicted labels in the multilabel setting.
 - **4e** is the DataFrame with the model's predicted label(s) and the probability distribution over all classes.
 
-Once we have experimented with the MLP parameters, and possibly iterated more on the data programming step if necessary, we can prepare our models for deployment by simply updating the model environment variables in `.env` to point to `python_model.pkl`. For this example use case, multiclass and multilabel models were copied and renamed to `./example_data/m/mlruns/multiclass_model.pkl` and `./example_data/m/mlruns/multilabel_model.pkl`, but their original path variables looked like this:
+Once we have experimented with the MLP parameters, and possibly iterated more on the data programming step if necessary, we can prepare our models for deployment by simply updating the model environment variables in `.env` to point to `python_model.pkl`. For this example use case, multiclass and multilabel models were copied and renamed to `${MODELLING_DATA_PATH}/mlruns/multiclass_model.pkl` and `${MODELLING_DATA_PATH}/mlruns/multilabel_model.pkl`, but their original path variables looked like this:
 ```shell
 MULTICLASS_EXAMPLE_MODEL_PATH=/mlruns/1/71a7ab2f6b694420820d707f699b32eb/artifacts/mlp/python_model.pkl
 MULTILABEL_EXAMPLE_MODEL_PATH=/mlruns/1/ab741913d3b44abdbfc3a381a551366a/artifacts/mlp/python_model.pkl
@@ -325,8 +325,9 @@ curl -X 'POST' \
 
 Follow these guidelines to see where you can contribute to expand the system's functionality and adaptability. The following items are on ADaPT-ML's "wish list":
 - a configuration file that can be used by the label-studio, data-programming, and modelling projects to automatically create the classification task directory for label studio, a coding schema for annotators, the Enum object that stores values that the Labeling Functions use, the ModelResponse schema for deployment, and anything else where it is important to have consistency and maintainability in the classification task name and classes.
-- a main UI with links to all of the different UIs, buttons that can run commands to sample data, move files, and run end-to-end experiments, forms for submitting new classification tasks, an interface that makes writing labeling functions easier, etc.
+- a main UI with links to all of the different UIs, buttons that can run commands to sample data and run end-to-end experiments by returning the `EXP_ID` and `RUN_ID` within mlruns for a successful and performant Label Model and End Model, forms for submitting new classification tasks, an interface that makes writing labeling functions easier, etc.
 - implement some algorithms that can take a representative sample of a table in CrateDB for training data creation.
 - implement classification algorithms in addition to the MLP.
-- determine the best method for updating the CrateDB tables with worker labels, gold labels, Label model labels and probabilities, and model predictions and probabilities to eliminate the need for reading and writing DataFrames to disk.
-- perhaps a separate project for creating a flexible feature store.
+- determine the best method for updating the CrateDB tables with worker labels, gold labels, Label Model labels and probabilities, and End Model predictions and probabilities.
+- a separate project for creating a flexible feature store.
+
