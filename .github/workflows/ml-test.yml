@@ -31,7 +31,7 @@ jobs:
     - name: Give database a chance to start up
       run: sleep 30
     - name: Check running containers
-      run: docker ps -a
+      run: docker-compose ps
 
     # Testing out the modelling functionality
     - name: Test 1 -- multiclass with LM test data
