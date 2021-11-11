@@ -13,7 +13,26 @@ ADaPT-ML aims to be the flexible framework upon which researchers can implement 
 
 ADaPT-ML takes as much of the development work as possible out of creating novel models of phenomenon for which we have well-developed theories that have yet to be applied to big data.
 
+## Introduction ##
+
+ADaPT-ML is composed of a number of open-source tools and libraries, as shown in this system diagram. To familiarize yourself with these components, please review the tools and libraries linked to below the diagram.
+
 ![System Diagram](./graphics/system.png)
+
+- [Docker](https://docs.docker.com/) and [Docker Compose](https://docs.docker.com/compose/)
+  - working with environment variables, volumes, Dockerfiles, and the main docker-compose commands
+- [Pandas](https://pandas.pydata.org/)
+  - DataFrames
+- [Label Studio v1.0](https://labelstud.io/)
+  - Labeling Config files
+- [Snorkel v0.9.7](https://www.snorkel.org/get-started/)
+  - writing Labeling Functions, Label Matrix, Label Model
+- [MLflow v1.19.0](https://mlflow.org/)
+  - MLflow Projects, MLflow Tracking, MLflow Models, Model Registry
+- [FastAPI v0.68.1](https://fastapi.tiangolo.com/)
+  - endpoints, Pydantic, requests, JSON
+
+Now that you are familiar with the concepts, terminology, and tools that make up ADaPT-ML, let's look at the example use case included in this repository.
 
 ## Example Usage ##
 

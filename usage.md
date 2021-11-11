@@ -1,22 +1,6 @@
 ## Installation and Usage Guidelines ##
 
-Follow these guidelines to set up ADaPT-ML on your machine and to see how you can add new classification tasks to the system. 
-
-Before getting started, please make sure you are familiar with the following:
-- [Docker](https://docs.docker.com/) and [Docker Compose](https://docs.docker.com/compose/)
-  - working with environment variables, volumes, Dockerfiles, and the main docker-compose commands
-- [Pandas](https://pandas.pydata.org/)
-  - DataFrames
-- [Label Studio v1.0](https://labelstud.io/)
-  - Labeling Config files
-- [Snorkel v0.9.7](https://www.snorkel.org/get-started/)
-  - writing Labeling Functions, Label Matrix, Label Model
-- [MLflow v1.19.0](https://mlflow.org/)
-  - MLflow Projects, MLflow Tracking, MLflow Models, Model Registry
-- [FastAPI v0.68.1](https://fastapi.tiangolo.com/)
-  - endpoints, Pydantic, requests, JSON
-
-Now that you are familiar with the concepts, terminology, and tools that make up ADaPT-ML, let's get started!
+Follow these guidelines to set up ADaPT-ML on your machine and to see how you can add new classification tasks to the system.
 
 ### Step 1: Install Docker and Docker Compose ###
 Docker and Docker Compose are required to use ADaPT-ML. Please follow the links for each and review the installation instructions, and make sure that they are installed on the host machine where you will be cloning or forking this repository to.
