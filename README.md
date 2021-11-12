@@ -32,7 +32,7 @@ ADaPT-ML is composed of a number of open-source tools and libraries, as shown in
 - [FastAPI v0.68.1](https://fastapi.tiangolo.com/)
   - endpoints, Pydantic, requests, JSON
 
-Now that you are familiar with the concepts, terminology, and tools that make up ADaPT-ML, let's look at the example use case included in this repository.
+Now that you are familiar with the concepts, terminology, and tools that make up ADaPT-ML, let's look at the example use case included in this repository. Once you have an understanding of how ADaPT-ML works and want to get started with your own use case, please refer to these instructions for [testing](./testing.md) ADaPT-ML on your machine, and the [usage guidelines](./usage.md), including how to contribute to this project.
 
 ## Example Usage ##
 
