@@ -9,12 +9,6 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    env:
-      DB_DATA_PATH: ./crate
-
-      MODELLING_DATA_PATH: ./example_data/m
-      MULTICLASS_EXAMPLE_MODEL_PATH: /mlruns/multiclass_model.pkl
-      MULTILABEL_EXAMPLE_MODEL_PATH: /mlruns/multilabel_model.pkl
 
     steps:
     - uses: actions/checkout@v2
@@ -23,9 +17,9 @@ jobs:
     - name: Build the docker-compose stack
       run: docker-compose -f docker-compose.yml --profile deploy up -d
     - name: Give database a chance to start up
-      run: sleep 30
+      run: sleep 10
     - name: Check running containers
-      run: docker ps -a
+      run: docker-compose ps
 
     # Testing out the deployment functionality
     - name: Predict multiclass

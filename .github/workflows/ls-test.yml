@@ -9,14 +9,6 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-#    env:
-#      DB_DATA_PATH: ./crate
-#
-#      LS_DATA_PATH: ./example_data/ls/data
-#      DATABASE_IP: crate://crate-db:4200
-#      LS_TASKS_PATH: ./example_data/ls/tasks
-#      LS_ANNOTATIONS_PATH: ./example_data/ls/annotations
-
     steps:
     - uses: actions/checkout@v2
 
@@ -24,9 +16,9 @@ jobs:
     - name: Build the docker-compose stack
       run: docker-compose -f docker-compose.yml --profile label up -d
     - name: Give database a chance to start up
-      run: sleep 30
+      run: sleep 10
     - name: Check running containers
-      run: docker ps -a
+      run: docker-compose ps
 
     # Testing out the modelling functionality
     - name: Test 1 -- sample tasks
