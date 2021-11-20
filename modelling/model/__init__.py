@@ -15,6 +15,7 @@ TEST_PRED_DF_HTML_FILENAME = os.path.join(TMP_ARTIFACTS, 'test.html')
 
 CONFUSION_MATRIX_FILENAME = os.path.join(TMP_ARTIFACTS, 'confusion_matrix.jpg')
 
+STDOUT_LOG_FILENAME = os.path.join(TMP_ARTIFACTS, 'stdout_log.txt')
 LOGGING_FILENAME = os.path.join(TMP_ARTIFACTS, 'log.txt')
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO, filename=LOGGING_FILENAME, filemode='w')
 
@@ -22,3 +23,4 @@ parser = argparse.ArgumentParser(description='Train a multi-layer perceptron cla
 parser.add_argument('train_path', type=str, help='File path or URL to the training data')
 parser.add_argument('test_path', type=str, help='File path or URL to the test data')
 parser.add_argument('features', nargs='+', type=str, help='column name(s) of the features to use.')
+parser.add_argument('--verbose', default=1, type=int, choices=(0, 1), help='redirect stdout to file?')

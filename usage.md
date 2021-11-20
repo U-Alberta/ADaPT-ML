@@ -6,7 +6,7 @@ Follow these guidelines to set up ADaPT-ML on your machine and to see how you ca
 [Docker](https://docs.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) are required to use ADaPT-ML. Please follow the links for each and review the installation instructions, and make sure that they are installed on the host machine where you will be forking and cloning this repository to.
 
 ### Step 2: [Set up the environment variables for Docker Compose](./.env) ###
-Review the `.env` file in the repository's root directory, and edit the variables according to their descriptions.
+**It is recommended that at this point, you test ADaPT-ML by following these [instructions](./test/testing.md)**. After testing, make a copy of the `.env` file in the repository's root directory and call it `.env.dev`. Review the `.env.dev` file, and edit the variables according to their descriptions.
 
 ### Step 3: Changes to [label-studio](./label-studio) ###
 
@@ -57,7 +57,7 @@ Until there is one configuration file for defining the classification task name 
 Once you have your new classification task ready to go by completing Steps 1-5, all you need to do is:
 ```shell
 cd ADaPT-ML/
-docker-compose --profile dev up -d
+docker-compose --env-file .env.dev --profile dev up -d
 docker-compose ps
 ```
 Once you see Docker Compose report this:

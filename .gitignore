@@ -123,5 +123,17 @@ dmypy.json
 # CrateDB
 crate/log
 
-# temp
+# test
 example_test.py
+example_data/dp/dbdata
+example_data/dp/mlruns/
+example_data/dp/tmp_artifacts
+example_data/ls/annotations/example/agreement_log.txt
+example_data/ls/annotations/example/ann_df.pkl
+example_data/ls/annotations/example/process_log.txt
+example_data/ls/annotations/example/task_df.pkl
+example_data/ls/data
+example_data/ls/tasks/example_tasks_log.txt
+example_data/m/dbdata
+example_data/m/mlruns/
+example_data/m/tmp_artifacts

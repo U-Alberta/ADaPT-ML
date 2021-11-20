@@ -32,7 +32,7 @@ ADaPT-ML is composed of a number of open-source tools and libraries, as shown in
 - [FastAPI v0.68.1](https://fastapi.tiangolo.com/)
   - endpoints, Pydantic, requests, JSON
 
-Now that you are familiar with the concepts, terminology, and tools that make up ADaPT-ML, let's look at the example use case included in this repository. Once you have an understanding of how ADaPT-ML works and want to get started with your own use case, please refer to these instructions for [testing](./testing.md) ADaPT-ML on your machine, and the [usage guidelines](./usage.md), including how to contribute to this project.
+Now that you are familiar with the concepts, terminology, and tools that make up ADaPT-ML, let's look at the example use case included in this repository. Once you have an understanding of how ADaPT-ML works and want to get started with your own use case, please refer to these instructions for [testing](test/testing.md) ADaPT-ML on your machine, and the [usage guidelines](./usage.md), including how to contribute to this project.
 
 ## Example Usage ##
 
@@ -78,7 +78,7 @@ This module will format the data in the column names provided so that it can be 
 
 ![Step Two](./graphics/step_2.png)
 
-- **2a** shows all of the created projects, allowing for multiple classification problems. 
+- **2a** shows all the created projects, allowing for multiple classification problems. 
 - **2b** has the popup for importing our `example_tasks.json` file.
 - **2c** shows the imported tasks, which can be clicked on to arrive at the labeling page.
 - **2d** is the main labeling interface determined by the [example config file](label-studio/config/example_config.xml), with different tabs for multiple annotators.
@@ -142,7 +142,7 @@ docker exec modelling-mlflow sh -c ". ~/.bashrc && wait-for-it modelling-mlflow-
 
 ![Step 4](./graphics/step_4.png)
 
-- **4a** shows all of the training parameters for the MLP model, in addition to the specific features used for the given training data. Note that the `txt_use` parameter is the column 1i in the [diagram for Step 1](#step-1-obtain-and-featurize-some-data).
+- **4a** shows all the training parameters for the MLP model, in addition to the specific features used for the given training data. Note that the `txt_use` parameter is the column 1i in the [diagram for Step 1](#step-1-obtain-and-featurize-some-data).
 - **4b** if the test data has gold labels in addition to the Label Model's labels, then the model will be evaluated against both, and they will show up here with "GOLD" and "LM" prefixes. If there are no gold labels, then the metrics will only have "LM".
 - **4c** is the confusion matrix for the gold labels and predicted labels in the multiclass setting.
 - **4d** is the confusion matrix for the gold labels and predicted labels in the multilabel setting.

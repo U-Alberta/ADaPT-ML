@@ -56,6 +56,7 @@ services:
       - ${LS_DATA_PATH}:/label-studio/data
       - ${LS_TASKS_PATH}:/tasks
       - ${LS_ANNOTATIONS_PATH}:/annotations
+      - ./test:/test
     environment:
       - DATABASE_IP=${DATABASE_IP}
     stdin_open: true
@@ -120,6 +121,7 @@ services:
       - ./data-programming/label:/code/label
       - ./data-programming/MLproject:/code/MLproject
       - ./data-programming/conda.yaml:/code/conda.yaml
+      - ./test:/test
     environment:
       - MLFLOW_TRACKING_URI=${DP_MLFLOW_TRACKING_URI}
       - DATABASE_IP=${DATABASE_IP}
@@ -170,6 +172,7 @@ services:
   m:
     profiles:
       - modelling
+      - deploy
       - dev
     image: nullberry/adapt-ml-m:latest
     container_name: modelling-mlflow
@@ -185,6 +188,7 @@ services:
       - ./modelling/model_objs.py:/code/model_objs.py
       - ./modelling/MLproject:/code/MLproject
       - ./modelling/conda.yaml:/code/conda.yaml
+      - ./test:/test
     environment:
       - MLFLOW_TRACKING_URI=${MODELLING_MLFLOW_TRACKING_URI}
       - DATABASE_IP=${DATABASE_IP}

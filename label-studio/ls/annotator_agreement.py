@@ -59,7 +59,6 @@ def report(task, alpha):
     RESULT: {result} 
     """.format(task=task, alpha=alpha, result=result)
     logging.info(summary_str)
-    print(summary_str)
 
 
 def main():

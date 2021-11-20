@@ -25,7 +25,8 @@ parser.add_argument('--prec_init', default=0.7, type=float, help='LF precision i
 parser.add_argument('--seed', default=0, type=int, help='a random seed to initialize the random number generator with')
 parser.add_argument('--parallel', default=0, type=int, choices=(0, 1), help='run LFs in parallel?')
 parser.add_argument('--device', default='cpu', type=str, choices=('cpu', 'cuda'),
-                    help='config device to use for training the Label Model')
+                    help='config device to use for training the Label Model'),
+parser.add_argument('--verbose', default=1, type=int, choices=(0, 1), help='redirect stdout to file?')
 
 TMP_ARTIFACTS = '/tmp_artifacts'
 
@@ -43,6 +44,7 @@ LF_SUMMARY_DEV_FILENAME = os.path.join(TMP_ARTIFACTS, 'lf_summary_dev.html')
 LF_SUMMARY_TRAIN_FILENAME = os.path.join(TMP_ARTIFACTS, 'lf_summary_train.html')
 CONFUSION_MATRIX_FILENAME = os.path.join(TMP_ARTIFACTS, 'confusion_matrix.jpg')
 
+STDOUT_LOG_FILENAME = os.path.join(TMP_ARTIFACTS, 'stdout_log.txt')
 LOGGING_FILENAME = os.path.join(TMP_ARTIFACTS, 'log.txt')
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO, filename=LOGGING_FILENAME, filemode='w')
 

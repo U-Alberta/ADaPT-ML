@@ -1,6 +1,7 @@
-echo "STARTING ADaPT-ML AND RUNNING ALL TESTS"
+#!/bin/bash -e
+echo "=== STARTING ADaPT-ML AND RUNNING ALL TESTS ==="
 
-docker-compose --profile dev up -d
+docker-compose --env-file .env --profile dev up -d
 while docker-compose ps | grep -i "starting"
   do
     echo "Waiting for MLflow databases (5 sec)..."
@@ -8,12 +9,18 @@ while docker-compose ps | grep -i "starting"
   done
 
 echo "Checking for exited containers..."
-! docker-compose ps | grep -i "Exit"
-echo "☑ Startup complete."
+exited=$(docker-compose ps | grep "Exit")
+if [ "$exited" = 0 ]
+then
+  echo "Check failed: some containers exited"
+  exit 1
+fi
+echo "Startup complete."
 
-. ./test/ls.sh
-. ./test/dp.sh
-. ./test/ml.sh
-. ./test/deploy.sh
-
-echo "ALL TESTS COMPLETED SUCCESSFULLY."
+docker exec label-studio-dev python /test/ls-test.py
+docker exec dp-mlflow sh -c ". ~/.bashrc && python /test/dp-test.py"
+docker exec modelling-mlflow sh -c ". ~/.bashrc && python /test/ml-test.py"
+docker network connect --ip 172.19.0.8 adapt-ml_m_network modelling-mlflow-deploy
+docker exec modelling-mlflow sh -c ". ~/.bashrc && python /test/deploy-test.py"
+docker network disconnect adapt-ml_m_network modelling-mlflow-deploy
+echo "=== TESTING COMPLETE ==="

@@ -18,9 +18,9 @@ parser.add_argument('task', type=str, choices=CLASSIFICATION_TASKS, help='What c
 parser.add_argument('--filename', default=None, type=str, help='What would you like the task file to be called?')
 parsed_args = parser.parse_args()
 
-FILENAME = parsed_args.filename if parsed_args.filename is not None else "{d}_{t}.json".format(d=date_str,
-                                                                                               t=parsed_args.task)
-JSON_TASKS_PATH = os.path.join(LS_TASKS_PATH, FILENAME)
+FILENAME = parsed_args.filename if parsed_args.filename is not None else "{d}_{t}".format(d=date_str,
+                                                                                          t=parsed_args.task)
+JSON_TASKS_PATH = os.path.join(LS_TASKS_PATH, '{}.json'.format(FILENAME))
 LOGGING_FILENAME = os.path.join(LS_TASKS_PATH, '{}_log.txt'.format(FILENAME))
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO, filename=LOGGING_FILENAME, filemode='w')
 

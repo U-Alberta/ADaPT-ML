@@ -14,6 +14,7 @@ entry_points:
             seed: {type: int, default: 0}
             parallel: {type: int, default: 0}
             device: {type: string, default: cpu}
+            verbose: {type: int, default: 1}
         command: "python ./label/example.py
         --task {task}
         --dev_data {dev_data}
@@ -23,5 +24,6 @@ entry_points:
         --seed {seed}
         --parallel {parallel}
         --device {device}
+        --verbose {verbose}
         {train_data}
         "

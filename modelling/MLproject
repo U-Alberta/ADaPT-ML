@@ -23,6 +23,7 @@ entry_points:
             n_iter_no_change: {type: int, default: 10}
             max_fun: {type: int, default: 15000}
             random_state: {type: int, default: 0}
+            verbose: {type: int, default: 1}
         command: "python ./model/mlp.py
          --activation {activation}
          --solver {solver}
@@ -39,6 +40,7 @@ entry_points:
          --n_iter_no_change {n_iter_no_change}
          --max_fun {max_fun}
          --random_state {random_state}
+         --verbose {verbose}
          {train_data}
          {test_data}
          {features}"

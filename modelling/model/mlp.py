@@ -2,8 +2,8 @@
 multi-layer perceptron classifier
 https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html
 """
-import argparse
 import logging
+import sys
 from math import floor, ceil
 
 import matplotlib.pyplot as plt
@@ -14,8 +14,8 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import sklearn.metrics as eval
-from model import (X_TRAIN_FILENAME, TRAIN_DF_FILENAME, TRAIN_DF_HTML_FILENAME, TEST_PRED_DF_FILENAME,
-                   TEST_PRED_DF_HTML_FILENAME, CONFUSION_MATRIX_FILENAME, parser)
+from model import (STDOUT_LOG_FILENAME, X_TRAIN_FILENAME, TRAIN_DF_FILENAME, TRAIN_DF_HTML_FILENAME,
+                   TEST_PRED_DF_FILENAME, TEST_PRED_DF_HTML_FILENAME, CONFUSION_MATRIX_FILENAME, parser)
 from model_objs import LookupClassifier
 from sklearn.neural_network import MLPClassifier
 
@@ -211,6 +211,8 @@ def plot_multilabel_confusion_matrix(confusion_matrix, axes, class_label, class_
 
 
 def main():
+    if not parsed_args.verbose:
+        sys.stdout = open(STDOUT_LOG_FILENAME, 'w')
     with mlflow.start_run():
         run = mlflow.active_run()
         logging.info("Active run_id: {}".format(run.info.run_id))
@@ -288,6 +290,7 @@ def main():
 
         logging.info("Logging artifacts ...")
         tracking.log(TRAIN_PARAMS, metrics)
+    sys.stdout.close()
 
 
 if __name__ == '__main__':
