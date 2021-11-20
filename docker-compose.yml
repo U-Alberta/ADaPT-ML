@@ -131,6 +131,7 @@ services:
   m_db:
     profiles:
       - modelling
+      - deploy
       - dev
     restart: on-failure
     image: mysql/mysql-server:8.0.26
