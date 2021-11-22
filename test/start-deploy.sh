@@ -17,9 +17,9 @@ fi
 echo "Startup complete."
 
 # set up a temporary network to use to test the model deployment
-docker network create test-deploy-network --subnet 172.19.0.0/16 --gateway 172.19.0.1
-docker network connect --ip 172.19.0.8 test-deploy-network modelling-mlflow-deploy
-docker network connect --ip 172.19.0.4 test-deploy-network modelling-mlflow
+docker network create test-deploy-network --subnet 192.168.2.0/24 --gateway 192.168.2.10
+docker network connect --ip 192.168.2.4 test-deploy-network modelling-mlflow-deploy
+docker network connect --ip 192.168.2.8 test-deploy-network modelling-mlflow
 
 docker exec modelling-mlflow sh -c ". ~/.bashrc && python /test/deploy-test.py"
 

@@ -217,12 +217,12 @@ def check_response(df, expected):
 print("=== STARTING MODEL DEPLOYMENT TESTS WITH EXAMPLE DATA ===")
 
 print("Testing multiclass predictions...")
-response = send_request("http://172.19.0.8:80/predict_multiclass_example",
+response = send_request("http://192.168.2.4:80/predict_multiclass_example",
                         ["22", "24", "19", "15", "18"])
 check_response(response, MULTICLASS_DF)
 
 print("Testing multilabel predictions...")
-response = send_request("http://172.19.0.8:80/predict_multilabel_example",
+response = send_request("http://192.168.2.4:80/predict_multilabel_example",
                         ["03", "05", "12", "06", "08"])
 check_response(response, MULTILABEL_DF)
 
