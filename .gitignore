@@ -122,6 +122,8 @@ dmypy.json
 
 # CrateDB
 crate/log
+crate/blobs
+crate/data/nodes/0/node.lock
 
 # test
 example_test.py
