@@ -121,21 +121,15 @@ dmypy.json
 .pyre/
 
 # CrateDB
-crate/log
-crate/blobs
-crate/data/nodes/0/node.lock
+crate
+!crate/data/nodes/0/indices
 
 # test
 example_test.py
-example_data/dp/dbdata
-example_data/dp/mlruns/
-example_data/dp/tmp_artifacts
-example_data/ls/annotations/example/agreement_log.txt
-example_data/ls/annotations/example/ann_df.pkl
-example_data/ls/annotations/example/process_log.txt
-example_data/ls/annotations/example/task_df.pkl
-example_data/ls/data
-example_data/ls/tasks/example_tasks_log.txt
-example_data/m/dbdata
-example_data/m/mlruns/
-example_data/m/tmp_artifacts
+example_data
+!example_data/dp/mlruns/multi*.pkl
+!example_data/dp/unlabeled_data
+!example_data/ls/annotations/example/multi*.pkl
+!example_data/ls/annotations/example_annotations.json
+!example_data/ls/tasks/example_tasks.json
+!example_data/m/mlruns/multi*.pkl
