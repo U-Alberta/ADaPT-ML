@@ -2,6 +2,8 @@
 
 docker-compose --env-file .env --profile label up -d
 
+echo "Letting CrateDB start up..."
+sleep 5
 echo "Checking for exited containers..."
 exited=$(docker-compose ps | grep "Exit")
 if [ "$exited" = 0 ]
