@@ -13,8 +13,7 @@ services:
       - deploy_network
     volumes:
       - ${DB_DATA_PATH}:/data
-      - ${DB_DATA_PATH}/repos:/repos
-    command: [ "crate", "-Cnetwork.host=_site_", "-Cpath.repo=/repos" ]
+    command: [ "crate", "-Cnetwork.host=_site_" ]
     deploy:
       replicas: 1
       restart_policy:

@@ -121,8 +121,9 @@ dmypy.json
 .pyre/
 
 # CrateDB
-crate
-!crate/data/nodes/0/indices
+crate/log
+crate/blobs
+crate/repos
 
 # test
 example_test.py
