@@ -1,5 +1,3 @@
-# This is a workflow containing an automated test suite covering the core functionality of the software.
-
 name: ADaPT-ML Label Studio CI
 
 on: [push]
@@ -9,6 +7,7 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+
     steps:
     - uses: actions/checkout@v2
 
@@ -16,9 +15,9 @@ jobs:
     - name: Build the docker-compose stack
       run: docker-compose -f docker-compose.yml --profile label up -d
     - name: Give database a chance to start up
-      run: sleep 10
+      run: sleep 30
     - name: Check running containers
-      run: docker-compose ps
+      run: docker ps -a
 
     # Testing out the modelling functionality
     - name: Test 1 -- sample tasks

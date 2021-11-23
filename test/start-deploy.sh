@@ -1,5 +1,28 @@
-docker-compose --profile deploy up -d
+#!/bin/bash -e
+
+docker-compose --env-file .env --profile deploy up -d
+while docker-compose ps | grep -i "starting"
+  do
+    echo "Waiting for MLflow databases (5 sec)..."
+    sleep 5
+  done
 
 echo "Checking for exited containers..."
-! docker-compose ps | grep -i "Exit"
-echo "☑ Startup complete."
+exited=$(docker-compose ps | grep "Exit")
+if [ "$exited" = 0 ]
+then
+  echo "Check failed: some containers exited"
+  exit 1
+fi
+echo "Startup complete."
+
+# set up a temporary network to use to test the model deployment
+docker network create test-deploy-network --subnet 192.168.2.0/24 --gateway 192.168.2.10
+docker network connect --ip 192.168.2.4 test-deploy-network modelling-mlflow-deploy
+docker network connect --ip 192.168.2.8 test-deploy-network modelling-mlflow
+
+docker exec modelling-mlflow sh -c ". ~/.bashrc && python /test/deploy-test.py"
+
+docker network disconnect test-deploy-network modelling-mlflow-deploy
+docker network disconnect test-deploy-network modelling-mlflow
+docker network rm test-deploy-network

@@ -13,7 +13,8 @@ services:
       - deploy_network
     volumes:
       - ${DB_DATA_PATH}:/data
-    command: [ "crate", "-Cnetwork.host=_site_" ]
+      - ${DB_DATA_PATH}/repos:/repos
+    command: [ "crate", "-Cnetwork.host=_site_" , "-Cpath.repo=/repos"]
     deploy:
       replicas: 1
       restart_policy:
@@ -56,6 +57,7 @@ services:
       - ${LS_DATA_PATH}:/label-studio/data
       - ${LS_TASKS_PATH}:/tasks
       - ${LS_ANNOTATIONS_PATH}:/annotations
+      - ./test:/test
     environment:
       - DATABASE_IP=${DATABASE_IP}
     stdin_open: true
@@ -120,6 +122,7 @@ services:
       - ./data-programming/label:/code/label
       - ./data-programming/MLproject:/code/MLproject
       - ./data-programming/conda.yaml:/code/conda.yaml
+      - ./test:/test
     environment:
       - MLFLOW_TRACKING_URI=${DP_MLFLOW_TRACKING_URI}
       - DATABASE_IP=${DATABASE_IP}
@@ -129,6 +132,7 @@ services:
   m_db:
     profiles:
       - modelling
+      - deploy
       - dev
     restart: on-failure
     image: mysql/mysql-server:8.0.26
@@ -170,6 +174,7 @@ services:
   m:
     profiles:
       - modelling
+      - deploy
       - dev
     image: nullberry/adapt-ml-m:latest
     container_name: modelling-mlflow
@@ -185,6 +190,7 @@ services:
       - ./modelling/model_objs.py:/code/model_objs.py
       - ./modelling/MLproject:/code/MLproject
       - ./modelling/conda.yaml:/code/conda.yaml
+      - ./test:/test
     environment:
       - MLFLOW_TRACKING_URI=${MODELLING_MLFLOW_TRACKING_URI}
       - DATABASE_IP=${DATABASE_IP}

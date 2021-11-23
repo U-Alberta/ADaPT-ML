@@ -13,40 +13,5 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    # Building and setting up the containers
-    - name: Build the docker-compose stack
-      run: docker-compose -f docker-compose.yml --profile deploy up -d
-    - name: Give database a chance to start up
-      run: sleep 10
-    - name: Check running containers
-      run: docker-compose ps
-
-    # Testing out the deployment functionality
-    - name: Predict multiclass
-      run: |
-        curl -X 'POST' \
-        'http://localhost/predict_multiclass_example' \
-        -H 'accept: application/json' \
-        -H 'Content-Type: application/json' \
-        -d '{
-          "table_name": [
-            "example_data", "example_data", "example_data", "example_data", "example_data"
-          ],
-          "id": [
-            "22", "24", "19", "15", "18"
-          ]
-        }'
-    - name: Predict multilabel
-      run: |
-        curl -X 'POST' \
-        'http://localhost/predict_multilabel_example' \
-        -H 'accept: application/json' \
-        -H 'Content-Type: application/json' \
-        -d '{
-          "table_name": [
-            "example_data", "example_data", "example_data", "example_data", "example_data"
-          ],
-          "id": [
-            "03", "05", "12", "06", "08"
-          ]
-        }'
+    - name: Build the docker compose profile and test deployment
+      run: bash ./test/start-deploy.sh

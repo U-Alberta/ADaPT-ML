@@ -1,13 +1,16 @@
 import logging
 import sys
-import pandas as pd
+
 import mlflow
-from label import (TRAIN_MATRIX_FILENAME, TRAINING_DATA_FILENAME,
+import pandas as pd
+from label import (STDOUT_LOG_FILENAME, TRAIN_MATRIX_FILENAME, TRAINING_DATA_FILENAME,
                    TRAINING_DATA_HTML_FILENAME, DEV_DF_FILENAME, DEV_DF_HTML_FILENAME, DEV_MATRIX_FILENAME,
                    LABEL_MODEL_FILENAME, procedure, evaluate, tracking)
 
 
 def start(registered_model_name, lf_features, dev_annotations_path, get_lfs, class_labels, parsed_args):
+    if not parsed_args.verbose:
+        sys.stdout = open(STDOUT_LOG_FILENAME, 'w')
     with mlflow.start_run():
         run = mlflow.active_run()
         logging.info("Active run_id: {}".format(run.info.run_id))
@@ -17,7 +20,9 @@ def start(registered_model_name, lf_features, dev_annotations_path, get_lfs, cla
         try:
             train_df = pd.read_pickle(parsed_args.train_data)
         except IOError:
-            sys.exit("Invalid path to data")
+            logging.error("Invalid path to data")
+            sys.stdout.close()
+            sys.exit(1)
         train_params = {
             'n_epochs': parsed_args.n_epochs,
             'optimizer': parsed_args.optimizer,
@@ -44,7 +49,8 @@ def start(registered_model_name, lf_features, dev_annotations_path, get_lfs, cla
         except Exception as e:
             msg = "Unable to create train label matrix:\n{}\nStopping.".format(e.args)
             logging.error(msg)
-            sys.exit(msg)
+            sys.stdout.close()
+            sys.exit(1)
         try:
             dev_L = procedure.create_label_matrix(dev_df, lfs, parsed_args.parallel)
             procedure.save_label_matrix(dev_L, DEV_MATRIX_FILENAME)
@@ -62,7 +68,8 @@ def start(registered_model_name, lf_features, dev_annotations_path, get_lfs, cla
         except Exception as e:
             msg = "Unable to train label model:\n{}\nStopping.".format(e.args)
             logging.error(msg)
-            sys.exit(msg)
+            sys.stdout.close()
+            sys.exit(1)
 
         # use the label model to label the data
         logging.info("Predicting {} ...".format(parsed_args.task))
@@ -107,3 +114,4 @@ def start(registered_model_name, lf_features, dev_annotations_path, get_lfs, cla
                      input_example,
                      registered_model_name,
                      label_model)
+    sys.stdout.close()

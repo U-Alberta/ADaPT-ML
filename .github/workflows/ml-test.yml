@@ -9,55 +9,9 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-#    env:
-#      DB_DATA_PATH: ./crate
-#
-#      MODELLING_DATA_PATH: ./example_data/m
-#      DATABASE_IP: crate://crate-db:4200
-#
-#      MODELLING_MYSQL_DATABASE: mlruns.db
-#      MODELLING_MYSQL_USER: testusr
-#      MODELLING_MYSQL_PASSWORD: testpassword
-#      MODELLING_MYSQL_ROOT_PASSWORD: strongtestpassword
-#      MODELLING_HOST_NAME: modelling-mlflow-db
-#      MODELLING_MLFLOW_TRACKING_URI: mysql+pymysql://testusr:testpassword@modelling-mlflow-db:3306/mlruns.db
 
     steps:
     - uses: actions/checkout@v2
 
-    # Building and setting up the containers
-    - name: Build the docker-compose stack
-      run: docker-compose -f docker-compose.yml --profile modelling up -d
-    - name: Give database a chance to start up
-      run: sleep 30
-    - name: Check running containers
-      run: docker-compose ps
-
-    # Testing out the modelling functionality
-    - name: Test 1 -- multiclass with LM test data
-      run: docker exec modelling-mlflow sh -c ". ~/.bashrc && wait-for-it modelling-mlflow-db:3306 -s -- mlflow run --no-conda -e mlp --experiment-name test1 -P train_data=/dp_mlruns/multiclass_training_data.pkl -P test_data=/dp_mlruns/multiclass_training_data.pkl -P features=txt_use -P solver=lbfgs -P random_state=8 ."
-    - name: Check the run results
-      run: |
-        ls ./example_data/m/mlruns/1/**/artifacts
-        cat ./example_data/m/mlruns/1/**/artifacts/log.txt
-
-    - name: Test 2 -- multiclass with gold test data
-      run: docker exec modelling-mlflow sh -c ". ~/.bashrc && wait-for-it modelling-mlflow-db:3306 -s -- mlflow run --no-conda -e mlp --experiment-name test2 -P train_data=/dp_mlruns/multiclass_training_data.pkl -P test_data=/dp_mlruns/multiclass_development_data.pkl -P features=txt_use -P solver=lbfgs -P random_state=8 ."
-    - name: Check the run results
-      run: |
-        ls ./example_data/m/mlruns/2/**/artifacts
-        cat ./example_data/m/mlruns/2/**/artifacts/log.txt
-
-    - name: Test 3 -- multilabel with LM test data
-      run: docker exec modelling-mlflow sh -c ". ~/.bashrc && wait-for-it modelling-mlflow-db:3306 -s -- mlflow run --no-conda -e mlp --experiment-name test3 -P train_data=/dp_mlruns/multilabel_training_data.pkl -P test_data=/dp_mlruns/multilabel_training_data.pkl -P features=txt_use -P solver=lbfgs -P random_state=8 ."
-    - name: Check the run results
-      run: |
-        ls ./example_data/m/mlruns/3/**/artifacts
-        cat ./example_data/m/mlruns/3/**/artifacts/log.txt
-
-    - name: Test 4 -- multilabel with gold test data
-      run: docker exec modelling-mlflow sh -c ". ~/.bashrc && wait-for-it modelling-mlflow-db:3306 -s -- mlflow run --no-conda -e mlp --experiment-name test4 -P train_data=/dp_mlruns/multilabel_training_data.pkl -P test_data=/dp_mlruns/multilabel_development_data.pkl -P features=txt_use -P solver=lbfgs -P random_state=8 ."
-    - name: Check the run results
-      run: |
-        ls ./example_data/m/mlruns/4/**/artifacts
-        cat ./example_data/m/mlruns/4/**/artifacts/log.txt
+    - name: Build the docker-compose profile and test modelling
+      run: bash ./test/start-m.sh
