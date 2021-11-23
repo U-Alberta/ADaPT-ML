@@ -1,5 +1,3 @@
-# This is a workflow containing an automated test suite covering the core functionality of the software.
-
 name: ADaPT-ML Label Studio CI
 
 on: [push]
@@ -13,5 +11,41 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Build the docker-compose profile and test label studio functionality
-      run: bash ./test/start-ls.sh
+    # Building and setting up the containers
+    - name: Build the docker-compose stack
+      run: docker-compose -f docker-compose.yml --profile label up -d
+    - name: Give database a chance to start up
+      run: sleep 30
+    - name: Check running containers
+      run: docker ps -a
+
+    # Testing out the modelling functionality
+    - name: Test 1 -- sample tasks
+      run: docker exec label-studio-dev python ./ls/sample_tasks.py example_data txt 30 example --filename example_tasks.json
+    - name: Check the run results
+      run: cat ./example_data/ls/tasks/*log.txt
+
+    - name: Test 2 -- process annotations with random gold choice
+      run: docker exec label-studio-dev python ./ls/process_annotations.py example_annotations.json example random
+    - name: Check the run results
+      run: cat ./example_data/ls/annotations/example/process_log.txt
+
+    - name: Test 3 -- process annotations with drop gold choice
+      run: docker exec label-studio-dev python ./ls/process_annotations.py example_annotations.json example drop
+    - name: Check the run results
+      run: cat ./example_data/ls/annotations/example/process_log.txt
+
+    - name: Test 4 -- process annotations with majority gold choice
+      run: docker exec label-studio-dev python ./ls/process_annotations.py example_annotations.json example majority
+    - name: Check the run results
+      run: cat ./example_data/ls/annotations/example/process_log.txt
+
+    - name: Test 5 -- process annotations with worker_1 gold choice
+      run: docker exec label-studio-dev python ./ls/process_annotations.py example_annotations.json example 1
+    - name: Check the run results
+      run: cat ./example_data/ls/annotations/example/process_log.txt
+
+    - name: Test 6 -- annotator agreement
+      run: docker exec label-studio-dev python ./ls/annotator_agreement.py example
+    - name: Check the run results
+      run: cat ./example_data/ls/annotations/example/agreement_log.txt
