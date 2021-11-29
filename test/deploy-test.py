@@ -3,6 +3,8 @@ import requests
 import json
 import pandas as pd
 
+pd.set_option('display.max_columns', None)
+
 MULTICLASS_RESPONSE = {
     "table_name": [
         "example_data",
@@ -175,8 +177,13 @@ MULTILABEL_RESPONSE = {
         0.00000329882753306212
     ]
 }
-MULTICLASS_DF = pd.DataFrame(MULTICLASS_RESPONSE).sort_values(by=['id']).reset_index(drop=True)
-MULTILABEL_DF = pd.DataFrame(MULTILABEL_RESPONSE).sort_values(by=['id']).reset_index(drop=True)
+MULTICLASS_DF = pd.DataFrame(MULTICLASS_RESPONSE).sort_values(by=['id']).reset_index(drop=True).round({
+    'prob_cat': 5, 'prob_dog': 5, 'prob_bird': 5, 'prob_horse': 5, 'prob_snake': 5
+})
+MULTILABEL_DF = pd.DataFrame(MULTILABEL_RESPONSE).sort_values(by=['id']).reset_index(drop=True).round({
+    'prob_cat': 5, 'prob_dog': 5, 'prob_bird': 5, 'prob_horse': 5, 'prob_snake': 5
+})
+
 
 def send_request(url, ids):
     r = requests.post(url,
@@ -200,7 +207,9 @@ def send_request(url, ids):
         print(r.text)
         print("ERROR: Getting predictions failed.")
         sys.exit(1)
-    return pd.DataFrame(r.json()).sort_values(by=['id']).reset_index(drop=True)
+    return pd.DataFrame(r.json()).sort_values(by=['id']).reset_index(drop=True).round({
+        'prob_cat': 5, 'prob_dog': 5, 'prob_bird': 5, 'prob_horse': 5, 'prob_snake': 5
+    })
 
 
 def check_response(df, expected):
