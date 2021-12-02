@@ -134,3 +134,4 @@ example_data
 !example_data/ls/annotations/example_annotations.json
 !example_data/ls/tasks/example_tasks.json
 !example_data/m/mlruns/multi*.pkl
+sample.jsonl
