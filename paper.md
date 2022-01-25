@@ -27,11 +27,9 @@ belongs to; this data point can be text, an image, audio, or can even be multimo
 
 * Lack of available annotators with domain expertise, and/or resources such as time and money to label large amounts of data.
 
-* Studying a phenomenon that changes rapidly, so what constitutes a class may change over time, making the available training data obsolete. 
+* Studying a phenomenon that changes rapidly, so what constitutes a class may change over time, making the available training data obsolete.
 
-![Overview of how ADaPT-ML orchestrates data labelling and the end model lifecycle.\label{fig:system}](graphics/system.png){ width=20% }
-
-ADaPT-ML \autoref{fig:system} is a multimodal-ready MLOps system that covers the data processing, data labelling, model design, model training and optimization, and endpoint deployment, with the particular ability to adapt to classification tasks that have the aforementioned challenges. ADaPT-ML is designed to accomplish this by:
+ADaPT-ML (\autoref{fig:system}) is a multimodal-ready MLOps system that covers the data processing, data labelling, model design, model training and optimization, and endpoint deployment, with the particular ability to adapt to classification tasks that have the aforementioned challenges. ADaPT-ML is designed to accomplish this by:
 
 * Using `Snorkel` [@Snorkel] as the data programming framework to create large, annotated, multimodal datasets that can easily adapt to changing classification needs for training data-driven models.
 
@@ -41,6 +39,7 @@ ADaPT-ML \autoref{fig:system} is a multimodal-ready MLOps system that covers the
 
 * Deploying all End Models using `FastAPI` [@FastAPI]
 
+![Overview of how ADaPT-ML orchestrates data labelling and the end model lifecycle.\label{fig:system}](graphics/system.png){ width=70% }
 
 # Statement of Need
 
@@ -61,7 +60,7 @@ An early version of this software supported the modelling of universal personal 
 
 During the development of this software, `Snorkel` progressed into `Snorkel Flow` [@SnorkelFlow], a proprietary MLOps system that incorporates data cleaning, model training and deployment, and model evaluation and monitoring into its existing data programming framework. Unlike ADaPT-ML's focus on adding new classification tasks by updating existing and creating new Python modules, `Snorkel Flow` allows users to perform complex operations with a push-button UI, like creating Labelling Functions from ready-made builders.
 
-`Neu.ro`[@Neuro] and `MLRun`[@MLRun] are MLOps platforms that, like ADaPT-ML, orchestrate open-source tools like `Label Studio` and `MLFlow`. However, supporting dynamic and iterative training data creation through data programming is a core feature of ADaPT-ML, but frameworks like `Snorkel` are not integrated out-of-the-box with `Neu.ro` and `MLRun`. Additionally, collaboration with the `Neu.ro` team is necessary to create sandboxes with the needed tools, whereas ADaPT-ML is completely open-source and hands-on.
+`Neu.ro` [@Neuro] and `MLRun` [@MLRun] are MLOps platforms that, like ADaPT-ML, orchestrate open-source tools like `Label Studio` and `MLflow`. However, supporting dynamic and iterative training data creation through data programming is a core feature of ADaPT-ML, but frameworks like `Snorkel` are not integrated out-of-the-box with `Neu.ro` and `MLRun`. Additionally, collaboration with the `Neu.ro` team is necessary to create sandboxes with the needed tools, whereas ADaPT-ML is completely open-source and hands-on.
 
 # Acknowledgements
 We acknowledge contributions from Mitacs and The Canadian Energy and Climate Nexus / Le Lien Canadien de L’Energie et du Climat for funding during the early stages of this project's development.
