@@ -29,13 +29,15 @@ belongs to; this data point can be text, an image, audio, or can even be multimo
 
 * Studying a phenomenon that changes rapidly, so what constitutes a class may change over time, making the available training data obsolete. 
 
-ADaPT-ML is a multimodal-ready MLOps system that covers the data processing, data labelling, model design, model training and optimization, and endpoint deployment, with the particular ability to adapt to classification tasks that have the aforementioned challenges. ADaPT-ML is designed to accomplish this by:
+![Overview of how ADaPT-ML orchestrates data labelling and the end model lifecycle.\label{fig:system}](graphics/system.png){ width=20% }
+
+ADaPT-ML \autoref{fig:system} is a multimodal-ready MLOps system that covers the data processing, data labelling, model design, model training and optimization, and endpoint deployment, with the particular ability to adapt to classification tasks that have the aforementioned challenges. ADaPT-ML is designed to accomplish this by:
 
 * Using `Snorkel` [@Snorkel] as the data programming framework to create large, annotated, multimodal datasets that can easily adapt to changing classification needs for training data-driven models.
 
 * Integrating `Label Studio` [@LabelStudio] for annotating multimodal data.
 
-* Orchestrating the Labeling Function / Label Model / End Model development, testing, and monitoring using `MLflow` [@MLflow].
+* Orchestrating the Labelling Function / Label Model / End Model development, testing, and monitoring using `MLflow` [@MLflow].
 
 * Deploying all End Models using `FastAPI` [@FastAPI]
 
@@ -48,14 +50,18 @@ ADaPT-ML aims to be the flexible framework upon which researchers can implement 
 
 * Some programming experience or interest in learning how to write code based off of examples. 
 
-* Access to large amounts of unlabeled data that is constantly changing, such as social media data. 
+* Access to large amounts of unlabelled data that is constantly changing, such as social media data. 
 
-* Domain expertise or an intuition about how they would follow rules, heuristics, or use knowledge bases to annotate the unlabeled data. 
+* Domain expertise or an intuition about how they would follow rules, heuristics, or use knowledge bases to annotate the unlabelled data. 
 
 ADaPT-ML takes as much of the development work as possible out of creating novel models of phenomenon for which we have well-developed theories that have yet to be applied to big data.
 
 # Related Work
-An early version of this software supported the modelling of universal personal values and was complementary to the software architecture described in @Gutierrez2021. During the development of this software, `Snorkel` progressed into `Snorkel Flow` [@SnorkelFlow], a proprietary MLOps system that incorporates data cleaning, model training and deployment, and model evaluation and monitoring into its existing data programming framework.
+An early version of this software supported the modelling of universal personal values and was complementary to the software architecture described in @Gutierrez2021. 
+
+During the development of this software, `Snorkel` progressed into `Snorkel Flow` [@SnorkelFlow], a proprietary MLOps system that incorporates data cleaning, model training and deployment, and model evaluation and monitoring into its existing data programming framework. Unlike ADaPT-ML's focus on adding new classification tasks by updating existing and creating new Python modules, `Snorkel Flow` allows users to perform complex operations with a push-button UI, like creating Labelling Functions from ready-made builders.
+
+`Neu.ro`[@Neuro] and `MLRun`[@MLRun] are MLOps platforms that, like ADaPT-ML, orchestrate open-source tools like `Label Studio` and `MLFlow`. However, supporting dynamic and iterative training data creation through data programming is a core feature of ADaPT-ML, but frameworks like `Snorkel` are not integrated out-of-the-box with `Neu.ro` and `MLRun`. Additionally, collaboration with the `Neu.ro` team is necessary to create sandboxes with the needed tools, whereas ADaPT-ML is completely open-source and hands-on.
 
 # Acknowledgements
 We acknowledge contributions from Mitacs and The Canadian Energy and Climate Nexus / Le Lien Canadien de L’Energie et du Climat for funding during the early stages of this project's development.
