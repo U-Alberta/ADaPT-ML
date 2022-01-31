@@ -226,7 +226,7 @@ Follow these guidelines to see where you can contribute to expand the system's f
 - determine the best method for updating the CrateDB tables with worker labels, gold labels, Label Model labels and probabilities, and End Model predictions and probabilities.
 - a separate project for creating a flexible feature store.
 
-Please open an issue if you would like to propose an approach to adding these features.
+Please [open an issue](https://github.com/U-Alberta/ADaPT-ML/issues) if you would like to propose an approach to adding these features.
 
 ### Report Issues and Seek Support ###
-If you find a problem with the software or if you need help with any of the steps in this document or the testing document, please open an issue and I will try to address your concerns.
+If you find a problem with the software or if you need help with any of the steps in this document or the testing document, please [open an issue](https://github.com/U-Alberta/ADaPT-ML/issues) and I will try to address your concerns.
