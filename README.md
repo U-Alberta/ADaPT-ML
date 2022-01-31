@@ -1,3 +1,5 @@
+[![status](https://joss.theoj.org/papers/e846e08311cee3886d33101209166f4c/status.svg)](https://joss.theoj.org/papers/e846e08311cee3886d33101209166f4c)
+
 # ADaPT-ML #
 ## A Data Programming Template for Machine Learning ##
 
