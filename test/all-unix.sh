@@ -8,11 +8,17 @@ while docker-compose ps | grep -i "starting"
     sleep 5
   done
 
-echo "Checking for exited containers..."
+echo "Checking for exited or restarting containers..."
 exited=$(docker-compose ps | grep "Exit")
+restarting=$(docker-compose ps | grep "Restarting")
 if [ "$exited" = 0 ]
 then
-  echo "Check failed: some containers exited"
+  echo "Check failed: some containers exited."
+  exit 1
+fi
+if [ "$restarting" = 0 ]
+then
+  echo "Check failed: some containers restarting. Did the CrateDB bootstrap checks fail?"
   exit 1
 fi
 echo "Startup complete."
