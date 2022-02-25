@@ -8,21 +8,19 @@ Follow these guidelines to set up ADaPT-ML on your machine and to see how you ca
 1. Download and Install Docker and Docker Compose:
    - [Docker Engine v19.03.0+](https://docs.docker.com/)
    - [Docker Compose v1 1.29.2](https://docs.docker.com/compose/) (This software has not been tested with a newer version of Docker Compose)
-2. Check to make sure there is \>20 GB in your Docker root directory (usually `/var/lib/docker`) for storing images
-3. Ensure CrateDB will pass the bootstrap checks by following [these instructions](https://crate.io/docs/crate/howtos/en/latest/admin/bootstrap-checks.html), as the host system must be configured correctly to use CrateDB with Docker. 
+3. Ensure CrateDB will pass the bootstrap checks by following [these instructions](https://crate.io/docs/crate/howtos/en/latest/admin/bootstrap-checks.html#linux), as the host system must be configured correctly to use CrateDB with Docker. 
 
 #### Windows Setup ####
 1. Download and Install Docker Desktop (Docker Compose is included):
    - [Docker Desktop](https://docs.docker.com/desktop/windows/install/)
-   - If prompted to do so, download and install the [Linux kernel update package](https://docs.microsoft.com/en-us/windows/wsl/install-manual#step-4---download-the-linux-kernel-update-package)
-2. Check to make sure there is \>20 GB in your Docker root directory ([this thread](https://stackoverflow.com/questions/42250222/where-is-docker-image-location-in-windows-10) might help you find it) for storing images
+   - If prompted to do so, download and install the [Linux kernel update package](https://docs.microsoft.com/en-us/windows/wsl/install-manual#step-4---download-the-linux-kernel-update-package). Complete steps 4-6 in the linked article.
 3. Ensure CrateDB will pass the bootstrap checks by following [these instructions](https://stackoverflow.com/questions/69214301/using-docker-desktop-for-windows-how-can-sysctl-parameters-be-configured-to-per), copied below:
    1. In your Windows `%userprofile%` directory (usually `C:\Users\<username>`), create or edit the file `.wslconfig` with the following:
    ```
    [wsl2]
    kernelCommandLine = "sysctl.vm.max_map_count=262144"
    ```
-   2. Exit any WSL instance through the Command Line, `wsl --shutdown`, and restart your computer.
+   2. Exit any WSL instance through Command Prompt, `wsl --shutdown`, and restart your computer.
 
 #### **It is recommended that at this point, you test ADaPT-ML by following these [instructions](./test/README.md)** ####
 
