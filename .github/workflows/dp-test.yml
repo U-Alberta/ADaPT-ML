@@ -1,6 +1,6 @@
 # This is a workflow containing an automated test suite covering the core functionality of the software.
 
-name: ADaPT-ML Data Programming CI
+name: ADaPT-ML Data Programming CI for Linux, Mac, and Windows
 
 on: [push]
 
@@ -8,10 +8,25 @@ jobs:
 
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
+    defaults:
+      run:
+        shell: bash
 
     steps:
     - uses: actions/checkout@v2
     
     - name: Build the docker-compose profile and test data programming
       run: bash ./test/start-dp.sh
+
+#    - name: Give the database a chance to start up
+#      env:
+#        TIMER: ${{ matrix.timer }}
+#      run: $TIMER 30
+#
+#    - name: Test data programming
+#      run: docker exec dp-mlflow sh -c ". ~/.bashrc && python /test/dp-test.py"

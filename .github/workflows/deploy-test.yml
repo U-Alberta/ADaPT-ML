@@ -1,6 +1,6 @@
 # This is a workflow containing an automated test suite covering the core functionality of the software.
 
-name: ADaPT-ML Model Deployment CI
+name: ADaPT-ML Model Deployment CI for Linux, Mac, and Windows
 
 on: [push]
 
@@ -8,10 +8,31 @@ jobs:
 
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
+    defaults:
+      run:
+        shell: bash
 
     steps:
     - uses: actions/checkout@v2
 
-    - name: Build the docker compose profile and test deployment
+    - name: Build the docker-compose profile and test deployment
       run: bash ./test/start-deploy.sh
+
+#    - name: Give the database a chance to start up
+#      shell: bash
+#      run: sleep 30
+#
+#    - name: Test deployment
+#      run: |
+#        docker network create test-deploy-network --subnet 192.168.2.0/24 --gateway 192.168.2.10 \
+#        docker network connect --ip 192.168.2.4 test-deploy-network modelling-mlflow-deploy \
+#        docker network connect --ip 192.168.2.8 test-deploy-network modelling-mlflow \
+#        docker exec modelling-mlflow sh -c ". ~/.bashrc && python /test/deploy-test.py" \
+#        docker network disconnect test-deploy-network modelling-mlflow-deploy \
+#        docker network disconnect test-deploy-network modelling-mlflow \
+#        docker network rm test-deploy-network
