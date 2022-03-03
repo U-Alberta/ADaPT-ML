@@ -26,7 +26,7 @@ jobs:
 #    - name: Build the docker-compose profile and test sampling, annotation processing, and annotator agreement
 #      run: bash ./test/start-ls.sh
     - name: If this is the MacOS runner, install Docker
-      if: matrix.os == "macos-latest"
+      if: matrix.os == 'macos-latest'
       run: |
         brew install docker docker-machine \
         brew cask install virtualbox \
