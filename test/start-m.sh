@@ -16,5 +16,6 @@ then
   exit 1
 fi
 echo "Startup complete."
+docker-compose ps
 
 docker exec modelling-mlflow sh -c ". ~/.bashrc && python /test/ml-test.py"

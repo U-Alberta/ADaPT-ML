@@ -15,6 +15,7 @@ then
   exit 1
 fi
 echo "Startup complete."
+docker-compose ps
 
 # set up a temporary network to use to test the model deployment
 docker network create test-deploy-network --subnet 192.168.2.0/24 --gateway 192.168.2.10

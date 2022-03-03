@@ -12,5 +12,4 @@ then
   exit 1
 fi
 echo "Startup complete."
-
-docker exec label-studio-dev python /test/ls-test.py
+docker-compose ps

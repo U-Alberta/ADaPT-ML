@@ -34,11 +34,8 @@ jobs:
         docker-machine env default \
         eval "$(docker-machine env default)"
 
-    - name: Build the docker-compose stack
-      run: docker-compose -f docker-compose.yml --profile label up -d
-
-    - name: Give database a chance to start up
-      run: sleep 30
+    - name: Build the docker-compose profile
+      run: bash ./test/start-ls.sh
 
     - name: Test sampling, annotation processing, and annotator agreement
       run: docker exec label-studio-dev python /test/ls-test.py

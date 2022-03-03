@@ -15,5 +15,6 @@ then
   exit 1
 fi
 echo "Startup complete."
+docker-compose ps
 
 docker exec dp-mlflow sh -c ". ~/.bashrc && python /test/dp-test.py"
