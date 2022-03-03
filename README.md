@@ -72,7 +72,9 @@ We are now ready to annotate a sample of data in Label Studio! Because we only h
 3. Perform an empirical evaluation of the Labeling Functions and Label Model
 4. Validate the End Model
 
-The first step to annotate data using Label Studio is to sample it from CrateDB. The sampling method implemented currently in ADaPT-ML is a random N, so this commannd was used to sample all 30 datapoints for the multiclass and multilabel settings:
+The first step to annotate data using Label Studio is to set up the project using the Label Studio UI. For this example use case, we enter `localhost:8080` (if you changed the port in `docker-compose.yml`, replace `8080` with what you entered) in a web browser. Create an account, and set up the project (we simply called it "example").
+
+The second step is to sample some data from CrateDB. The sampling method implemented currently in ADaPT-ML is a random N, so this commannd was used to sample all 30 datapoints for the multiclass and multilabel settings:
 ```shell
 docker exec label-studio-dev python ./ls/sample_tasks.py example_data txt 30 example --filename example_tasks.json
 ```

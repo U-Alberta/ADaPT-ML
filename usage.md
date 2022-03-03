@@ -1,6 +1,6 @@
 ## Installation and Usage Guidelines ##
 
-Follow these guidelines to set up ADaPT-ML on your machine and to see how you can add new classification tasks to the system. Each header links to the appropriate file created for the [Example Use Case](./README.md) so you can see an example of these instructions implemented.
+Follow these guidelines to set up ADaPT-ML on your machine and to see how you can add new classification tasks to the system. Each header links to the appropriate file created for the [Example Use Case](./README.md#example-usage) so you can see an example of these instructions implemented.
 
 ### Step 1: Review System Requirements ###
 
@@ -22,7 +22,7 @@ Follow these guidelines to set up ADaPT-ML on your machine and to see how you ca
    ```
    2. Exit any WSL instance through Command Prompt, `wsl --shutdown`, and restart your computer.
 
-#### **It is recommended that at this point, you test ADaPT-ML by following these [instructions](./test/README.md)** ####
+#### **It is recommended that at this point, you test ADaPT-ML by following these [instructions](./test/README.md). Additionally, if you came straight here without following the [Example Use Case](./README.md#example-usage), please consider doing so now so that you can see the following steps implemented.** ####
 
 ### Step 2: [Set up the environment variables for Docker Compose](./.env) ###
 Make a copy of the `.env` file in the repository's root directory and call it `.env.dev`. Review the `.env.dev` file, and edit the variables according to their descriptions.

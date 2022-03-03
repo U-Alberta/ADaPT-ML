@@ -9,69 +9,66 @@ jobs:
   build:
 
     runs-on: ${{ matrix.os }}
+
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest, macos-latest, windows-latest ]
+        os: [ ubuntu-latest, macos-latest, windows-2022 ]
+
     defaults:
       run:
         shell: bash
-#        include:
-#          - os: ubuntu-latest
-#            timer: sleep
-#            reader: cat
-#          - os: macos-latest
-#            timer: sleep
-#            reader: cat
-#          - os: windows-latest
-#            timer: timeout
-#            reader: type
 
     steps:
     - uses: actions/checkout@v2
 
     # Building and setting up the containers
-    - name: Build the docker-compose profile and test sampling, annotation processing, and annotator agreement
-      run: bash ./test/start-ls.sh
+#    - name: Build the docker-compose profile and test sampling, annotation processing, and annotator agreement
+#      run: bash ./test/start-ls.sh
+    - name: If this is the MacOS runner, install Docker
+      if: ${{ runner.os == "macOS" }}
+      run: |
+        brew install docker docker-machine \
+        brew cask install virtualbox \
+        docker-machine create --driver virtualbox default \
+        docker-machine env default \
+        eval "$(docker-machine env default)"
 
-#    - name: Build the docker-compose stack
-#      run: docker-compose -f docker-compose.yml --profile label up -d
-#
-#    - name: Give database a chance to start up
-#      env:
-#        TIMER: ${{ matrix.timer }}
-#      run: $TIMER 30
-#
-#    - name: Test sampling, annotation processing, and annotator agreement
-#      run: docker exec label-studio-dev python /test/ls-test.py
+    - name: Build the docker-compose stack
+      run: docker-compose -f docker-compose.yml --profile label up -d
 
-    # Testing out the modelling functionality
-#    - name: Test 1 -- sample tasks
-#      run: docker exec label-studio-dev python ./ls/sample_tasks.py example_data txt 30 example --filename example_tasks.json
-#    - name: Check the run results
-#      run: cat ./example_data/ls/tasks/*log.txt
-#
-#    - name: Test 2 -- process annotations with random gold choice
-#      run: docker exec label-studio-dev python ./ls/process_annotations.py example_annotations.json example random
-#    - name: Check the run results
-#      run: cat ./example_data/ls/annotations/example/process_log.txt
-#
-#    - name: Test 3 -- process annotations with drop gold choice
-#      run: docker exec label-studio-dev python ./ls/process_annotations.py example_annotations.json example drop
-#    - name: Check the run results
-#      run: cat ./example_data/ls/annotations/example/process_log.txt
-#
-#    - name: Test 4 -- process annotations with majority gold choice
-#      run: docker exec label-studio-dev python ./ls/process_annotations.py example_annotations.json example majority
-#    - name: Check the run results
-#      run: cat ./example_data/ls/annotations/example/process_log.txt
-#
-#    - name: Test 5 -- process annotations with worker_1 gold choice
-#      run: docker exec label-studio-dev python ./ls/process_annotations.py example_annotations.json example 1
-#    - name: Check the run results
-#      run: cat ./example_data/ls/annotations/example/process_log.txt
-#
-#    - name: Test 6 -- annotator agreement
-#      run: docker exec label-studio-dev python ./ls/annotator_agreement.py example
-#    - name: Check the run results
-#      run: cat ./example_data/ls/annotations/example/agreement_log.txt
+    - name: Give database a chance to start up
+      run: sleep 30
+
+    - name: Test sampling, annotation processing, and annotator agreement
+      run: docker exec label-studio-dev python /test/ls-test.py
+
+    - name: Test 1 -- sample tasks
+      run: docker exec label-studio-dev python ./ls/sample_tasks.py example_data txt 30 example --filename example_tasks.json
+    - name: Check the run results
+      run: cat ./example_data/ls/tasks/*log.txt
+
+    - name: Test 2 -- process annotations with random gold choice
+      run: docker exec label-studio-dev python ./ls/process_annotations.py example_annotations.json example random
+    - name: Check the run results
+      run: cat ./example_data/ls/annotations/example/process_log.txt
+
+    - name: Test 3 -- process annotations with drop gold choice
+      run: docker exec label-studio-dev python ./ls/process_annotations.py example_annotations.json example drop
+    - name: Check the run results
+      run: cat ./example_data/ls/annotations/example/process_log.txt
+
+    - name: Test 4 -- process annotations with majority gold choice
+      run: docker exec label-studio-dev python ./ls/process_annotations.py example_annotations.json example majority
+    - name: Check the run results
+      run: cat ./example_data/ls/annotations/example/process_log.txt
+
+    - name: Test 5 -- process annotations with worker_1 gold choice
+      run: docker exec label-studio-dev python ./ls/process_annotations.py example_annotations.json example 1
+    - name: Check the run results
+      run: cat ./example_data/ls/annotations/example/process_log.txt
+
+    - name: Test 6 -- annotator agreement
+      run: docker exec label-studio-dev python ./ls/annotator_agreement.py example
+    - name: Check the run results
+      run: cat ./example_data/ls/annotations/example/agreement_log.txt
