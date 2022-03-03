@@ -30,7 +30,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: If this is the MacOS runner, install Docker
-      if: ${{ runner.os == "macOS" }}
+      if: matrix.os == "macos-latest"
       run: |
         brew install docker docker-machine \
         brew cask install virtualbox \
