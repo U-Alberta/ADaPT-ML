@@ -40,6 +40,13 @@ Now that you are familiar with the concepts, terminology, and tools that make up
 
 Our Example Use Case is to develop a model that can predict whether a data point is about a cat, dog, bird, horse, or snake. Although intuitively this is purely a multilabel task where it is reasonable to assume that one or more animals could be mentioned in one datapoint, this task has been divided into a multiclass setting, where there is only one possible class that the data point can belong to, and a multilabel setting, where one data point can belong to one or many classes, to demonstrate how to handle both tasks (it is not necessary for you to also divide your new classification task into multiclass and multilabel settings). 
 
+All of the directories and files mentioned in the following steps exist in the locations specified in the `.env` file of this repository. To follow along using the various UIs, complete [Step 1](usage.md#step-1-review-system-requirements) and these [tests](test/README.md) to get ADaPT-ML running on your host machine, and go to the following addresses in your web browser of choice:
+1. `localhost:4200` for CrateDB
+2. `localhost:8080` for Label Studio
+3. `localhost:5000` for data programming MLflow
+4. `localhost:5001` for modelling MLflow
+5. `localhost:81/docs` for FastAPI
+
 ### Step 1: obtain and featurize some data ###
 
 We do not have an existing annotated dataset for this classification task, so the first step will be to create one. When you first get started, you will need to gather the appropriate data for your task, and featurize it in two ways:
