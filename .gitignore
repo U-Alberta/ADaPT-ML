@@ -127,7 +127,7 @@ crate/repos
 
 # test
 example_test.py
-example_data
+example_data/*
 !example_data/dp/mlruns/multi*.pkl
 !example_data/dp/unlabeled_data
 !example_data/ls/annotations/example/multi*.pkl
