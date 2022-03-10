@@ -28,8 +28,8 @@ jobs:
 
     - name: If this is the Windows runner, switch Docker daemons
       if: matrix.os == 'windows-2022'
-      shell: pwsh
-      run: '& $Env:ProgramFiles\Docker\Docker\DockerCli.exe -SwitchDaemon'
+#      shell: pwsh
+      run: docker run --rm busybox echo hello_world
 
     - name: Build the docker-compose profile and test data programming
       run: bash ./test/start-dp.sh
