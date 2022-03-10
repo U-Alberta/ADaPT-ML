@@ -1,0 +1,229 @@
+### THIS FILE ONLY TO BE USED FOR GITHUB CI ###
+
+version: '3.8'
+
+services:
+  cratedb:
+    image: crate:latest
+    container_name: crate-db
+    ports:
+      - "4200:4200"
+    networks:
+      - dp_network
+      - m_network
+      - ls_network
+      - deploy_network
+    volumes:
+      - ${DB_DATA_PATH}:/data
+      - ${DB_DATA_PATH}/repos:/repos
+    command: [ "crate", "-Cnetwork.host=_site_" , "-Cpath.repo=/repos"]
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    environment:
+      - CRATE_HEAP_SIZE=2g
+
+  ls_web:
+    profiles:
+      - label
+      - dev
+    restart: on-failure
+    image: heartexlabs/label-studio:latest
+    container_name: label-studio-web
+    ports:
+      - "8080:8080"
+    networks:
+      - ls_network
+    volumes:
+      - ./label-studio/config:/config
+      - ${LS_DATA_PATH}:/label-studio/data
+      - ${LS_TASKS_PATH}:/tasks
+      - ${LS_ANNOTATIONS_PATH}:/annotations
+    environment:
+      - LABEL_STUDIO_LOCAL_FILES_SERVING_ENABLED=true
+      - LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT=/label-studio/files
+    command: [ "label-studio", "start" ]
+
+  ls:
+    profiles:
+      - label
+      - dev
+    restart: on-failure
+    image: nullberry/adapt-ml-ls:latest
+    container_name: label-studio-dev
+    networks:
+      - ls_network
+    volumes:
+      - ./label-studio/ls:/code/ls
+      - ${LS_DATA_PATH}:/label-studio/data
+      - ${LS_TASKS_PATH}:/tasks
+      - ${LS_ANNOTATIONS_PATH}:/annotations
+      - ./test:/test
+    environment:
+      - DATABASE_IP=${DATABASE_IP}
+    stdin_open: true
+    tty: true
+
+  dp_db:
+    profiles:
+      - data_programming
+      - dev
+    restart: on-failure
+    image: mysql/mysql-server:8.0.26
+    container_name: dp-mlflow-db
+    expose:
+      - 3306
+    networks:
+      - dp_network
+    volumes:
+      - ${DP_DATA_PATH}/dbdata:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=${DP_MYSQL_DATABASE}
+      - MYSQL_USER=${DP_MYSQL_USER}
+      - MYSQL_PASSWORD=${DP_MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${DP_MYSQL_ROOT_PASSWORD}
+
+  dp_web:
+    profiles:
+      - dev
+    restart: on-failure
+    image: nullberry/adapt-ml-mlflow-server:latest
+    container_name: dp-mlflow-server
+    ports:
+      - "5000:5000"
+    networks:
+      - dp_network
+    depends_on:
+      - dp_db
+    volumes:
+      - ${DP_DATA_PATH}/mlruns:/mlflow/mlruns
+    environment:
+      - MLFLOW_TRACKING_URI=${DP_MLFLOW_TRACKING_URI}
+    command: [ "mlflow",
+               "server",
+               "--backend-store-uri=$DP_MLFLOW_TRACKING_URI",
+               "--default-artifact-root=./mlruns",
+               "--host=0.0.0.0"]
+
+  dp:
+    profiles:
+      - data_programming
+      - dev
+    image: nullberry/adapt-ml-dp:latest
+    container_name: dp-mlflow
+    networks:
+      - dp_network
+    depends_on:
+      - dp_db
+    volumes:
+      - ${LS_ANNOTATIONS_PATH}:/annotations
+      - ${DP_DATA_PATH}/mlruns:/code/mlruns
+      - ${DP_DATA_PATH}/unlabeled_data:/unlabeled_data
+      - ${DP_DATA_PATH}/tmp_artifacts:/tmp_artifacts
+      - ./data-programming/label:/code/label
+      - ./data-programming/MLproject:/code/MLproject
+      - ./data-programming/conda.yaml:/code/conda.yaml
+      - ./test:/test
+    environment:
+      - MLFLOW_TRACKING_URI=${DP_MLFLOW_TRACKING_URI}
+      - DATABASE_IP=${DATABASE_IP}
+    stdin_open: true
+    tty: true
+
+  m_db:
+    profiles:
+      - modelling
+      - deploy
+      - dev
+    restart: on-failure
+    image: mysql/mysql-server:8.0.26
+    container_name: modelling-mlflow-db
+    expose:
+      - 3306
+    networks:
+      - m_network
+    volumes:
+      - ${MODELLING_DATA_PATH}/dbdata:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=${MODELLING_MYSQL_DATABASE}
+      - MYSQL_USER=${MODELLING_MYSQL_USER}
+      - MYSQL_PASSWORD=${MODELLING_MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MODELLING_MYSQL_ROOT_PASSWORD}
+
+  m_web:
+    profiles:
+      - dev
+    restart: on-failure
+    image: nullberry/adapt-ml-mlflow-server:latest
+    container_name: modelling-mlflow-server
+    ports:
+      - "5001:5000"
+    networks:
+      - m_network
+    depends_on:
+      - m_db
+    volumes:
+      - ${MODELLING_DATA_PATH}/mlruns:/mlflow/mlruns
+    environment:
+      - MLFLOW_TRACKING_URI=${MODELLING_MLFLOW_TRACKING_URI}
+    command: [ "mlflow",
+               "server",
+               "--backend-store-uri=$MODELLING_MLFLOW_TRACKING_URI",
+               "--default-artifact-root=./mlruns",
+               "--host=0.0.0.0" ]
+
+  m:
+    profiles:
+      - modelling
+      - deploy
+      - dev
+    image: nullberry/adapt-ml-m:latest
+    container_name: modelling-mlflow
+    networks:
+      - m_network
+    depends_on:
+      - m_db
+    volumes:
+      - ${MODELLING_DATA_PATH}/mlruns:/code/mlruns
+      - ${DP_DATA_PATH}/mlruns:/dp_mlruns
+      - ${MODELLING_DATA_PATH}/tmp_artifacts:/tmp_artifacts
+      - ./modelling/model:/code/model
+      - ./modelling/model_objs.py:/code/model_objs.py
+      - ./modelling/MLproject:/code/MLproject
+      - ./modelling/conda.yaml:/code/conda.yaml
+      - ./test:/test
+    environment:
+      - MLFLOW_TRACKING_URI=${MODELLING_MLFLOW_TRACKING_URI}
+      - DATABASE_IP=${DATABASE_IP}
+    stdin_open: true
+    tty: true
+
+  m_deploy:
+    profiles:
+      - deploy
+      - dev
+    image: nullberry/adapt-ml-m-deploy:latest
+    container_name: modelling-mlflow-deploy
+    ports:
+      - "80:80"
+    networks:
+      - deploy_network
+    volumes:
+      - ${MODELLING_DATA_PATH}/mlruns:/mlruns
+      - ./modelling/app:/app
+      - ./modelling/model_objs.py:/app/model_objs.py
+    environment:
+      - DATABASE_IP=${DATABASE_IP}
+      - MULTICLASS_EXAMPLE_MODEL_PATH=${MULTICLASS_EXAMPLE_MODEL_PATH}
+      - MULTILABEL_EXAMPLE_MODEL_PATH=${MULTILABEL_EXAMPLE_MODEL_PATH}
+
+networks:
+  ls_network:
+    driver: nat
+  dp_network:
+    driver: nat
+  m_network:
+    driver: nat
+  deploy_network:
+    driver: nat

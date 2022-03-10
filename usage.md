@@ -94,7 +94,7 @@ modelling-mlflow-db       /entrypoint.sh mysqld            Up (healthy)   3306/t
 modelling-mlflow-deploy   /start.sh                        Up             0.0.0.0:80->80/tcp,:::80->80/tcp                            
 modelling-mlflow-server   mlflow server --backend-st ...   Up             0.0.0.0:5001->5000/tcp,:::5001->5000/tcp 
 ```
-Then it's ready! Import your data into a table in CrateDB and refer to the [Example Usage](./README.md) for an example of how to manipulate the data so that it's ready for ADaPT-ML. How you load the data, featurize it, and sample from it to create your unlabeled training data is up to you -- ADaPT-ML does not perform these tasks. However, there may be an opportunity for certain sampling methods to become a part of the system; see [Contributing](#community-guidelines).
+Then it's ready! Import your data into a table in CrateDB and refer to the [Example Usage](./README.md) and this [script](./example_data/example_data_import.py) for an example of how to manipulate the data so that it's ready for ADaPT-ML. How you load the data, featurize it, and sample from it to create your unlabeled training data is up to you -- ADaPT-ML does not perform these tasks. However, there may be an opportunity for certain sampling methods to become a part of the system; see [Contributing](#community-guidelines).
 
 ### Optional: Create a dev/test dataset using Label Studio ###
 

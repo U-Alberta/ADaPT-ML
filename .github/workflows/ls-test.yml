@@ -29,9 +29,6 @@ jobs:
     - name: Build the docker-compose profile
       run: bash ./test/start-ls.sh
 
-    - name: Test sampling, annotation processing, and annotator agreement
-      run: docker exec label-studio-dev python /test/ls-test.py
-
     - name: Test 1 -- sample tasks
       run: docker exec label-studio-dev python ./ls/sample_tasks.py example_data txt 30 example --filename example_tasks.json
     - name: Check the run results
