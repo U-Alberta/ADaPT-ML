@@ -1,10 +1,11 @@
 #!/bin/bash -e
 
-if [ "$RUNNER_OS" = "Windows" ]; then
-  docker-compose --file ./test/docker-compose-windows.yml --env-file .env --profile label up -d
-else
-  docker-compose --env-file .env --profile label up -d
-fi
+#if [ "$RUNNER_OS" = "Windows" ]; then
+#  docker-compose --file ./test/docker-compose-windows.yml --env-file .env --profile label up -d
+#else
+#  docker-compose --env-file .env --profile label up -d
+#fi
+docker-compose --env-file .env --profile label up -d
 
 echo "Letting CrateDB start up..."
 sleep 5

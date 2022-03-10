@@ -26,6 +26,11 @@ jobs:
       if: matrix.os == 'macos-latest'
       run: bash ./test/install-docker.sh
 
+    - name: If this is the Windows runner, switch Docker daemons
+      if: matrix.os == 'windows-2022'
+      shell: pwsh
+      run: & $Env:ProgramFiles\Docker\Docker\DockerCli.exe -SwitchDaemon
+
     - name: Build the docker-compose profile and test deployment
       run: bash ./test/start-deploy.sh
 
