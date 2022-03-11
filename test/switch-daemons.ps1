@@ -17,12 +17,29 @@
 #Restart-Service docker
 
 #https://stackoverflow.com/questions/48066994/docker-no-matching-manifest-for-windows-amd64-in-the-manifest-list-entries
+#https://gist.github.com/steinwaywhw/a4cd19cda655b8249d908261a62687f8
+#https://stackoverflow.com/questions/57317141/linux-docker-ee-containers-on-windows-server-2016/57691939#57691939
 
-Write-Host "Set Path in variable"
+Write-Host "Get latest LinuxKit image"
+Invoke-WebRequest -UseBasicParsing -OutFile release.zip https://github.com/linuxkit/lcow/releases/download/v4.14.35-v0.3.9/release.zip
+Remove-Item "C:\Program Files\Linux Containers" -Force -Recurse
+Expand-Archive release.zip -DestinationPath "C:\Program Files\Linux Containers\."
+rm release.zip
+
+Write-Host "Set experimental to true for config"
 $FILE = "C:\ProgramData\docker\config\daemon.json"
+$configfile =@"
+{
+    "experimental": true
+}
+"@
+
+Write-Host "Enable LinuxKit system for running Linux containers"
+[Environment]::SetEnvironmentVariable("LCOW_SUPPORTED", "1", "Machine")
 
 Write-Host "Copy config file with experimental set to true"
-Copy-Item -Path .\test\daemon.json -Destination $FILE -PassThru
+#Copy-Item -Path .\test\daemon.json -Destination $FILE -PassThru
+$configfile|Out-File -FilePath $FILE -Encoding ascii -Force
 
 Write-Host "Check the file content"
 type $FILE
