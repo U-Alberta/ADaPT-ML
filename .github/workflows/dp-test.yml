@@ -33,7 +33,8 @@ jobs:
 #      run: '& $Env:ProgramFiles\Docker\Docker\DockerCli.exe -SwitchDaemon'
 
     - name: Pull a test Docker image
-      run: docker run --rm busybox echo hello_world
+#      run: docker run --rm busybox echo hello_world
+      run: docker run --help
 
     - name: Build the docker-compose profile and test data programming
       run: bash ./test/start-dp.sh
