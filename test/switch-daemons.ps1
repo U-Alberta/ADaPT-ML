@@ -4,7 +4,7 @@
 Uninstall-Package -Name docker -ProviderName DockerMSFTProvider
 
 #Enable Nested Virtualization if you’re running Docker Containers using Linux Virtual Machine running on Hyper-V.
-Get-VM WinContainerHost | Set-VMProcessor -ExposeVirtualizationExtensions $true
+#Get-VM WinContainerHost | Set-VMProcessor -ExposeVirtualizationExtensions $true
 
 #Then install the current preview build of Docker EE.
 Install-Module DockerProvider
