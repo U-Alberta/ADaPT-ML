@@ -22,7 +22,7 @@
 
 Write-Host "Get latest LinuxKit image"
 Invoke-WebRequest -UseBasicParsing -OutFile release.zip https://github.com/linuxkit/lcow/releases/download/v4.14.35-v0.3.9/release.zip
-Remove-Item "C:\Program Files\Linux Containers" -Force -Recurse
+#Remove-Item "C:\Program Files\Linux Containers" -Force -Recurse
 Expand-Archive release.zip -DestinationPath "C:\Program Files\Linux Containers\."
 rm release.zip
 
