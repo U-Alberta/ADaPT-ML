@@ -19,7 +19,7 @@
 #https://stackoverflow.com/questions/48066994/docker-no-matching-manifest-for-windows-amd64-in-the-manifest-list-entries
 
 Write-Host "Set Path in variable"
-$FILE = "C:\ProgramData\Docker\config\daemon.json"
+$FILE = "C:\ProgramData\docker\config\daemon.json"
 
 Write-Host "Replace experimental: false to experimental: true"
 (Get-Content -Path $FILE) -replace '"experimental": false','"experimental": true' | Set-Content -Path $FILE
