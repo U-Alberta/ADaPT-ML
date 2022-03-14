@@ -126,6 +126,7 @@ crate/blobs
 crate/repos
 
 # test
+sample.jsonl
 example_test.py
 example_data/*
 !example_data/dp/mlruns/multi*.pkl

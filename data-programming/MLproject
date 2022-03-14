@@ -27,3 +27,29 @@ entry_points:
         --verbose {verbose}
         {train_data}
         "
+    framing:
+        parameters:
+            train_data: path
+            task: {type: string, default: multiclass}
+            dev_data: {type: int, default: 0}
+            n_epochs: {type: int, default: 1000}
+            optimizer: {type: string, default: sgd}
+            prec_init: {type: float, default: 0.7}
+            seed: {type: int, default: 0}
+            parallel: {type: int, default: 0}
+            device: {type: string, default: cpu}
+            trld: {type: float, default: 0.5}
+            encoder: {type: str, default: roberta}
+        command: "python ./label/example.py
+        --task {task}
+        --dev_data {dev_data}
+        --n_epochs {n_epochs}
+        --optimizer {optimizer}
+        --prec_init {prec_init}
+        --seed {seed}
+        --parallel {parallel}
+        --device {device}
+        --trld {trld}
+        --encoder {encoder}
+        {train_data}
+        "

@@ -6,7 +6,9 @@ LS_ANNOTATIONS_PATH = '/annotations'
 
 LABEL_PREFIX = 'worker_'
 CLASSIFICATION_TASKS = {
-    'example': ('cat', 'dog', 'bird', 'horse', 'snake')
+    'example': ('cat', 'dog', 'bird', 'horse', 'snake'),
+    'framing': ("settled_science", "uncertain_science", "political_or_ideological_struggle", "disaster", "opportunity",
+                "economic", "morality_and_ethics", "role_of_science", "security", "health")
 }
 
 for task in CLASSIFICATION_TASKS:
