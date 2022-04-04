@@ -1,0 +1,26 @@
+{
+    "description": "<p>First release after JOSS review.</p>", 
+    "license": "other-open", 
+    "title": "U-Alberta/ADaPT-ML: First major release!", 
+    "version": "v1.0.0", 
+    "upload_type": "software", 
+    "publication_date": "2022-03-31", 
+    "creators": [
+        {
+            "name": "Andrea Whittaker"
+        }
+    ], 
+    "access_right": "open", 
+    "related_identifiers": [
+        {
+            "scheme": "url", 
+            "identifier": "https://github.com/U-Alberta/ADaPT-ML/tree/v1.0.0", 
+            "relation": "isSupplementTo"
+        }, 
+        {
+            "scheme": "doi", 
+            "identifier": "10.5281/zenodo.6402629", 
+            "relation": "isVersionOf"
+        }
+    ]
+}
